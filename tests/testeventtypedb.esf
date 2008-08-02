@@ -1,0 +1,25 @@
+MetaEventInfo            # how about a comment here
+{                        # or here
+  ip_addr SenderIP;      # or here
+  uint16  SenderPort;
+  int64   ReceiptTime;
+  uint16  SiteID;
+  string  aMetaString;
+}                        # or here
+
+# or a multiline comment
+# of random stuff
+# here
+
+TypeChecker
+{
+  string aString;
+  boolean aBoolean;
+  ip_addr anIPAddress;
+  uint16 aUInt16;
+  int16 anInt16;
+  uint32 aUInt32;
+  int32 anInt32;
+  uint64 aUInt64;
+  int64 anInt64;
+}
