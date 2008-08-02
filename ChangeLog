@@ -1,0 +1,92 @@
+Version 0.21.0 (molinaro)
+  * 64-bit port actually builds reliably now
+  * Removed lwes_perl.{c,h} from the lwes package, they
+    didn't belong here, they are now in the lwes-perl package
+  * Can now create unicast listeners
+  * Fixed problem with from hex string on FreeBSD, this
+    required refactoring the printing listener which first needed a test.
+
+Version 0.20.2 (gelinj)
+  * Support for 32 and 64-bit added.
+
+Version 0.20.1 (molinaro)
+  * minor problem where event name comparison could match prefixes, now
+    it does an exact match
+
+Version 0.20.0 (molinaro)
+  * add a function compare to the event name prior to deserialization
+
+Version 0.19.1 (molinaro)
+  * minor fixes for port to 64-bit linux, basically the compiler is
+    stricter about types, so fixing some compile warnings.
+
+Version 0.19.0 (shaffer)
+  * fix bad dependency.
+
+Version 0.18.0 (shaffer)
+  * use ysy_gettimeofday for listener timestamps on FreeBSD.
+
+Version 0.17.0 (molinaro)
+  * set the SO_SNDBUF to a value large enough to send several large events
+
+Version 0.16.2 (molinaro)
+  * remove code added in version 0.15.0 to attempt to clear global bison buffer
+    as it doesn't work in the case of multiple emitters.  Added a test case with
+    the multiple emitters and commented out the offending line.  When I have
+    a chance I'll go back and try to figure out how to fix this.
+
+Version 0.16.1 (molinaro)
+  * enumeration struct needs to be non-private in order to use it as just
+    a struct.
+
+Version 0.16.0 (molinaro)
+  * Added a separate add_headers function in the listener, so one can listen
+    for bytes, and add the header without deserializing the event.
+  * Added doxygen comments for all public headers except lwes_perl.h which
+    will be removed next major version bump.
+  * Fixed a posible core dump when you create_no_name an event then try
+    to emit it.
+  * Added some methods for iterating over all the keys in an event.
+
+Version 0.15.0 (molinaro)
+  * 100% coverage on all tested functions
+  * Added create_emitter_with_ttl to perl shortened forms
+
+Version 0.14.0 (molinaro)
+  * Library now defaults to a multicast ttl of 3
+  * Added a new constructor for emitters to set a different ttl
+  * Also, got coverage to 100% on all net functions
+
+Version 0.13.1 (molinaro)
+  * Haha, forgot to actually install the new script
+
+Version 0.13.0 (molinaro)
+  * now includes a script which given an esf file of extended format will
+    output the max sizes of the events in that files
+
+version 0.12.5 (molinaro)
+  * Make parser use a unique prefix so this library and others which use
+    flex/bison don't conflict
+
+version 0.12.4 (molinaro)
+  * Wrapped headers in conditional 'extern "c"' to avoid c++ name mangling.
+
+version 0.12.3 (molinaro)
+  * fubared 0.12.2 because of a local installed package
+
+version 0.12.2 (molinaro)
+  * changed variable names in header to not conflict with system headers
+
+Version 0.12.1 (molinaro)
+  * changed ports/bison to bison and ports/flex to flex in prereqs, prevents
+    problems when these are installed as sys.
+
+Version 0.12.0 (molinaro)
+  * converted to skeletor package
+
+Version 0.11.0 (molinaro)
+  * non-blocking calls added
+
+Version 0.9.0 (molinaro)
+  * Changed numbering scheme
+

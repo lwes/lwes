@@ -1,0 +1,100 @@
+#!/bin/sh
+
+# libtool and autoheader checks are not always necessary, so check to see if
+# we need to use them
+references_libtool=`perl -ne 'print if (! m/^dnl/ && ! m/^#/ && m/PROG_LIBTOOL/)' configure.ac`
+references_autoheader=`perl -ne 'print if (! m/^dnl/ && ! m/^#/ && m/CONFIG_HEADER/)' configure.ac`
+
+check_alternatives () \
+  {
+    _check_save="$1"
+
+    if test "x$_check_save" = x
+      then
+        echo "ERROR: bad call to check_alternatives" 1>&2
+        exit 1
+      fi
+
+    shift
+
+    _check_var="$1"
+    _check_rv=""
+
+    while test "x$_check_var" != x 
+      do
+        _check_rv=`which "$_check_var" 2> /dev/null`
+        if test "x$_check_rv" != x 
+          then
+            break
+          fi
+        shift
+        _check_var="$1"
+      done
+
+    if test "x$_check_rv" = x
+      then
+        echo "ERROR: can't find alternative for $_check_save" 1>&2
+        exit 1
+      fi
+
+    eval $_check_save='"$_check_rv"'
+  }
+
+if test "x$references_libtool" != "x" ; then
+  check_alternatives mylibtoolize glibtoolize libtoolize libtoolize15
+fi
+check_alternatives myaclocal aclocal19 aclocal
+if test "x$references_autoheader" != "x" ; then
+  check_alternatives myautoheader autoheader259 autoheader257 autoheader
+fi
+check_alternatives myautomake automake19 automake
+check_alternatives myautom4te autom4te259 autom4te257 autom4te
+check_alternatives myautoconf autoconf259 autoconf257 autoconf
+
+if test "x$references_libtool" != "x" ; then
+  echo -n "Running $mylibtoolize ... "
+  "$mylibtoolize" --automake > .libtool.out 2>&1
+  if test "x$?" != "x0" ; then
+    cat .libtool.out
+    exit 1
+  fi
+  echo "done"
+fi
+
+if test -d /usr/local/share/aclocal; then
+  aclocal_extra_dirs="$aclocal_extra_dirs -I /usr/local/share/aclocal"
+fi
+
+echo -n "Running $myaclocal ... "
+AUTOM4TE="$myautom4te" "$myaclocal" $aclocal_extra_dirs > .aclocal.out 2>&1
+if test "x$?" != "x0" ; then
+  cat .aclocal.out
+  exit 1
+fi
+echo "done"
+
+if test "x$references_autoheader" != "x" ; then
+  echo -n "Running $myautoheader ... "
+  "$myautoheader" > .autoheader.out 2>&1
+  if test "x$?" != "x0" ; then
+    cat .autoheader.out
+    exit 1
+  fi
+  echo "done"
+fi
+
+echo -n "Running $myautomake ... "
+AUTOCONF="$myautoconf" "$myautomake" -a > .automake.out 2>&1
+if test "x$?" != "x0" ; then
+  cat .automake.out
+  exit 1
+fi
+echo "done"
+
+echo -n "Running $myautoconf ... "
+"$myautoconf" > .autoconf.out 2>&1
+if test "x$?" != "x0" ; then
+  cat .autoconf.out
+  exit 1
+fi
+echo "done"
