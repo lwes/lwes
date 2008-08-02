@@ -1,3 +1,6 @@
+Version 0.22.0 (mlum)
+  * Added license headers
+
 Version 0.21.0 (molinaro)
   * 64-bit port actually builds reliably now
   * Removed lwes_perl.{c,h} from the lwes package, they
@@ -24,7 +27,7 @@ Version 0.19.0 (shaffer)
   * fix bad dependency.
 
 Version 0.18.0 (shaffer)
-  * use ysy_gettimeofday for listener timestamps on FreeBSD.
+  * Changed listener timestamps on FreeBSD.
 
 Version 0.17.0 (molinaro)
   * set the SO_SNDBUF to a value large enough to send several large events

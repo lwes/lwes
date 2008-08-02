@@ -9,3 +9,5 @@ For next major version bump
 - make strings const in marshall functions (this may be able to be done
   in a minor version bump, since it may be binary compatible).
 - remove BODY_LENGTH and HEADER_LENGTH from lwes_types.h
+- make ESF parser reentrant
+

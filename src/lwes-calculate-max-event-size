@@ -1,0 +1,246 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+
+use Data::Dumper;
+
+if (scalar (@ARGV) < 1)
+  {
+    print STDERR "lwes-calculate-max-size <esf_files>\n";
+    exit 1;
+  }
+
+my $events = {};
+
+my $current_event = undef;
+my $in_event = 0;
+my $in_meta = 0;
+
+my $lines = 1;
+# parse the file
+open (FH, "< $ARGV[0]");
+while (<FH>)
+  {
+    my $line = $_;
+
+    # kill leading and trailing white-space
+    $line =~ s/^\s*//g;
+    $line =~ s/\s*$//g;
+
+    # skip comment lines
+    next if $line =~ m/^#/;
+    # skip blank lines
+    next if $line eq "";
+
+    if ($in_event)
+      {
+        if ($line eq "}")
+          {
+            $in_event = 0;
+            $current_event = undef;
+          }
+        else
+          {
+            if ($line =~ /^(\w+)\s+(\w+);\s+#\s+(\w+)\s+(\w+),\s+(\w+)(,\s+(\w+))?/)
+              {
+                my ($type, $sname, $lname, $contract, $source, $max_length)
+                  = ($1, $2, $3, $4, $5, $7);
+                if ($contract ne "OPTIONAL"
+                    && $contract ne "REQUIRED")
+                  {
+                    print STDERR "ERROR: line $lines\n";
+                    print STDERR "ERROR: '$contract' should be one of\n";
+                    print STDERR "\tOPTIONAL\n";
+                    print STDERR "\tREQUIRED\n";
+                    exit 1;
+                  }
+                foreach my $src (split /\|/, $source)
+                  {
+                    if (   $src ne "COMMAND_ARGS"
+                        && $src ne "FUNCTION_ARGS"
+                        && $src ne "CALCULATED"
+                        && $src ne "HTTP_REQ"
+                        && $src ne "XARGS"
+                       )
+                      {
+                        print STDERR "ERROR: line $lines\n";
+                        print STDERR "ERROR: '$src' should be one or"
+                                     ." more of\n";
+                        print STDERR "\tCOMMAND_ARGS\n";
+                        print STDERR "\tFUNCTION_ARGS\n";
+                        print STDERR "\tCALCULATED\n";
+                        print STDERR "\tHTTP_REQ\n";
+                        print STDERR "\tXARGS\n";
+                        exit 1;
+                      }
+                  }
+                if (defined ($current_event))
+                  {
+                    $events->{$current_event}->{$sname} =
+                      {
+                        'type' => $type,
+                        'lname' => $lname,
+                        'contract' => $contract,
+                        'source' => $source,
+                      };
+                    if (defined ($max_length))
+                      {
+                        $events->{$current_event}->{$sname}->{'max_length'} =
+                          $max_length;
+                      }
+                  }
+              }
+          }
+      }
+    else
+      {
+        if ($line eq "{")
+          {
+            $in_event = 1;
+          }
+        else
+          {
+            unless (exists ($events->{$line}))
+              {
+                $current_event = $line;
+                $events->{$current_event} = { };
+              }
+            else
+              {
+                print STDERR "ERROR: line $lines\n";
+                print STDERR "ERROR: $line event exists twice in file!\n";
+                exit 1;
+              }
+          }
+      }
+  }
+close (FH);
+
+# calculate the sizes
+
+# calculate meta size
+my $meta_attributes_size = 0;
+foreach my $attr (keys %{$events->{'MetaEventInfo'}})
+  {
+    # ignore fields set by the listener or journaller
+    next if $attr eq "SenderIP";
+    next if $attr eq "SenderPort";
+    next if $attr eq "ReceiptTime";
+    next if $attr eq "SiteID";
+    $meta_attributes_size +=
+      calculateEventEntrySize
+        ($events->{'MetaEventInfo'}->{$attr}->{'type'},
+         $attr,
+         $events->{'MetaEventInfo'}->{$attr}->{'max_length'});
+  }
+
+foreach my $event (keys %{$events})
+  {
+    next if $event eq "MetaEventInfo";
+    my $event_max_size = $meta_attributes_size;
+    $event_max_size += calculateEventHeaderSize ($event);
+    foreach my $attr (keys %{$events->{$event}})
+      {
+        $event_max_size +=
+          calculateEventEntrySize
+            ($events->{$event}->{$attr}->{'type'},
+             $attr,
+             $events->{$event}->{$attr}->{'max_length'});
+      }
+    print "$event\t$event_max_size\n";
+  }
+
+sub calculateEventHeaderSize
+{
+  my ($eventname) = @_;
+  my $size = 0;
+
+  # one byte for event name length
+  $size += 1;
+
+  # length bytes for event name
+  $size += length $eventname;
+
+  # two bytes for number of attributes
+  $size += 2;
+
+  return $size;
+}
+
+sub calculateEventEntrySize
+{
+  my ($type, $attr, $max_size) = @_;
+
+  my $size = 0;
+
+  # add one byte for attribute name length
+  $size += 1;
+
+  # add length bytes for attribute name
+  $size += length $attr;
+
+  # add one byte for attribute type id
+  $size += 1;
+
+  # now add bytes for data types
+  if ($type eq "boolean")
+    {
+      $size += 1;
+    }
+  elsif ($type eq "uint16")
+    {
+      $size += 2;
+    }
+  elsif ($type eq "int16")
+    {
+      $size += 2;
+    }
+  elsif ($type eq "uint32")
+    {
+      $size += 4;
+    }
+  elsif ($type eq "int32")
+    {
+      $size += 4;
+    }
+  elsif ($type eq "uint64")
+    {
+      $size += 8;
+    }
+  elsif ($type eq "int64")
+    {
+      $size += 8;
+    }
+  elsif ($type eq "ip_addr")
+    {
+      $size += 4;
+    }
+  elsif ($type eq "string")
+    {
+      # two bytes of length
+      $size += 2;
+
+      # add max size bytes of length
+      unless (defined ($max_size))
+        {
+          print STDERR "ERROR: must specify a max size for string types\n";
+          exit 1;
+        }
+      if ($max_size > 65535)
+        {
+          print STDERR "ERROR: max size must be less than 65535\n";
+          exit 1;
+        }
+      $size += $max_size;
+    }
+  else
+    {
+      print STDERR "ERROR: unknown type [$type]\n";
+      exit 1;
+    }
+
+  return $size;
+}
+
+exit 0;
