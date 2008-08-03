@@ -16,6 +16,7 @@ config.log
 config.status
 config.sub
 configure
+depcomp
 doc
 doxygen.config
 install-sh
