@@ -799,8 +799,8 @@ static void listener (const char *ip, const int port, const char *iface)
   assert (value09_o == 2);
   assert (lwes_event_get_INT_64 (event, "total", &value09_o) == 0);
   assert (value09_o == 2);
-  assert (lwes_event_get_INT_16 (event, "freq", &value04_o) == 0);
-  assert (value04_o == 10);
+  assert (lwes_event_get_INT_16 (event, "freq", &value05_o) == 0);
+  assert (value05_o == 10);
 
   lwes_event_destroy(event);
 
@@ -818,8 +818,8 @@ static void listener (const char *ip, const int port, const char *iface)
   assert (value09_o == 0);
   assert (lwes_event_get_INT_64 (event, "total", &value09_o) == 0);
   assert (value09_o == 2);
-  assert (lwes_event_get_INT_16 (event, "freq", &value04_o) == 0);
-  assert (value04_o == 32767);
+  assert (lwes_event_get_INT_16 (event, "freq", &value05_o) == 0);
+  assert (value05_o == 32767);
 
   lwes_event_destroy(event);
 
@@ -936,8 +936,8 @@ static void listener_to (const char *ip,
   assert (lwes_event_get_INT_64 (event, "total", &value09_o) == 0);
   assert (value09_o == 0);
   /* we test the weird time running backward case here */
-  assert (lwes_event_get_INT_16 (event, "freq", &value04_o) == 0);
-  assert (value04_o == 0);
+  assert (lwes_event_get_INT_16 (event, "freq", &value05_o) == 0);
+  assert (value05_o == 0);
   lwes_event_destroy (event);
   lwes_listener_destroy (listener);
   lwes_listener_destroy (o_listener);

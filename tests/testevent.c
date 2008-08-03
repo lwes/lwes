@@ -462,7 +462,7 @@ test_event_with_encoding (void)
   int i;
 
   LWES_SHORT_STRING evnt_nm_o1;
-  LWES_U_INT_16     evnt_enc_o1;
+  LWES_INT_16       evnt_enc_o1;
   LWES_U_INT_16     nm_attr_o1;
   LWES_LONG_STRING  value01_o1;
   LWES_BOOLEAN      value02_o1;
@@ -479,7 +479,7 @@ test_event_with_encoding (void)
   LWES_IP_ADDR      value12_o1;
 
   LWES_SHORT_STRING evnt_nm_o2;
-  LWES_U_INT_16     evnt_enc_o2;
+  LWES_INT_16       evnt_enc_o2;
   LWES_U_INT_16     nm_attr_o2;
   LWES_LONG_STRING  value01_o2;
   LWES_BOOLEAN      value02_o2;
