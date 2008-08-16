@@ -120,6 +120,11 @@ lwes_emitter_emit
 {
   int error=0;
 
+  if(emitter == NULL)
+  {
+    return -1;
+  }
+
   /* Send an event */
   error = lwes_emitter_emit_event (emitter,event);
 
@@ -137,6 +142,11 @@ lwes_emitter_emitto
    struct lwes_event *event)
 {
   int size;
+
+  if(emitter == NULL)
+  {
+    return -1;
+  }
 
   /* Send an event */
   if ((size = lwes_event_to_bytes (event,emitter->buffer,MAX_MSG_SIZE,0)) < 0)

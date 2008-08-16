@@ -953,6 +953,9 @@ static void emitter    (const char *ip, const int port, const char *iface)
  * assert ( db != NULL );
  */
 
+  /* test null safety */
+  assert ( lwes_emitter_emit(NULL, NULL) == -1 );
+
   /* emit without heartbeat */
   emitter = lwes_emitter_create (ip, iface, port, 0, 60);
   assert ( emitter != NULL );
