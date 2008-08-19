@@ -1,3 +1,9 @@
+Version 0.22.2 (mlum)
+  * Fixed dist target to include lwes-calculate-max-event-size
+
+Version 0.22.1 (mlum)
+  * Fixed some test coverage, added NULL safety to emitter
+
 Version 0.22.0 (mlum)
   * Added license headers
 

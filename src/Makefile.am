@@ -16,7 +16,7 @@ myincludes =
 
 # any additional files to add to the distribution
 
-myextradist =
+myextradist = lwes-calculate-max-event-size
 
 # any additional files to clean up with 'make clean'
 
