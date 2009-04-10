@@ -737,6 +737,18 @@ test_large_send ()
 int main (void)
 {
 
+  printf
+    ("WARNING -\n");
+  printf
+    ("WARNING - this test may block forever if you have iptables or\n");
+  printf
+    ("WARNING - similar firewall software on your computer.  \n");
+  printf
+    ("WARNING - allow UDP traffic on port %d to fix it.\n", mcast_port);
+  printf
+    ("WARNING -\n");
+
+
 #if DEBUG
   printf ("test_wo_interface\n");
 #endif

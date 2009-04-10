@@ -75,7 +75,7 @@ lib_LTLIBRARIES =							\
 
 liblwes_la_SOURCES = ${mysourcefiles}
 liblwes_la_LIBADD =
-liblwes_la_LDFLAGS = -version-info @MAJOR_VERSION@:@MINOR_VERSION@:0
+liblwes_la_LDFLAGS = -version-info @MAJOR_VERSION@:@MINOR_VERSION@:0 @GCOV_LTFLAGS@
 
 bin_PROGRAMS = \
   lwes-event-printing-listener \

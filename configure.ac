@@ -104,9 +104,10 @@ if test "x[$]ENABLE_COVERAGE" = "x1"; then
   AC_MSG_WARN(enable coverage)
   CFLAGS="`echo \"[$]CFLAGS\" | perl -pe 's/-O\d+//g;'` -fprofile-arcs -ftest-coverage"
   CXXFLAGS="`echo \"[$]CXXFLAGS\" | perl -pe 's/-O\d+//g;'` -fprofile-arcs -ftest-coverage"
+  GCOV_LTFLAGS="-XCClinker -fprofile-arcs -XCClinker -ftest-coverage"
 fi
 
-AC_SUBST(ENABLE_COVERAGE)
+AC_SUBST(ENABLE_COVERAGE GCOV_LTFLAGS)
 
 # --- Compiler warnings ---
 #

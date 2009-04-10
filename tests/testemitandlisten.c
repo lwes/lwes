@@ -659,6 +659,10 @@ void test_emitter_failures (void)
                                  (int) mcast_port, emitter, event) == -2);
     lwes_net_sendto_bytes_error = 0;
 
+    assert (lwes_emitter_emitto ((char *) mcast_ip,
+                                 (char *) mcast_iface,
+                                 (int) mcast_port, NULL, event) == -1);
+
     lwes_event_destroy (event);
     lwes_emitter_destroy (emitter);
   }
