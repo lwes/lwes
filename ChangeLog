@@ -1,3 +1,8 @@
+Version 0.22.3 (mlum)
+ * Fixed memory leak in lexer
+ * Allow multiple ESF parsers to exist
+ * Changed bison to a pure parser, laying the foundation for a reentrant one
+
 Version 0.22.2 (mlum)
   * Fixed dist target to include lwes-calculate-max-event-size
 

@@ -1,4 +1,4 @@
-The LWES Light-Weight Event System is a framework for allowing the
+The LWES Light Weight Event System is a framework for allowing the
 exchange of information from many machines to many machines in a
 controlled, platform neutral, language neutral way. The exchange
 of information is done in a connectless fashion using multicast
@@ -24,7 +24,7 @@ The system consists of two major components
 
 There is also a custom listener which defers deserialization until some
 point in the future, and simply captures and writes the events to a log.
-This is in the pj package, and is called a journaller.
+This is in the lwes-journaller package, and is called a journaller.
 
 This library is the C implementation of the LWES.  There are also 
 wrappers for various scripting languages, and a pure java implementation 
