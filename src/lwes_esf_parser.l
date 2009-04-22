@@ -13,6 +13,13 @@
 #undef YY_DECL
 #define YY_DECL int lweslex( YYSTYPE *lvalp, void *param)
 
+/* this fixes a problem in flex where compiling with -Wall fails since
+   the ECHO macro ignores the output of fwrite().  So we assign the output 
+   to a static variable but don't use it so the compile suceeds */
+static int __lwesfwriteout;
+#define ECHO _fwout = fwrite( yytext, yyleng, 1, yyout )
+
+/* function prototypes */
 int lweslex(YYSTYPE *lvalp, void *param);
 void lweslexdestroy (void);
 
