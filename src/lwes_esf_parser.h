@@ -30,6 +30,18 @@
 extern "C" {
 #endif 
 
+/* define a structure to control the parser and lexer */
+
+struct lwes_parser_state
+{
+  struct lwes_event_type_db *db;
+  char *lastType;
+  char *lastEvent;
+  int lineno;
+  int in_event;
+  int errors;
+};
+
 extern int
 lwes_parse_esf
   (struct lwes_event_type_db *database,

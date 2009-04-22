@@ -5,15 +5,15 @@
 
 #define YYSTYPE const char*
 
+#include "lwes_esf_parser.h"
 #include "lwes_esf_parser_y.h"  /* token codes from the parser */
 
 #define YY_NO_UNPUT
 
-int inEvent = 0;
-extern int lineno;
-int lweslex(void);
+#define YY_DECL int lweslex( YYSTYPE *lvalp, void *param)
+
+int lweslex(YYSTYPE *lvalp, void *param);
 void lweslexdestroy (void);
-YYSTYPE lweslval;
 
 void
 lweslexdestroy
@@ -31,46 +31,56 @@ lweslexdestroy
 
 %%
 
-\n              { lineno++; }
-uint16          { lweslval = (YYSTYPE)lwestext;
+\n              { ((struct lwes_parser_state *) param)->lineno++; }
+uint16          { 
+                  *lvalp = (YYSTYPE)lwestext;
                   return(YY_UINT16);
                 }
-int16           { lweslval = (YYSTYPE)lwestext;
+int16           {
+                  *lvalp = (YYSTYPE)lwestext;
                   return(YY_INT16);
                 }
-uint32          { lweslval = (YYSTYPE)lwestext;
+uint32          {
+                  *lvalp = (YYSTYPE)lwestext;
                   return(YY_UINT32);
                 }
-int32           { lweslval = (YYSTYPE)lwestext;
+int32           {
+                  *lvalp = (YYSTYPE)lwestext;
                   return(YY_INT32);
                 }
-string          { lweslval = (YYSTYPE)lwestext;
+string          {
+                  *lvalp = (YYSTYPE)lwestext;
                   return(YY_STRING);
                 }
-ip_addr         { lweslval = (YYSTYPE)lwestext;
+ip_addr         {
+                  *lvalp = (YYSTYPE)lwestext;
                   return(YY_IP_ADDR);
                 }
-int64           { lweslval = (YYSTYPE)lwestext;
+int64           {
+                  *lvalp = (YYSTYPE)lwestext;
                   return(YY_INT64);
                 }
-uint64          { lweslval = (YYSTYPE)lwestext;
+uint64          {
+                  *lvalp = (YYSTYPE)lwestext;
                   return(YY_UINT64);
                 }
-boolean         { lweslval = (YYSTYPE)lwestext;
+boolean         {
+                  *lvalp = (YYSTYPE)lwestext;
                   return(YY_BOOLEAN);
                 }
-[a-zA-Z0-9_:]+   { lweslval = (YYSTYPE)lwestext;
-                  if (inEvent)
+[a-zA-Z0-9_:]+  {
+                   *lvalp = (YYSTYPE)lwestext;
+                  if (((struct lwes_parser_state *) param)->in_event)
                     return(ATTRIBUTEWORD);
                   else
                     return(EVENTWORD);
                 }
 "{"             {
-                  inEvent = 1;
+                  ((struct lwes_parser_state *) param)->in_event = 1;
                   return '{';
                 }
 "}"             {
-                  inEvent = 0;
+                  ((struct lwes_parser_state *) param)->in_event = 0;
                   return '}';
                 }
 ";"             {

@@ -9,18 +9,24 @@
 #endif
 
 #define YYSTYPE const char*
+#define YYLEX_PARAM param
+#define YYPARSE_PARAM param
 
 #include "lwes_esf_parser.h"
 
-int lwesparse(void);
-int lweslex(void);
+int lwesparse(void *param);
+int lweslex(YYSTYPE *lvalp, void *param);
 void lweslexdestroy (void);
-void lweserror(const char *s);
 
-static struct lwes_event_type_db *db;
-static char *lastType;
-static char *lastEvent;
+void lwes_yyerror(const char *s, void *param);
+
+/* since yyerror() only supports the msg param, we 'fool'
+   C into sending the void * pointer along with the message */
+#define lweserror(msg) lwes_yyerror(msg, param)
+
 %}
+
+%pure_parser
 
 %token YY_UINT16 YY_INT16 YY_UINT32 YY_INT32 YY_INT64 YY_UINT64 YY_BOOLEAN YY_STRING YY_IP_ADDR EVENTWORD ATTRIBUTEWORD
 
@@ -30,30 +36,30 @@ eventlist: event
     ;
 
 event: eventname '{' attributelist '}'  {
-                                          if ( lastType != NULL )
-                                            free(lastType);
-                                          if ( lastEvent != NULL )
-                                            free(lastEvent);
-                                          lastType  = NULL;
-                                          lastEvent = NULL;
+            if ( ((struct lwes_parser_state *) param)->lastType != NULL )
+              free( ((struct lwes_parser_state *) param)->lastType );
+            if ( ((struct lwes_parser_state *) param)->lastEvent != NULL )
+              free( ((struct lwes_parser_state *) param)->lastEvent );
+            ((struct lwes_parser_state *) param)->lastType = NULL;
+            ((struct lwes_parser_state *) param)->lastEvent = NULL;
                                         }
     | error ';'   { lweserror("parser error with ';'"); }
     | error '}'   { lweserror("parser error with '}'"); }
     ;
 
 eventname: EVENTWORD  {
-                        lwes_event_type_db_add_event
-                          (db,
-                           (LWES_SHORT_STRING)lweslval);
-                        lastEvent = strdup (lweslval);
+          lwes_event_type_db_add_event(((struct lwes_parser_state *) param)->db,
+                                       (LWES_SHORT_STRING)lweslval);
+          ((struct lwes_parser_state *) param)->lastEvent = strdup(lweslval);
 
-                        if ( lastEvent == NULL ) {
-                          char buffer[256];
-                          sprintf(buffer,"malloc problem for eventname '%s'",
-                                  lweslval);
-                          lweserror(buffer);
-                        }
+          if(((struct lwes_parser_state *) param)->lastEvent == NULL ) {
+                        char buffer[256];
+                        sprintf(buffer,"malloc problem for eventname '%s'",
+                                lweslval);
+                        lweserror(buffer);
+          }
                       }
+  
     ;
 
 attributelist: attribute
@@ -66,119 +72,119 @@ attribute: type attributename ';'
     ;
 
 attributename: ATTRIBUTEWORD {
-                               if (lastType != NULL)
-                                 {
-                                   lwes_event_type_db_add_attribute
-                                     (db,
-                                      (LWES_SHORT_STRING)lastEvent,
-                                      (LWES_SHORT_STRING)lweslval,
-                                      (LWES_SHORT_STRING)lastType);
-                                   free(lastType);
-                                   lastType = NULL;
-                                 }
-                               else
-                                 {
-                                   lweserror("Bad 'type' 'attributename' pair");
-                                 }
+        if (((struct lwes_parser_state *) param)->lastType != NULL)
+        {
+          lwes_event_type_db_add_attribute
+            (((struct lwes_parser_state *) param)->db,
+            (LWES_SHORT_STRING) ((struct lwes_parser_state *) param)->lastEvent,
+            (LWES_SHORT_STRING) lweslval,
+            (LWES_SHORT_STRING) ((struct lwes_parser_state *) param)->lastType);
+            free(((struct lwes_parser_state *) param)->lastType);
+            ((struct lwes_parser_state *) param)->lastType = NULL;
+         }
+         else
+         {
+         lweserror("Bad 'type' 'attributename' pair");
+         }
                              }
     ;
 
 type: YY_UINT16  {
-                   /* allocate a string, and copy the type value into it */
-                   lastType = strdup (lweslval);
+          /* allocate a string, and copy the type value into it */
+          ((struct lwes_parser_state *) param)->lastType = strdup(lweslval);
 
-                   if ( lastType == NULL )
-                     {
-                       char buffer[256];
-                       sprintf(buffer,"malloc problem for type '%s'", lweslval);
-                       lweserror(buffer);
-                     }
+          if ( ((struct lwes_parser_state *) param)->lastType == NULL )
+          {
+            char buffer[256];
+            sprintf(buffer,"malloc problem for type '%s'", lweslval);
+            lweserror(buffer);
+          }
                  }
     | YY_INT16   {
-                   /* allocate a string, and copy the type value into it */
-                   lastType = strdup (lweslval);
+          /* allocate a string, and copy the type value into it */
+          ((struct lwes_parser_state *) param)->lastType = strdup(lweslval);
 
-                   if ( lastType == NULL )
-                     {
-                       char buffer[256];
-                       sprintf(buffer,"malloc problem for type '%s'", lweslval);
-                       lweserror(buffer);
-                     }
+          if ( ((struct lwes_parser_state *) param)->lastType == NULL )
+          {
+            char buffer[256];
+            sprintf(buffer,"malloc problem for type '%s'", lweslval);
+            lweserror(buffer);
+          }
                  }
     | YY_UINT32  {
-                   /* allocate a string, and copy the type value into it */
-                   lastType = strdup (lweslval);
-                   if ( lastType == NULL )
-                     {
-                       char buffer[256];
-                       sprintf(buffer,"malloc problem for type '%s'", lweslval);
-                       lweserror(buffer);
-                     }
+          /* allocate a string, and copy the type value into it */
+          ((struct lwes_parser_state *) param)->lastType = strdup(lweslval);
+          if ( ((struct lwes_parser_state *) param)->lastType == NULL )
+          {
+            char buffer[256];
+            sprintf(buffer,"malloc problem for type '%s'", lweslval);
+            lweserror(buffer);
+          }
                  }
     | YY_INT32   {
-                   /* allocate a string, and copy the type value into it */
-                   lastType = strdup (lweslval);
-                   if ( lastType == NULL )
-                     {
-                       char buffer[256];
-                       sprintf(buffer,"malloc problem for type '%s'", lweslval);
-                       lweserror(buffer);
-                     }
+          /* allocate a string, and copy the type value into it */
+          ((struct lwes_parser_state *) param)->lastType = strdup(lweslval);
+          if ( ((struct lwes_parser_state *) param)->lastType == NULL )
+          {
+            char buffer[256];
+            sprintf(buffer,"malloc problem for type '%s'", lweslval);
+            lweserror(buffer);
+          }
                  }
     | YY_STRING  {
-                   /* allocate a string, and copy the type value into it */
-                   lastType = strdup (lweslval);
-                   if ( lastType == NULL )
-                     {
-                       char buffer[256];
-                       sprintf(buffer,"malloc problem for type '%s'", lweslval);
-                       lweserror(buffer);
-                     }
+          /* allocate a string, and copy the type value into it */
+          ((struct lwes_parser_state *) param)->lastType = strdup(lweslval);
+          if ( ((struct lwes_parser_state *) param)->lastType == NULL )
+          {
+            char buffer[256];
+            sprintf(buffer,"malloc problem for type '%s'", lweslval);
+            lweserror(buffer);
+          }
                  }
     | YY_IP_ADDR {
-                   /* allocate a string, and copy the type value into it */
-                   lastType = strdup (lweslval);
-                   if ( lastType == NULL )
-                     {
-                       char buffer[256];
-                       sprintf(buffer,"malloc problem for type '%s'", lweslval);
-                       lweserror(buffer);
-                     }
+          /* allocate a string, and copy the type value into it */
+          ((struct lwes_parser_state *) param)->lastType = strdup(lweslval);
+          if ( ((struct lwes_parser_state *) param)->lastType == NULL )
+          {
+            char buffer[256];
+            sprintf(buffer,"malloc problem for type '%s'", lweslval);
+            lweserror(buffer);
+          }
                  }
     | YY_INT64   {
-                   /* allocate a string, and copy the type value into it */
-                   lastType = strdup (lweslval);
-                   if ( lastType == NULL )
-                     {
-                       char buffer[256];
-                       sprintf(buffer,"malloc problem for type '%s'", lweslval);
-                       lweserror(buffer);
-                     }
+          /* allocate a string, and copy the type value into it */
+          ((struct lwes_parser_state *) param)->lastType = strdup(lweslval);
+          if ( ((struct lwes_parser_state *) param)->lastType == NULL )
+          {
+            char buffer[256];
+            sprintf(buffer,"malloc problem for type '%s'", lweslval);
+            lweserror(buffer);
+          }
                  }
     | YY_UINT64  {
-                   /* allocate a string, and copy the type value into it */
-                   lastType = strdup (lweslval);
-                   if ( lastType == NULL )
-                     {
-                       char buffer[256];
-                       sprintf(buffer,"malloc problem for type '%s'", lweslval);
-                       lweserror(buffer);
-                     }
+          /* allocate a string, and copy the type value into it */
+          ((struct lwes_parser_state *) param)->lastType = strdup(lweslval);
+          if ( ((struct lwes_parser_state *) param)->lastType == NULL )
+          {
+            char buffer[256];
+            sprintf(buffer,"malloc problem for type '%s'", lweslval);
+            lweserror(buffer);
+          }
                  }
     | YY_BOOLEAN {
-                   /* allocate a string, and copy the type value into it */
-                   lastType = strdup (lweslval);
-                   if ( lastType == NULL )
-                     {
-                       char buffer[256];
-                       sprintf(buffer,"malloc problem for type '%s'", lweslval);
-                       lweserror(buffer);
-                     }
+          /* allocate a string, and copy the type value into it */
+          ((struct lwes_parser_state *) param)->lastType = strdup(lweslval);
+          if ( ((struct lwes_parser_state *) param)->lastType == NULL )
+          {
+            char buffer[256];
+            sprintf(buffer,"malloc problem for type '%s'", lweslval);
+            lweserror(buffer);
+          }
                  }
     | ATTRIBUTEWORD { char buffer[256];
                       sprintf(buffer,"unknown type '%s'",lweslval); 
                       lweserror(buffer);
-                      lastType = NULL;
+                      ((struct lwes_parser_state *) param)->lastType = NULL;
                     }
     ;
 
@@ -186,21 +192,20 @@ type: YY_UINT16  {
 
 extern FILE *lwesin;
 
-int lineno = 1;
-int errors = 0;
-
 int
 lwes_parse_esf
   (struct lwes_event_type_db *database,
    const char *filename)
 {
   FILE *fd = NULL;
+  struct lwes_parser_state state;
 
-  db=database;
-
-  /* reset errors and lineno */
-  errors = 0;
-  lineno = 1;
+  state.db = database;
+  state.lastType = NULL;
+  state.lastEvent = NULL;
+  state.lineno = 1;
+  state.in_event = 0;
+  state.errors = 0;
 
   /* open the file */
   fd = fopen (filename, "r");
@@ -208,7 +213,7 @@ lwes_parse_esf
   if ( fd != NULL )
   {
     lwesin = fd;
-    lwesparse();
+    lwesparse((void *) &state);
     fclose (fd);
   }
   else
@@ -216,7 +221,7 @@ lwes_parse_esf
     fprintf (stderr,"ERROR: No such file : \"%s\"\n",filename);
   }
 
-  if (!errors)
+  if (state.errors)
     return 1;
 
   return 0;
@@ -229,8 +234,8 @@ lwes_parse_esf_destroy
   lweslexdestroy ();
 }
 
-void lweserror(const char *s)
+void lwes_yyerror(const char *s, void *param)
 {
-  fprintf(stderr,"ERROR : %s : line %d\n",s,lineno);
-  errors = 1;
+  fprintf(stderr,"ERROR : %s : line %d\n",s, ((struct lwes_parser_state *) param)->lineno);
+  ((struct lwes_parser_state *) param)->errors = 1;
 }
