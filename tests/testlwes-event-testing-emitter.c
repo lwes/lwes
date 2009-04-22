@@ -267,6 +267,7 @@ fork_and_wait (int          argc,
 
           if (kill_child)
             {
+              fprintf(stderr, "killing pid %d", pid);
               kill (pid, SIGINT);
             }
         }

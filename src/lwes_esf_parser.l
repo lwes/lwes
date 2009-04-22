@@ -10,6 +10,7 @@
 
 #define YY_NO_UNPUT
 
+#undef YY_DECL
 #define YY_DECL int lweslex( YYSTYPE *lvalp, void *param)
 
 int lweslex(YYSTYPE *lvalp, void *param);
@@ -21,7 +22,7 @@ lweslexdestroy
 {
 /* FIXME: This doesn't work with multiple parsers, I think I need to
    experiment with reentrancy */
-/*  lwes_delete_buffer (YY_CURRENT_BUFFER); */
+  lwes_delete_buffer (YY_CURRENT_BUFFER);
 }
 
 

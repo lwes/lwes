@@ -17,6 +17,7 @@
 int lwesparse(void *param);
 int lweslex(YYSTYPE *lvalp, void *param);
 void lweslexdestroy (void);
+void lwesrestart(FILE *input_file);
 
 void lwes_yyerror(const char *s, void *param);
 
@@ -213,6 +214,7 @@ lwes_parse_esf
   if ( fd != NULL )
   {
     lwesin = fd;
+    lwesrestart(lwesin);
     lwesparse((void *) &state);
     fclose (fd);
   }

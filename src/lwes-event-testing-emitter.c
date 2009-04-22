@@ -18,6 +18,9 @@
  * Boston, MA 02110-1301 USA.                                           *
  *======================================================================*/
 #include <assert.h>
+#include <signal.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 #include "lwes_emitter.h"
 #include "lwes_time_functions.h"
