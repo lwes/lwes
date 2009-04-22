@@ -30,6 +30,8 @@
 extern "C" {
 #endif 
 
+#define lweslval _lweslval
+
 /* define a structure to control the parser and lexer */
 
 struct lwes_parser_state
