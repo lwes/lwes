@@ -107,7 +107,8 @@ if test "x[$]ENABLE_COVERAGE" = "x1"; then
   GCOV_LTFLAGS="-XCClinker -fprofile-arcs -XCClinker -ftest-coverage"
 fi
 
-AC_SUBST(ENABLE_COVERAGE GCOV_LTFLAGS)
+AC_SUBST(ENABLE_COVERAGE)
+AC_SUBST(GCOV_LTFLAGS)
 
 # --- Compiler warnings ---
 #
