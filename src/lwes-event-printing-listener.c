@@ -297,9 +297,11 @@ int main (int   argc,
 
   sigaction (SIGINT, &act, NULL);
   sigaction (SIGTERM, &act, NULL);
+  sigaction (SIGPIPE, &act, NULL);
 
   sigdelset (&fullset, SIGINT);
   sigdelset (&fullset, SIGTERM);
+  sigdelset (&fullset, SIGPIPE);
 
   sigprocmask (SIG_SETMASK, &fullset, NULL);
 

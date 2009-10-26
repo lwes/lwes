@@ -1,7 +1,13 @@
+Version 0.23.0 (molinaro)
+  * SIGPIPE should also cause a shutdown in lwes-event-printing-listener and
+    lwes-event-counting-listener, this allows these programs to be the head
+    of a processing pipeline, and correctly shutdown when the program after
+    it in the pipeline exits.
+
 Version 0.22.3 (mlum)
- * Fixed memory leak in lexer
- * Allow multiple ESF parsers to exist
- * Changed bison to a pure parser, laying the foundation for a reentrant one
+  * Fixed memory leak in lexer
+  * Allow multiple ESF parsers to exist
+  * Changed bison to a pure parser, laying the foundation for a reentrant one
 
 Version 0.22.2 (mlum)
   * Fixed dist target to include lwes-calculate-max-event-size
