@@ -84,6 +84,8 @@ test_db (void)
 {
   struct lwes_event_type_db *db;
   const char *esffile = "testeventtypedb.esf";
+  const char *nofile  = "doesntexist.esf";
+
   /* cause malloc to fail at initial malloc */
   null_at = 1;
   db = lwes_event_type_db_create((char*)esffile);
@@ -94,6 +96,10 @@ test_db (void)
   db = lwes_event_type_db_create((char*)esffile);
   assert ( db == NULL );
   hash_null = 0;
+
+  /* try to load a non-existent files */
+  db = lwes_event_type_db_create ((char *)nofile);
+  assert (db == NULL);
 
   /* succeed this time */
   db = lwes_event_type_db_create((char*)esffile);

@@ -221,6 +221,7 @@ lwes_parse_esf
   else
   {
     fprintf (stderr,"ERROR: No such file : \"%s\"\n",filename);
+    state.errors++;
   }
 
   if (state.errors)

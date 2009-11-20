@@ -3,6 +3,8 @@ Version 0.23.0 (molinaro)
     lwes-event-counting-listener, this allows these programs to be the head
     of a processing pipeline, and correctly shutdown when the program after
     it in the pipeline exits.
+  * return an error from esf_parser and event_type_db when a non-existent esf
+    is attempted to be loaded
 
 Version 0.22.3 (mlum)
   * Fixed memory leak in lexer
