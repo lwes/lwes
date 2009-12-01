@@ -111,6 +111,10 @@ test_db (void)
   assert (
     lwes_event_type_db_check_for_event( db,
                                         (LWES_SHORT_STRING)"TypeChecker") );
+  /* so will this one */
+  assert (
+    lwes_event_type_db_check_for_event( db,
+                                        (LWES_SHORT_STRING)"Empty") );
 
   /* this event will not */
   assert (
@@ -247,6 +251,52 @@ test_db (void)
                                         LWES_STRING_TOKEN,
                                         (LWES_SHORT_STRING)"aMetaString",
                                         (LWES_SHORT_STRING)"TypeChecker"));
+  /* also for the empty event */
+  assert (
+    lwes_event_type_db_check_for_attribute ( db,
+                                             (LWES_SHORT_STRING)"SenderIP",
+                                             (LWES_SHORT_STRING)"Empty"));
+  assert (
+    lwes_event_type_db_check_for_type ( db,
+                                        LWES_IP_ADDR_TOKEN,
+                                        (LWES_SHORT_STRING)"SenderIP",
+                                        (LWES_SHORT_STRING)"Empty"));
+  assert (
+    lwes_event_type_db_check_for_attribute ( db,
+                                             (LWES_SHORT_STRING)"SenderPort",
+                                             (LWES_SHORT_STRING)"Empty"));
+  assert (
+    lwes_event_type_db_check_for_type ( db,
+                                        LWES_U_INT_16_TOKEN,
+                                        (LWES_SHORT_STRING)"SenderPort",
+                                        (LWES_SHORT_STRING)"Empty"));
+  assert (
+    lwes_event_type_db_check_for_attribute ( db,
+                                             (LWES_SHORT_STRING)"ReceiptTime",
+                                             (LWES_SHORT_STRING)"Empty"));
+  assert (
+    lwes_event_type_db_check_for_type ( db,
+                                        LWES_INT_64_TOKEN,
+                                        (LWES_SHORT_STRING)"ReceiptTime",
+                                        (LWES_SHORT_STRING)"Empty"));
+  assert (
+    lwes_event_type_db_check_for_attribute ( db,
+                                             (LWES_SHORT_STRING)"SiteID",
+                                             (LWES_SHORT_STRING)"Empty"));
+  assert (
+    lwes_event_type_db_check_for_type ( db,
+                                        LWES_U_INT_16_TOKEN,
+                                        (LWES_SHORT_STRING)"SiteID",
+                                        (LWES_SHORT_STRING)"Empty"));
+  assert (
+    lwes_event_type_db_check_for_attribute ( db,
+                                             (LWES_SHORT_STRING)"aMetaString",
+                                             (LWES_SHORT_STRING)"Empty"));
+  assert (
+    lwes_event_type_db_check_for_type ( db,
+                                        LWES_STRING_TOKEN,
+                                        (LWES_SHORT_STRING)"aMetaString",
+                                        (LWES_SHORT_STRING)"Empty"));
 
   /* now make sure that unknown fields work fine */
   assert (

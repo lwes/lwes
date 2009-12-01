@@ -63,8 +63,10 @@ eventname: EVENTWORD  {
   
     ;
 
-attributelist: attribute
-    |   attributelist attribute
+attributelist:
+      /* empty */
+    | attribute
+    | attributelist attribute
     ;
 
 attribute: type attributename ';'

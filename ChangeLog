@@ -4,7 +4,9 @@ Version 0.23.0 (molinaro)
     of a processing pipeline, and correctly shutdown when the program after
     it in the pipeline exits.
   * return an error from esf_parser and event_type_db when a non-existent esf
-    is attempted to be loaded
+    is attempted to be loaded.
+  * allow empty events, ie, those defined as Empty {} in an esf to work and
+    just pick up meta fields.
 
 Version 0.22.3 (mlum)
   * Fixed memory leak in lexer

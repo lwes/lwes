@@ -23,3 +23,8 @@ TypeChecker
   uint64 aUInt64;
   int64 anInt64;
 }
+
+# check out empty events
+Empty
+{
+}
