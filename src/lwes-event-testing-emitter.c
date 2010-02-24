@@ -50,6 +50,10 @@ static const char help[] =
   "       The number of seconds to emit for."                          "\n"
   "       (default: 1)"                                                "\n"
   ""                                                                   "\n"
+  "    -x [one argument]"                                              "\n"
+  "       The number of extra pad bytes to add to each event."         "\n"
+  "       (default: 0)"                                                "\n"
+  ""                                                                   "\n"
   "    -b [one argument]"                                              "\n"
   "       The amount of seconds to break for between event bursts."    "\n"
   "       (default: 0)"                                                "\n"
@@ -67,17 +71,19 @@ int main (int   argc,
   const char *mcast_iface = NULL;
   int         mcast_port  = 12345;
   int         number      = 1;
+  int         pad         = 0;
   int         seconds     = 1;
   int         pause       = 0;
 
   struct lwes_emitter * emitter;
   struct lwes_event *event;
+  char *pad_string;
 
   /* turn off error messages, I'll handle them */
   opterr = 0;
   while (1)
     {
-      char c = getopt (argc, argv, "m:p:i:n:s:b:h");
+      char c = getopt (argc, argv, "m:p:i:n:s:x:b:h");
 
       if (c == -1)
         {
@@ -108,7 +114,6 @@ int main (int   argc,
 
           case 's':
             seconds = atoi(optarg);
-
             break;
 
           case 'h':
@@ -121,6 +126,12 @@ int main (int   argc,
 
             break;
 
+          case 'x':
+            fprintf(stderr,"optarg = \"%s\"\n", optarg);
+            pad = atoi(optarg);
+            fprintf(stderr,"optarg = \"%s\"\n", optarg);
+            break;
+
           default:
             fprintf (stderr,
                      "error: unrecognized command line option -%c\n", 
@@ -128,6 +139,27 @@ int main (int   argc,
 
             return 1;
         }
+    }
+
+  pad_string = NULL;
+  fprintf(stderr, "pad = %d\n", pad);
+  if (pad > 0)
+    {
+      pad_string = malloc(pad+1);
+      fprintf(stderr, "pad_string = 0x%p\n", pad_string);
+      if (pad_string == NULL)
+        {
+          fprintf (stderr,
+                   "Unable to allocate %d bytes for pad string\n",
+                   pad);
+          exit(1);
+        }
+      else
+        {
+          memset(pad_string, 'X', pad);
+          pad_string[pad] = '\0';
+        }
+      fprintf(stderr, "pad_string = \"%s\"\n", pad_string);
     }
 
   emitter = lwes_emitter_create ( (LWES_SHORT_STRING) mcast_ip,
@@ -169,6 +201,9 @@ int main (int   argc,
               (lwes_event_set_STRING (event,"k1", "b-key.count") == 8);
             assert
               (lwes_event_set_INT_16 (event,"v1", 2) == 9);
+            if (pad>0) {
+              assert(lwes_event_set_STRING (event,"pad",pad_string) == 10);
+            }
 
             assert (lwes_emitter_emit (emitter, event) == 0);
 
@@ -198,6 +233,7 @@ int main (int   argc,
         sleep (pause);
       }
     lwes_emitter_destroy(emitter);
+    if (pad_string!=NULL) free(pad_string);
   }
 
   return 0;
