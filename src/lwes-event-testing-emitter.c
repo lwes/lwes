@@ -174,14 +174,15 @@ int main (int   argc,
   assert (emitter != NULL);
 
   {
-    int i,s;
+    int i,s,n;
     LWES_INT_64 start  = 0LL;
     LWES_INT_64 stop   = 0LL;
 
-    for (s = 0; s < seconds; ++s)
+    for (s = 0, n = 0; s < seconds; ++s)
       {
         start = currentTimeMillisLongLong ();
-        for (i = 0; i < number; ++i)
+        stop  = start;
+        for (i = 0; i < number; ++i, ++n)
           {
             event  = lwes_event_create (NULL, "MyEvent");
             assert (event != NULL);
@@ -204,8 +205,12 @@ int main (int   argc,
               (lwes_event_set_STRING (event,"k1", "b-key.count") == 8);
             assert
               (lwes_event_set_INT_16 (event,"v1", 2) == 9);
+            assert
+              (lwes_event_set_U_INT_64(event, "global_count", n) == 10);
+            assert
+              (lwes_event_set_INT_64 (event,"SentTime", stop) == 11);
             if (pad>0) {
-              assert(lwes_event_set_STRING (event,"pad",pad_string) == 10);
+              assert(lwes_event_set_STRING (event,"pad",pad_string) == 12);
             }
 
             assert (lwes_emitter_emit (emitter, event) == 0);
