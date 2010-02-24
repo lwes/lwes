@@ -233,12 +233,14 @@ int main (int   argc,
                 const int delay_ms = (i*1000/number) - (stop-start);
                 if (delay_ms > 0)
                   {
-                    usleep (delay_ms);
+                    usleep (delay_ms*1000);
                   }
               }
           }
-        usleep ((1000 - (stop - start))*1000);
-
+        {
+          const int delay_ms = (1000 - (stop - start))*1000;
+          if (delay_ms > 0) usleep (delay_ms);
+        }
         {
           char timebuff[20];
           /* HH/MM/SS DD/MM/YYYY  */
