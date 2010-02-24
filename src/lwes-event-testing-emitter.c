@@ -58,6 +58,9 @@ static const char help[] =
   "       The amount of seconds to break for between event bursts."    "\n"
   "       (default: 0)"                                                "\n"
   ""                                                                   "\n"
+  "    -e"                                                             "\n"
+  "       Attempt to emit events evenly throughout each second."       "\n"
+  ""                                                                   "\n"
   "    -h"                                                             "\n"
   "       show this message"                                           "\n"
   ""                                                                   "\n"
@@ -74,6 +77,7 @@ int main (int   argc,
   int         pad         = 0;
   int         seconds     = 1;
   int         pause       = 0;
+  int         even        = 0;
 
   struct lwes_emitter * emitter;
   struct lwes_event *event;
@@ -83,7 +87,7 @@ int main (int   argc,
   opterr = 0;
   while (1)
     {
-      char c = getopt (argc, argv, "m:p:i:n:s:x:b:h");
+      char c = getopt (argc, argv, "m:p:i:n:s:x:b:eh");
 
       if (c == -1)
         {
@@ -116,6 +120,10 @@ int main (int   argc,
             seconds = atoi(optarg);
             break;
 
+          case 'e':
+            even = 1;
+            break;
+
           case 'h':
             fprintf (stderr, "%s", help);
 
@@ -127,9 +135,7 @@ int main (int   argc,
             break;
 
           case 'x':
-            fprintf(stderr,"optarg = \"%s\"\n", optarg);
             pad = atoi(optarg);
-            fprintf(stderr,"optarg = \"%s\"\n", optarg);
             break;
 
           default:
@@ -142,11 +148,9 @@ int main (int   argc,
     }
 
   pad_string = NULL;
-  fprintf(stderr, "pad = %d\n", pad);
   if (pad > 0)
     {
       pad_string = malloc(pad+1);
-      fprintf(stderr, "pad_string = 0x%p\n", pad_string);
       if (pad_string == NULL)
         {
           fprintf (stderr,
@@ -159,7 +163,6 @@ int main (int   argc,
           memset(pad_string, 'X', pad);
           pad_string[pad] = '\0';
         }
-      fprintf(stderr, "pad_string = \"%s\"\n", pad_string);
     }
 
   emitter = lwes_emitter_create ( (LWES_SHORT_STRING) mcast_ip,
@@ -215,6 +218,18 @@ int main (int   argc,
               {
                 printf ("Was only able to emit %7d in 1 sec\n",i);
                 break;
+              }
+            
+            /* if we are attempting to send events evenly throughout
+            the second, consider pausing briefly to get back on
+            schedule */
+            if (even)
+              {
+                const int delay_ms = (i*1000/number) - (stop-start);
+                if (delay_ms > 0)
+                  {
+                    usleep (delay_ms);
+                  }
               }
           }
         usleep ((1000 - (stop - start))*1000);
