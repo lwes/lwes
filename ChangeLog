@@ -1,3 +1,7 @@
+Version 1.0.0 (molinaro)
+  * Limiting event name and attribute names to 127 bytes to allow for version
+    checking in wire event format
+
 Version 0.23.0 (molinaro)
   * SIGPIPE should also cause a shutdown in lwes-event-printing-listener and
     lwes-event-counting-listener, this allows these programs to be the head

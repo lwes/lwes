@@ -86,7 +86,7 @@ lwes_net_open
   /* Setting the value for SO_SNDBF , trying for 10*MAX_MSG_SIZE */
   for ( i = 10 ; i > 0 ; i-- )
     {
-      arg = MAX_MSG_SIZE*i;
+      arg = LWES_MSG_SIZE_MAX*i;
       if (setsockopt (conn->socketfd, SOL_SOCKET, SO_SNDBUF,
                       (void*)&arg,sizeof(arg)) == 0)
         {
@@ -288,12 +288,12 @@ lwes_net_recv_bind
           return -2;
         }
 
-      /* try for as big a buffer as possible, start at 100*MAX_MSG_SIZE
+      /* try for as big a buffer as possible, start at 100*LWES_MSG_SIZE_MAX
        * and work down, if you can't get a buffer of at least one max
        * message, error out */
       for ( i = 100 ; i > 0 ; i-- )
         {
-          arg = MAX_MSG_SIZE*i;
+          arg = LWES_MSG_SIZE_MAX*i;
           if (setsockopt(conn->socketfd, SOL_SOCKET, SO_RCVBUF,
                          (void*)&arg,sizeof(arg)) == 0)
             {

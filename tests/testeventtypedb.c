@@ -128,7 +128,7 @@ test_db (void)
                                              (LWES_SHORT_STRING)"TypeChecker"));
   assert (
     lwes_event_type_db_check_for_type ( db,
-                                        LWES_STRING_TOKEN,
+                                        LWES_TYPE_STRING,
                                         (LWES_SHORT_STRING)"aString",
                                         (LWES_SHORT_STRING)"TypeChecker"));
 
@@ -138,7 +138,7 @@ test_db (void)
                                              (LWES_SHORT_STRING)"TypeChecker"));
   assert (
     lwes_event_type_db_check_for_type ( db,
-                                        LWES_BOOLEAN_TOKEN,
+                                        LWES_TYPE_BOOLEAN,
                                         (LWES_SHORT_STRING)"aBoolean",
                                         (LWES_SHORT_STRING)"TypeChecker"));
   assert (
@@ -147,7 +147,7 @@ test_db (void)
                                              (LWES_SHORT_STRING)"TypeChecker"));
   assert (
     lwes_event_type_db_check_for_type ( db,
-                                        LWES_IP_ADDR_TOKEN,
+                                        LWES_TYPE_IP_ADDR,
                                         (LWES_SHORT_STRING)"anIPAddress",
                                         (LWES_SHORT_STRING)"TypeChecker"));
   assert (
@@ -156,7 +156,7 @@ test_db (void)
                                              (LWES_SHORT_STRING)"TypeChecker"));
   assert (
     lwes_event_type_db_check_for_type ( db,
-                                        LWES_U_INT_16_TOKEN,
+                                        LWES_TYPE_U_INT_16,
                                         (LWES_SHORT_STRING)"aUInt16",
                                         (LWES_SHORT_STRING)"TypeChecker"));
   assert (
@@ -165,7 +165,7 @@ test_db (void)
                                              (LWES_SHORT_STRING)"TypeChecker"));
   assert (
     lwes_event_type_db_check_for_type ( db,
-                                        LWES_INT_16_TOKEN,
+                                        LWES_TYPE_INT_16,
                                         (LWES_SHORT_STRING)"anInt16",
                                         (LWES_SHORT_STRING)"TypeChecker"));
   assert (
@@ -174,7 +174,7 @@ test_db (void)
                                              (LWES_SHORT_STRING)"TypeChecker"));
   assert (
     lwes_event_type_db_check_for_type ( db,
-                                        LWES_U_INT_32_TOKEN,
+                                        LWES_TYPE_U_INT_32,
                                         (LWES_SHORT_STRING)"aUInt32",
                                         (LWES_SHORT_STRING)"TypeChecker"));
   assert (
@@ -183,7 +183,7 @@ test_db (void)
                                              (LWES_SHORT_STRING)"TypeChecker"));
   assert (
     lwes_event_type_db_check_for_type ( db,
-                                        LWES_INT_32_TOKEN,
+                                        LWES_TYPE_INT_32,
                                         (LWES_SHORT_STRING)"anInt32",
                                         (LWES_SHORT_STRING)"TypeChecker"));
 
@@ -193,7 +193,7 @@ test_db (void)
                                              (LWES_SHORT_STRING)"TypeChecker"));
   assert (
     lwes_event_type_db_check_for_type ( db,
-                                        LWES_U_INT_64_TOKEN,
+                                        LWES_TYPE_U_INT_64,
                                         (LWES_SHORT_STRING)"aUInt64",
                                         (LWES_SHORT_STRING)"TypeChecker"));
   assert (
@@ -202,7 +202,7 @@ test_db (void)
                                              (LWES_SHORT_STRING)"TypeChecker"));
   assert (
     lwes_event_type_db_check_for_type ( db,
-                                        LWES_INT_64_TOKEN,
+                                        LWES_TYPE_INT_64,
                                         (LWES_SHORT_STRING)"anInt64",
                                         (LWES_SHORT_STRING)"TypeChecker"));
   /* now check the meta fields */
@@ -212,7 +212,7 @@ test_db (void)
                                              (LWES_SHORT_STRING)"TypeChecker"));
   assert (
     lwes_event_type_db_check_for_type ( db,
-                                        LWES_IP_ADDR_TOKEN,
+                                        LWES_TYPE_IP_ADDR,
                                         (LWES_SHORT_STRING)"SenderIP",
                                         (LWES_SHORT_STRING)"TypeChecker"));
   assert (
@@ -221,7 +221,7 @@ test_db (void)
                                              (LWES_SHORT_STRING)"TypeChecker"));
   assert (
     lwes_event_type_db_check_for_type ( db,
-                                        LWES_U_INT_16_TOKEN,
+                                        LWES_TYPE_U_INT_16,
                                         (LWES_SHORT_STRING)"SenderPort",
                                         (LWES_SHORT_STRING)"TypeChecker"));
   assert (
@@ -230,7 +230,7 @@ test_db (void)
                                              (LWES_SHORT_STRING)"TypeChecker"));
   assert (
     lwes_event_type_db_check_for_type ( db,
-                                        LWES_INT_64_TOKEN,
+                                        LWES_TYPE_INT_64,
                                         (LWES_SHORT_STRING)"ReceiptTime",
                                         (LWES_SHORT_STRING)"TypeChecker"));
   assert (
@@ -239,7 +239,7 @@ test_db (void)
                                              (LWES_SHORT_STRING)"TypeChecker"));
   assert (
     lwes_event_type_db_check_for_type ( db,
-                                        LWES_U_INT_16_TOKEN,
+                                        LWES_TYPE_U_INT_16,
                                         (LWES_SHORT_STRING)"SiteID",
                                         (LWES_SHORT_STRING)"TypeChecker"));
   assert (
@@ -248,7 +248,7 @@ test_db (void)
                                              (LWES_SHORT_STRING)"TypeChecker"));
   assert (
     lwes_event_type_db_check_for_type ( db,
-                                        LWES_STRING_TOKEN,
+                                        LWES_TYPE_STRING,
                                         (LWES_SHORT_STRING)"aMetaString",
                                         (LWES_SHORT_STRING)"TypeChecker"));
   /* also for the empty event */
@@ -258,7 +258,7 @@ test_db (void)
                                              (LWES_SHORT_STRING)"Empty"));
   assert (
     lwes_event_type_db_check_for_type ( db,
-                                        LWES_IP_ADDR_TOKEN,
+                                        LWES_TYPE_IP_ADDR,
                                         (LWES_SHORT_STRING)"SenderIP",
                                         (LWES_SHORT_STRING)"Empty"));
   assert (
@@ -267,7 +267,7 @@ test_db (void)
                                              (LWES_SHORT_STRING)"Empty"));
   assert (
     lwes_event_type_db_check_for_type ( db,
-                                        LWES_U_INT_16_TOKEN,
+                                        LWES_TYPE_U_INT_16,
                                         (LWES_SHORT_STRING)"SenderPort",
                                         (LWES_SHORT_STRING)"Empty"));
   assert (
@@ -276,7 +276,7 @@ test_db (void)
                                              (LWES_SHORT_STRING)"Empty"));
   assert (
     lwes_event_type_db_check_for_type ( db,
-                                        LWES_INT_64_TOKEN,
+                                        LWES_TYPE_INT_64,
                                         (LWES_SHORT_STRING)"ReceiptTime",
                                         (LWES_SHORT_STRING)"Empty"));
   assert (
@@ -285,7 +285,7 @@ test_db (void)
                                              (LWES_SHORT_STRING)"Empty"));
   assert (
     lwes_event_type_db_check_for_type ( db,
-                                        LWES_U_INT_16_TOKEN,
+                                        LWES_TYPE_U_INT_16,
                                         (LWES_SHORT_STRING)"SiteID",
                                         (LWES_SHORT_STRING)"Empty"));
   assert (
@@ -294,7 +294,7 @@ test_db (void)
                                              (LWES_SHORT_STRING)"Empty"));
   assert (
     lwes_event_type_db_check_for_type ( db,
-                                        LWES_STRING_TOKEN,
+                                        LWES_TYPE_STRING,
                                         (LWES_SHORT_STRING)"aMetaString",
                                         (LWES_SHORT_STRING)"Empty"));
 
@@ -306,12 +306,12 @@ test_db (void)
   /* also that trying the wrong type fails */
   assert (
     ! lwes_event_type_db_check_for_type ( db,
-                                        LWES_U_INT_16_TOKEN,
+                                        LWES_TYPE_U_INT_16,
                                         (LWES_SHORT_STRING)"aMetaString",
                                         (LWES_SHORT_STRING)"TypeChecker"));
   assert (
     ! lwes_event_type_db_check_for_type ( db,
-                                          LWES_U_INT_16_TOKEN,
+                                          LWES_TYPE_U_INT_16,
                                           (LWES_SHORT_STRING)"random",
                                           (LWES_SHORT_STRING)"TypeChecker"));
 
@@ -341,7 +341,7 @@ test_db (void)
   assert ( lwes_event_type_db_add_attribute ( db,
                                               (LWES_SHORT_STRING)"TypeChecker",
                                               (LWES_SHORT_STRING)"aMetaString",
-                                              (LWES_SHORT_STRING)"string")
+                                              LWES_TYPE_STRING)
            == -3);
 
   /* fail at allocating space for the attribute value type */
@@ -350,7 +350,7 @@ test_db (void)
   assert ( lwes_event_type_db_add_attribute ( db,
                                               (LWES_SHORT_STRING)"TypeChecker",
                                               (LWES_SHORT_STRING)"aMetaString",
-                                              (LWES_SHORT_STRING)"string")
+                                              LWES_TYPE_STRING)
            == -3);
 
   /* fail at putting the attribute into the event hash */
@@ -358,7 +358,7 @@ test_db (void)
   assert ( lwes_event_type_db_add_attribute ( db,
                                               (LWES_SHORT_STRING)"TypeChecker",
                                               (LWES_SHORT_STRING)"aMetaString",
-                                              (LWES_SHORT_STRING)"string")
+                                              LWES_TYPE_STRING)
            == -3);
   put_null = 0;
 

@@ -57,7 +57,7 @@ test_event1 (void)
 {
   struct lwes_event *event1;
   struct lwes_event_type_db *db = NULL;
-  LWES_BYTE bytes[MAX_MSG_SIZE];
+  LWES_BYTE bytes[LWES_MSG_SIZE_MAX];
   int size1;
   LWES_LONG_STRING string1;
   LWES_LONG_STRING string2;
@@ -75,24 +75,24 @@ test_event1 (void)
   db = lwes_event_type_db_create (file);
   assert (db != NULL);
 
-  event1 = lwes_event_create_with_encoding (db, "Event1", encoding);
+  event1 = lwes_event_create (db, "Event1");
   assert ( event1 != NULL );
 
   /* use the max string size */
   string1 = random_ascii (10);
   string2 = random_ascii (50);
-  assert (lwes_event_set_STRING   (event1, "st",       string1) == 2);
-  assert (lwes_event_set_BOOLEAN  (event1, "t_bool",   1)       == 3);
-  assert (lwes_event_set_INT_16   (event1, "t_int16",  1)       == 4);
-  assert (lwes_event_set_U_INT_16 (event1, "t_uint16", 1)       == 5);
-  assert (lwes_event_set_INT_32   (event1, "t_int32",  1)       == 6);
-  assert (lwes_event_set_U_INT_32 (event1, "t_uint32", 1)       == 7);
-  assert (lwes_event_set_INT_64   (event1, "t_int64",  1)       == 8);
-  assert (lwes_event_set_U_INT_64 (event1, "t_uint64", 1)       == 9);
-  assert (lwes_event_set_IP_ADDR  (event1, "t_ip_addr",ip_addr) == 10);
-  assert (lwes_event_set_STRING   (event1, "t_string", string2) == 11);
+  assert (lwes_event_set_STRING   (event1, "st",       string1) == 1);
+  assert (lwes_event_set_BOOLEAN  (event1, "t_bool",   1)       == 2);
+  assert (lwes_event_set_INT_16   (event1, "t_int16",  1)       == 3);
+  assert (lwes_event_set_U_INT_16 (event1, "t_uint16", 1)       == 4);
+  assert (lwes_event_set_INT_32   (event1, "t_int32",  1)       == 5);
+  assert (lwes_event_set_U_INT_32 (event1, "t_uint32", 1)       == 6);
+  assert (lwes_event_set_INT_64   (event1, "t_int64",  1)       == 7);
+  assert (lwes_event_set_U_INT_64 (event1, "t_uint64", 1)       == 8);
+  assert (lwes_event_set_IP_ADDR  (event1, "t_ip_addr",ip_addr) == 9);
+  assert (lwes_event_set_STRING   (event1, "t_string", string2) == 10);
 
-  size1 = lwes_event_to_bytes (event1, bytes, MAX_MSG_SIZE, 0);
+  size1 = lwes_event_to_bytes (event1, bytes, LWES_MSG_SIZE_MAX, 0);
 
   sprintf (bigbuf, "Event1\t%d\n",size1);
 

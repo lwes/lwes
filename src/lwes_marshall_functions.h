@@ -241,10 +241,35 @@ marshall_BOOLEAN
  *  \param[in,out] offset the offset into the array, then the new offset
  *
  *  \return 0 on error, the number of bytes written on success.
+ *  \deprecated Use marshall_IPV4 instead
  */
 int
 marshall_IP_ADDR
   (LWES_IP_ADDR      ipAddress,
+   LWES_BYTE_P       bytes,
+   size_t            length,
+   size_t            *offset);
+
+/*! \brief Marshall an ip4v address into a byte array
+ *
+ * Attempt to marshall ipAddress into the given byte array at the given
+ * offset if there is enough total space.  The length should be the total
+ * length of the array.
+ *
+ * The offset will be modified by the number of bytes set, and that value
+ * will be returned.  Thus a value of 0 is an error, meaning not enough
+ * space to write this.
+ *
+ *  \param[in] ipAddress the LWES_IP_ADDR to write into the array
+ *  \param[in] bytes the byte array to write into
+ *  \param[in] length total length of the array
+ *  \param[in,out] offset the offset into the array, then the new offset
+ *
+ *  \return 0 on error, the number of bytes written on success.
+ */
+int
+marshall_IPV4
+  (LWES_IPV4         ipAddress,
    LWES_BYTE_P       bytes,
    size_t            length,
    size_t            *offset);

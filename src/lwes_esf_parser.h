@@ -28,7 +28,7 @@
 
 #ifdef __cplusplus
 extern "C" {
-#endif 
+#endif
 
 #define lweslval _lweslval
 
@@ -37,11 +37,11 @@ extern "C" {
 struct lwes_parser_state
 {
   struct lwes_event_type_db *db;
-  char *lastType;
-  char *lastEvent;
-  int lineno;
-  int in_event;
-  int errors;
+  LWES_TYPE         lastType;
+  LWES_SHORT_STRING lastEvent;
+  int               lineno;
+  int               in_event;
+  int               errors;
 };
 
 extern int
@@ -55,7 +55,6 @@ lwes_parse_esf_destroy
 
 #ifdef __cplusplus
 }
-#endif 
+#endif
 
 #endif /* __LWES_ESF_PARSER_H */
-

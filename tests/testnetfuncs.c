@@ -692,7 +692,7 @@ receiver_with_small_timeout
 
   assert ((n = lwes_net_recv_bytes_by (&connection,
                                        buffer,
-                                       MAX_MSG_SIZE,
+                                       LWES_MSG_SIZE_MAX,
                                        timeout_ms)) < 0);
 
   lwes_net_close (&connection);
@@ -717,9 +717,9 @@ test_large_send ()
 {
   struct lwes_net_connection connection;
   unsigned int i;
-  LWES_BYTE buffer [MAX_MSG_SIZE];
+  LWES_BYTE buffer [LWES_MSG_SIZE_MAX];
 
-  for (i=0; i < MAX_MSG_SIZE; i++)
+  for (i=0; i < LWES_MSG_SIZE_MAX; i++)
     {
       buffer[i] = (LWES_BYTE) i;
     }
@@ -729,7 +729,7 @@ test_large_send ()
                           (char *)mcast_iface,
                           (int)mcast_port)
            == 0 );
-  assert ( lwes_net_send_bytes (&connection, buffer, MAX_MSG_SIZE)  > 0); 
+  assert ( lwes_net_send_bytes (&connection, buffer, LWES_MSG_SIZE_MAX)  > 0); 
   lwes_net_close (&connection);  
 }
 

@@ -389,7 +389,7 @@ void test_listener_failures (void)
     struct lwes_emitter *emitter;
     struct lwes_event *event;
     struct lwes_event *event2;
-    LWES_BYTE bytes[MAX_MSG_SIZE];
+    LWES_BYTE bytes[LWES_MSG_SIZE_MAX];
     int n;
     size_t m;
 
@@ -417,7 +417,7 @@ void test_listener_failures (void)
     assert (lwes_emitter_emit (emitter, event) == 0);
     /* get the bytes */
     assert ((n = lwes_listener_recv_bytes_by
-                   (listener, bytes, MAX_MSG_SIZE, 1000)) > 0);
+                   (listener, bytes, LWES_MSG_SIZE_MAX, 1000)) > 0);
 
 
     /* fail to add headers for various reasons */
@@ -514,7 +514,7 @@ void test_event_name_peek (void)
     struct lwes_emitter *emitter;
     struct lwes_event *event;
     struct lwes_event *event2;
-    LWES_BYTE bytes[MAX_MSG_SIZE];
+    LWES_BYTE bytes[LWES_MSG_SIZE_MAX];
     int n;
     LWES_SHORT_STRING name1 = (LWES_SHORT_STRING)"TypeChecker";
     LWES_SHORT_STRING name2 = (LWES_SHORT_STRING)"Type";
@@ -544,7 +544,7 @@ void test_event_name_peek (void)
     assert (lwes_emitter_emit (emitter, event) == 0);
     /* get the bytes */
     assert ((n = lwes_listener_recv_bytes_by
-                   (listener, bytes, MAX_MSG_SIZE, 1000)) > 0);
+                   (listener, bytes, LWES_MSG_SIZE_MAX, 1000)) > 0);
 
     /* check that the exact name matches */
     assert (lwes_listener_event_has_name (bytes, n, name1) == 0);
@@ -563,7 +563,7 @@ void test_event_name_peek (void)
 
   /* failure at event name peek */
   {
-    LWES_BYTE bytes[MAX_MSG_SIZE];
+    LWES_BYTE bytes[LWES_MSG_SIZE_MAX];
 
     /* NULL bytes */
     assert (lwes_listener_event_has_name (NULL, 10, eventname) != 0);

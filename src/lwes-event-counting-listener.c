@@ -164,47 +164,49 @@ lwes_event_attribute_to_stream
   (struct lwes_event_attribute *attribute,
    FILE *stream)
 {
-  if (attribute->type == LWES_U_INT_16_TOKEN)
-  {
-    lwes_U_INT_16_to_stream (*((LWES_U_INT_16 *)attribute->value),stream);
-  }
-  else if (attribute->type == LWES_INT_16_TOKEN)
-  {
-    lwes_INT_16_to_stream (*((LWES_INT_16 *)attribute->value),stream);
-  }
-  else if (attribute->type == LWES_U_INT_32_TOKEN)
-  {
-    lwes_U_INT_32_to_stream (*((LWES_U_INT_32 *)attribute->value),stream);
-  }
-  else if (attribute->type == LWES_INT_32_TOKEN)
-  {
-    lwes_INT_32_to_stream (*((LWES_INT_32 *)attribute->value),stream);
-  }
-  else if (attribute->type == LWES_U_INT_64_TOKEN)
-  {
-    lwes_U_INT_64_to_stream (*((LWES_U_INT_64 *)attribute->value),stream);
-  }
-  else if (attribute->type == LWES_INT_64_TOKEN)
-  {
-    lwes_INT_64_to_stream (*((LWES_INT_64 *)attribute->value),stream);
-  }
-  else if (attribute->type == LWES_BOOLEAN_TOKEN)
-  {
-    lwes_BOOLEAN_to_stream (*((LWES_BOOLEAN *)attribute->value),stream);
-  }
-  else if (attribute->type == LWES_IP_ADDR_TOKEN)
-  {
-    lwes_IP_ADDR_to_stream (*((LWES_IP_ADDR *)attribute->value),stream);
-  }
-  else if (attribute->type == LWES_STRING_TOKEN)
-  {
-    lwes_LONG_STRING_to_stream ((LWES_LONG_STRING)attribute->value,stream);
-  }
-  else
-  {
-    /* should really do something here, but not sure what */
-  }
-  return 0;
+  int ret = 0;
+  switch (attribute->type)
+    {
+      case LWES_TYPE_U_INT_16:
+        ret =
+          lwes_U_INT_16_to_stream (*((LWES_U_INT_16 *)attribute->value),stream);
+        break;
+      case LWES_TYPE_INT_16:
+        ret =
+          lwes_INT_16_to_stream (*((LWES_INT_16 *)attribute->value),stream);
+        break;
+      case LWES_TYPE_U_INT_32:
+        ret =
+          lwes_U_INT_32_to_stream (*((LWES_U_INT_32 *)attribute->value),stream);
+        break;
+      case LWES_TYPE_INT_32:
+        ret =
+          lwes_INT_32_to_stream (*((LWES_INT_32 *)attribute->value),stream);
+        break;
+      case LWES_TYPE_U_INT_64:
+        ret =
+          lwes_U_INT_64_to_stream (*((LWES_U_INT_64 *)attribute->value),stream);
+        break;
+      case LWES_TYPE_INT_64:
+        ret =
+          lwes_INT_64_to_stream (*((LWES_INT_64 *)attribute->value),stream);
+        break;
+      case LWES_TYPE_BOOLEAN:
+        ret =
+          lwes_BOOLEAN_to_stream (*((LWES_BOOLEAN *)attribute->value),stream);
+        break;
+      case LWES_TYPE_IP_ADDR:
+        ret =
+          lwes_IP_ADDR_to_stream (*((LWES_IP_ADDR *)attribute->value),stream);
+        break;
+      case LWES_TYPE_STRING:
+        ret =
+          lwes_LONG_STRING_to_stream((LWES_LONG_STRING)attribute->value,stream);
+        break;
+      case LWES_TYPE_UNDEFINED:
+        break;
+    }
+  return ret;
 }
 
 static

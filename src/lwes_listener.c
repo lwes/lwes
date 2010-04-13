@@ -38,7 +38,8 @@ lwes_listener_create
 
   /* I originally was allocating on the stack, but that fails on freebsd,
      so I'll malloc and free this here */
-  listener->buffer = (LWES_BYTE_P) malloc (sizeof (LWES_BYTE)*MAX_MSG_SIZE);
+  listener->buffer =
+    (LWES_BYTE_P) malloc (sizeof (LWES_BYTE)*LWES_MSG_SIZE_MAX);
 
   if ( listener->buffer == NULL )
     {
@@ -97,7 +98,7 @@ lwes_listener_add_header_fields
   /* deserialize the event name */
   offset_to_num_attrs = 0;
   if (unmarshall_SHORT_STRING (listener->dtmp->tmp_string,
-                               (SHORT_STRING_MAX+1),
+                               (LWES_EVENT_NAME_MAX+1),
                                bytes,
                                max,
                                &offset_to_num_attrs) == 0)
@@ -121,7 +122,7 @@ lwes_listener_add_header_fields
                                   bytes,
                                   max,
                                   &n) == 0
-      || marshall_BYTE           (LWES_INT_64_TOKEN,
+      || marshall_BYTE           (LWES_TYPE_INT_64,
                                   bytes,
                                   max,
                                   &n) == 0
@@ -139,7 +140,7 @@ lwes_listener_add_header_fields
                                   bytes,
                                   max,
                                   &n) == 0
-      || marshall_BYTE           (LWES_IP_ADDR_TOKEN,
+      || marshall_BYTE           (LWES_TYPE_IP_ADDR,
                                   bytes,
                                   max,
                                   &n) == 0
@@ -157,7 +158,7 @@ lwes_listener_add_header_fields
                                    bytes,
                                    max,
                                    &n) == 0
-       || marshall_BYTE           (LWES_U_INT_16_TOKEN,
+       || marshall_BYTE           (LWES_TYPE_U_INT_16,
                                    bytes,
                                    max,
                                    &n) == 0
@@ -237,7 +238,7 @@ lwes_listener_recv_process_event
   int ret;
   if ((ret = lwes_listener_add_header_fields (listener,
                                               listener->buffer,
-                                              MAX_MSG_SIZE,
+                                              LWES_MSG_SIZE_MAX,
                                               &n)) < 0)
     {
       return ret;
@@ -256,7 +257,7 @@ lwes_listener_recv
 
   if ( (n = lwes_listener_recv_bytes (listener,
                                       listener->buffer,
-                                      MAX_MSG_SIZE)) < 0 )
+                                      LWES_MSG_SIZE_MAX)) < 0 )
     {
       return n;
     }
@@ -274,7 +275,7 @@ lwes_listener_recv_by
 
   if ( (n = lwes_listener_recv_bytes_by (listener,
                                          listener->buffer,
-                                         MAX_MSG_SIZE,
+                                         LWES_MSG_SIZE_MAX,
                                          timeout_ms)) < 0 )
     {
       return n;

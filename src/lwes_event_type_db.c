@@ -21,11 +21,14 @@
 #include "lwes_esf_parser.h"
 #include "lwes_hash.h"
 
+const LWES_SHORT_STRING LWES_META_INFO_STRING =
+  (LWES_SHORT_STRING)"MetaEventInfo";
+
 struct lwes_event_type_db *
 lwes_event_type_db_create
   (const char *filename)
 {
-  struct lwes_event_type_db *db = 
+  struct lwes_event_type_db *db =
      (struct lwes_event_type_db *)
        malloc (sizeof (struct lwes_event_type_db));
   if (db != NULL)
@@ -69,7 +72,7 @@ lwes_event_type_db_destroy
       while (lwes_hash_enumeration_has_more_elements (&e))
         {
           eventName = lwes_hash_enumeration_next_element (&e);
-          attrHash = 
+          attrHash =
             (struct lwes_hash *)lwes_hash_remove (db->events, eventName);
           if (lwes_hash_keys (attrHash, &e2))
             {
@@ -139,13 +142,13 @@ lwes_event_type_db_add_attribute
   (struct lwes_event_type_db *db,
    LWES_SHORT_STRING event_name,
    LWES_SHORT_STRING attr_name,
-   LWES_SHORT_STRING type)
+   LWES_TYPE type)
 {
   int ret;
   struct lwes_hash *eventHash =
     (struct lwes_hash *)lwes_hash_get (db->events, event_name);
   LWES_SHORT_STRING tmpAttrName = NULL;
-  LWES_BYTE        *tmpAttrType = NULL;
+  LWES_TYPE        *tmpAttrType = NULL;
 
   tmpAttrName =
       (LWES_SHORT_STRING)malloc (sizeof (LWES_CHAR)*(strlen (attr_name)+1));
@@ -155,49 +158,14 @@ lwes_event_type_db_add_attribute
     }
   strcpy (tmpAttrName, attr_name);
 
-  tmpAttrType = (LWES_BYTE *)malloc (sizeof (LWES_BYTE));
+  tmpAttrType = (LWES_TYPE *)malloc (sizeof (LWES_TYPE));
   if (tmpAttrType == NULL)
     {
       free (tmpAttrName);
       return -3;
     }
 
-  if (strcmp (type, LWES_U_INT_16_STRING) == 0)
-    {
-      *tmpAttrType = LWES_U_INT_16_TOKEN;
-    }
-  else if (strcmp (type, LWES_INT_16_STRING) == 0)
-    {
-      *tmpAttrType = LWES_INT_16_TOKEN;
-    }
-  else if (strcmp (type, LWES_U_INT_32_STRING) == 0)
-    {
-      *tmpAttrType = LWES_U_INT_32_TOKEN;
-    }
-  else if (strcmp (type, LWES_INT_32_STRING) == 0)
-    {
-      *tmpAttrType = LWES_INT_32_TOKEN;
-    }
-  else if (strcmp (type, LWES_U_INT_64_STRING) == 0)
-    {
-      *tmpAttrType = LWES_U_INT_64_TOKEN;
-    }
-  else if (strcmp (type, LWES_INT_64_STRING) == 0)
-    {
-      *tmpAttrType = LWES_INT_64_TOKEN;
-    }
-  else if (strcmp (type, LWES_BOOLEAN_STRING) == 0)
-    {
-      *tmpAttrType = LWES_BOOLEAN_TOKEN;
-    }
-  else if (strcmp (type, LWES_IP_ADDR_STRING) == 0)
-    {
-      *tmpAttrType = LWES_IP_ADDR_TOKEN;
-    }
-  else if (strcmp (type, LWES_STRING_STRING) == 0)
-    {
-      *tmpAttrType = LWES_STRING_TOKEN;
-    }
+  *tmpAttrType = type;
 
   ret = lwes_hash_put (eventHash, tmpAttrName, tmpAttrType);
 
@@ -213,7 +181,7 @@ lwes_event_type_db_add_attribute
 
 int
 lwes_event_type_db_check_for_event
-  (struct lwes_event_type_db *db, 
+  (struct lwes_event_type_db *db,
    LWES_SHORT_STRING event_name)
 {
   return lwes_hash_contains_key (db->events, event_name);
@@ -221,13 +189,13 @@ lwes_event_type_db_check_for_event
 
 int
 lwes_event_type_db_check_for_attribute
-  (struct lwes_event_type_db *db, 
+  (struct lwes_event_type_db *db,
    LWES_CONST_SHORT_STRING attr_name,
    LWES_CONST_SHORT_STRING event_name)
 {
-  struct lwes_hash *event = 
+  struct lwes_hash *event =
     (struct lwes_hash *)lwes_hash_get (db->events, event_name);
-  struct lwes_hash *meta_event = 
+  struct lwes_hash *meta_event =
     (struct lwes_hash *)lwes_hash_get (db->events, LWES_META_INFO_STRING);
   int metaContainsAttribute = 0;
   int eventContainsAttribute = 0;
@@ -244,8 +212,8 @@ lwes_event_type_db_check_for_attribute
 
 int
 lwes_event_type_db_check_for_type
-  (struct lwes_event_type_db *db, 
-   LWES_BYTE type_value,
+  (struct lwes_event_type_db *db,
+   LWES_TYPE type_value,
    LWES_CONST_SHORT_STRING attr_name,
    LWES_CONST_SHORT_STRING event_name)
 {
@@ -253,15 +221,15 @@ lwes_event_type_db_check_for_type
     (struct lwes_hash *)lwes_hash_get (db->events, event_name);
   struct lwes_hash *meta_event =
     (struct lwes_hash *)lwes_hash_get (db->events, LWES_META_INFO_STRING);
-  LWES_BYTE *tmp_type = NULL;
+  LWES_TYPE *tmp_type = NULL;
 
   if (event != NULL)
   {
-    tmp_type = (LWES_BYTE *)lwes_hash_get (event, attr_name);
+    tmp_type = (LWES_TYPE *)lwes_hash_get (event, attr_name);
   }
   if (tmp_type == NULL && meta_event != NULL)
   {
-    tmp_type = (LWES_BYTE *)lwes_hash_get (meta_event, attr_name);
+    tmp_type = (LWES_TYPE *)lwes_hash_get (meta_event, attr_name);
   }
   if (tmp_type == NULL)
   {

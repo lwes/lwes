@@ -26,8 +26,6 @@
 
 #include <stdio.h>
 
-#define LWES_ENCODING "enc"
-
 #ifdef __cplusplus
 extern "C" {
 #endif 
@@ -43,10 +41,10 @@ struct lwes_event_deserialize_tmp
 {
   /*! a LWES_SHORT_STRING of max size for use when deserializing short
    *  strings */
-  LWES_CHAR     tmp_string[SHORT_STRING_MAX+1];
+  LWES_CHAR     tmp_string[LWES_EVENT_NAME_MAX+1];
   /*! a LWES_LONG_STRING of max size for use when deserializing long
    *  strings */
-  LWES_CHAR     tmp_string_long[LONG_STRING_MAX+1];
+  LWES_CHAR     tmp_string_long[LWES_STRING_MAX+1];
 };
 
 /*! \struct lwes_event lwes_event.h
@@ -72,7 +70,7 @@ struct lwes_event
 struct lwes_event_attribute
 {
   /*! The type of the attribute */
-  LWES_BYTE         type;
+  LWES_TYPE         type;
   /*! The value of the attribute */
   void             *value;
 };
@@ -115,24 +113,6 @@ lwes_event_create
   (struct lwes_event_type_db *db,
    LWES_CONST_SHORT_STRING name);
 
-/*! \brief Create the memory for an event with encoding
- *
- * This allocate's space for name, so you don't have to dynamically
- * allocate the memory for it
- *
- * \param[in] name the name of the event
- * \param[in] db the event type db to use for this object, if NULL, disable type
- *            checking.
- * \param[in] encoding the character encoding used for strings in this object
- *
- * \return the newly allocated event or NULL if an error occurred
- */
-struct lwes_event *
-lwes_event_create_with_encoding
-  (struct lwes_event_type_db *db,
-   LWES_CONST_SHORT_STRING name,
-   LWES_INT_16 encoding);
-
 /*! \brief Cleanup the memory for an event 
  *
  * \param[in] event the event to free
@@ -158,21 +138,6 @@ int
 lwes_event_set_name
   (struct lwes_event *event,
    LWES_CONST_SHORT_STRING name);
-
-/*! \brief Set the encoding of the event
- *
- *  Note the encoding is just advisory, it is up to the user of the library
- *  to insure the encoding of strings matches what is placed here
- *
- *  \param[in] event the event to set the encoding of
- *  \param[in] encoding the new encoding
- *
- *  \return 0 on success, a negative number on failure
- */
-int
-lwes_event_set_encoding
-  (struct lwes_event *event,
-   LWES_INT_16 encoding);
 
 /*! \brief Add a LWES_U_INT_16 attribute to the event
  *
@@ -385,23 +350,8 @@ lwes_event_get_name
  */
 int
 lwes_event_get_number_of_attributes
-  (struct lwes_event *event, 
-   LWES_U_INT_16 *number);
-
-/*! \brief Get the encoding of the event
- *
- *  Note the encoding is just advisory, it is up to the user of the library
- *  to insure the encoding of strings matches what is placed here
- *
- *  \param[in] event the event to get the encoding from
- *  \param[out] encoding the encoding of the event
- *
- *  \return 0 on success, a negative number on failure
- */
-int
-lwes_event_get_encoding
   (struct lwes_event *event,
-   LWES_INT_16       *encoding);
+   LWES_U_INT_16 *number);
 
 /*! \brief Get an LWES_U_INT_16 attribute from the event
  *
@@ -532,8 +482,8 @@ lwes_event_get_BOOLEAN
    LWES_BOOLEAN            *value);
 
 /*! \brief Serialize an event
- 
-   Serialization format is 
+
+   Serialization format is
 
    <pre>
     1 byte event name length ( 1 < b <= 255 )
@@ -732,9 +682,9 @@ int
 lwes_event_enumeration_next_element
   (struct lwes_event_enumeration *enumeration,
    LWES_CONST_SHORT_STRING *key,
-   LWES_TYPE *type); 
+   LWES_TYPE *type);
 
 #ifdef __cplusplus
 }
-#endif 
+#endif
 #endif /* __LWES_EVENT_FUNCTIONS_H */

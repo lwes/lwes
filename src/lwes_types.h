@@ -126,6 +126,11 @@ typedef int                LWES_BOOLEAN;
  */
 typedef struct in_addr     LWES_IP_ADDR;
 
+/*! \typedef struct in_addr LWES_IPV4
+ *  \brief an ipv4 internet address, which is 4 bytes in length
+ */
+typedef struct in_addr     LWES_IPV4;
+
 /*! \typedef char *             LWES_SHORT_STRING
  *  \brief a string which is at most 1 byte in length
  */
@@ -146,65 +151,27 @@ typedef const char *       LWES_CONST_SHORT_STRING;
  */
 typedef const char *       LWES_CONST_LONG_STRING;
 
+/*! \typedef float       LWES_FLOAT
+ *  \brief an ieee 754 single precision floating point value
+ */
+typedef float              LWES_FLOAT;
+
+/*! \typedef double      LWES_DOUBLE
+ *  \brief an ieee 754 double precision floating point value
+ */
+typedef double             LWES_DOUBLE;
+
 /*! \typedef char  LWES_CHAR
  *  \brief a character which is mainly used in mallocs for string types
  */
 typedef char               LWES_CHAR;
 
-/* Maximums of each type in characters for a standard encoding */
-/* WARNING, WARNING
-   These #define's should be considered deprecated, they will be removed
-   in a future version of lwes */
-#define SHORT_STRING_MAX    255   /*                                          */
-#define LONG_STRING_MAX     65535 /*                                          */
-#define BYTE_STRING_MAX     2     /*                   00 - FF                */
-#define U_INT_16_STRING_MAX 5     /*                    0 - 65535             */
-#define INT_16_STRING_MAX   6     /*               -32768 - 32767             */
-#define U_INT_32_STRING_MAX 10    /*                    0 - 4294967295        */
-#define INT_32_STRING_MAX   11    /*          -2147483648 - 2147483647        */
-#define U_INT_64_STRING_MAX 20    /*                  0 - 18446744073709551615*/
-#define INT_64_STRING_MAX   20    /*-9223372036854775808 - 9223372036854775807*/
-#define BOOLEAN_STRING_MAX  5     /*                 true - false             */
-#define IP_ADDR_STRING_MAX  15    /*               xxx.xxx.xxx.xxx            */
+/* maximum payload size for an event system message payload */
+extern const size_t LWES_MSG_SIZE_MAX;
 
-#define MAX_HEADER_LENGTH   22
-#define MAX_BODY_LENGTH     65513  /* 65535 - 22                              */
-
-#ifndef TRUE
-#define TRUE 1
-#endif
-#ifndef FALSE
-#define FALSE 0
-#endif
-extern const size_t MAX_QUEUED_ELEMENTS;
-extern const size_t MAX_MSG_SIZE;
-
-/* TODO: these really need to go away and be replaced with the type enumeration
-   below, until then they need to remain in-sync.
- */
-extern const LWES_BYTE LWES_UNDEFINED_TOKEN;
-extern const LWES_BYTE LWES_U_INT_16_TOKEN;
-extern const LWES_BYTE LWES_INT_16_TOKEN;
-extern const LWES_BYTE LWES_U_INT_32_TOKEN;
-extern const LWES_BYTE LWES_INT_32_TOKEN;
-extern const LWES_BYTE LWES_U_INT_64_TOKEN;
-extern const LWES_BYTE LWES_INT_64_TOKEN;
-extern const LWES_BYTE LWES_BOOLEAN_TOKEN;
-extern const LWES_BYTE LWES_IP_ADDR_TOKEN;
-extern const LWES_BYTE LWES_STRING_TOKEN;
-
-extern const LWES_SHORT_STRING LWES_UNDEFINED_STRING;
-extern const LWES_SHORT_STRING LWES_U_INT_16_STRING;
-extern const LWES_SHORT_STRING LWES_INT_16_STRING;
-extern const LWES_SHORT_STRING LWES_U_INT_32_STRING;
-extern const LWES_SHORT_STRING LWES_INT_32_STRING;
-extern const LWES_SHORT_STRING LWES_U_INT_64_STRING;
-extern const LWES_SHORT_STRING LWES_INT_64_STRING;
-extern const LWES_SHORT_STRING LWES_BOOLEAN_STRING;
-extern const LWES_SHORT_STRING LWES_IP_ADDR_STRING;
-extern const LWES_SHORT_STRING LWES_STRING_STRING;
-
-extern const LWES_SHORT_STRING LWES_META_INFO_STRING;
+/* maximum sizes of different types of strings in the system */
+#define LWES_EVENT_NAME_MAX 127
+#define LWES_STRING_MAX     65535
 
 /*! \enum An enumeration of the types used by lwes */
 typedef enum {
@@ -217,6 +184,11 @@ typedef enum {
     LWES_TYPE_INT_64    = 7,   /*!< 8 byte signed integer type */
     LWES_TYPE_U_INT_64  = 8,   /*!< 8 byte unsigned integer type */
     LWES_TYPE_BOOLEAN   = 9,   /*!< 1 byte boolean type */
+//    LWES_TYPE_BYTE      = 10,  /*!< 1 byte */
+//    LWES_TYPE_FLOAT     = 11,  /*!< 4 byte ieee 754 single precision float */
+//    LWES_TYPE_DOUBLE    = 12,  /*!< 8 byte ieee 754 double precision flaot */
+//    LWES_TYPE_IPV4      = 13,  /*!< 4 byte ipv4 address type */
+//    LWES_TYPE_EVENT     = 14,  /*!< event type */
     LWES_TYPE_UNDEFINED = 255, /*!< undefined type */
 } LWES_TYPE;
 

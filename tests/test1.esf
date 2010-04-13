@@ -11,8 +11,6 @@ MetaEventInfo
                        # time the event was received by the listener/journaller
   uint16  SiteID;      # receiver_id                  OPTIONAL, COMMAND_ARGS
                        # id of the listener/journaller
-  int16   enc;         # encoding_type                REQUIRED, FUNCTION_ARGS
-                       # encoding type of strings in the event
   string  st;          # sender_type                  OPTIONAL, FUNCTION_ARGS, 10
                        # sender type, this should be a short string which
                        # describes the sender type.  (ie. "java", or "perl")

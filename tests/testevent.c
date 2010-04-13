@@ -76,13 +76,13 @@ my_lwes_hash_get
 {
   if (lwes_hash_get_type_error == 1)
     {
-      null_type.type = LWES_U_INT_16_TOKEN;
+      null_type.type = LWES_TYPE_U_INT_16;
       null_type.value = (void*)&enc;
       return (void *)&null_type;
     }
   else if (lwes_hash_get_value_error == 1)
     {
-      null_type.type = LWES_INT_16_TOKEN;
+      null_type.type = LWES_TYPE_INT_16;
       null_type.value = NULL;
       return (void *)&null_type;
     }
@@ -117,23 +117,6 @@ static LWES_BYTE ref_bytes_no_db[216] = {
   0xff,0x0b,0x61,0x4d,0x65,0x74,0x61,0x53,0x74,0x72,0x69,0x6e,0x67,0x05,0x00,
   0x05,0x68,0x65,0x6c,0x6c,0x6f};
 
-static LWES_BYTE ref_bytes_encoding_no_db[223] = {
-  0x0b,0x54,0x79,0x70,0x65,0x43,0x68,0x65,0x63,0x6b,0x65,0x72,0x00,0x0e,0x03,
-  0x65,0x6e,0x63,0x02,0x00,0x01,0x0b,0x61,0x6e,0x49,0x50,0x41,0x64,0x64,0x72,
-  0x65,0x73,0x73,0x06,0x64,0x00,0x00,0xe0,0x07,0x61,0x55,0x49,0x6e,0x74,0x33,
-  0x32,0x03,0xff,0xff,0xff,0xff,0x08,0x61,0x42,0x6f,0x6f,0x6c,0x65,0x61,0x6e,
-  0x09,0x01,0x08,0x61,0x42,0x6f,0x6f,0x6c,0x65,0x61,0x6e,0x09,0x01,0x07,0x61,
-  0x6e,0x49,0x6e,0x74,0x31,0x36,0x02,0xff,0xff,0x07,0x61,0x53,0x74,0x72,0x69,
-  0x6e,0x67,0x05,0x00,0x13,0x68,0x74,0x74,0x70,0x3a,0x2f,0x2f,0x77,0x77,0x77,
-  0x2e,0x74,0x65,0x73,0x74,0x2e,0x63,0x6f,0x6d,0x07,0x61,0x6e,0x49,0x6e,0x74,
-  0x36,0x34,0x07,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0x07,0x61,0x6e,0x49,
-  0x6e,0x74,0x33,0x32,0x04,0xff,0xff,0xff,0xff,0x07,0x61,0x55,0x49,0x6e,0x74,
-  0x31,0x36,0x01,0xff,0xff,0x0d,0x61,0x6e,0x6f,0x74,0x68,0x65,0x72,0x55,0x49,
-  0x6e,0x74,0x31,0x36,0x01,0xff,0xff,0x08,0x53,0x65,0x6e,0x64,0x65,0x72,0x49,
-  0x50,0x06,0x01,0x00,0x00,0x7f,0x07,0x61,0x55,0x49,0x6e,0x74,0x36,0x34,0x08,
-  0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0x0b,0x61,0x4d,0x65,0x74,0x61,0x53,
-  0x74,0x72,0x69,0x6e,0x67,0x05,0x00,0x05,0x68,0x65,0x6c,0x6c,0x6f};
-
 static LWES_BYTE ref_bytes_db[188] = {
   0x0b,0x54,0x79,0x70,0x65,0x43,0x68,0x65,0x63,0x6b,0x65,0x72,0x00,0x0b,0x0b,
   0x61,0x6e,0x49,0x50,0x41,0x64,0x64,0x72,0x65,0x73,0x73,0x06,0x64,0x00,0x00,
@@ -151,7 +134,6 @@ static LWES_BYTE ref_bytes_db[188] = {
 
 const char *esffile         = "testeventtypedb.esf";
 LWES_SHORT_STRING eventname = (LWES_SHORT_STRING)"TypeChecker";
-LWES_U_INT_16     encoding  = (LWES_U_INT_16)1;
 LWES_SHORT_STRING key01     = (LWES_SHORT_STRING)"aString";
 LWES_LONG_STRING  value01   = (LWES_LONG_STRING)"http://www.test.com";
 LWES_SHORT_STRING key02     = (LWES_SHORT_STRING)"aBoolean";
@@ -185,7 +167,7 @@ test_event_with_db (void)
   struct lwes_event *event2;
   struct lwes_event_type_db *db = NULL;
   struct lwes_event_deserialize_tmp dtmp;
-  LWES_BYTE bytes[MAX_MSG_SIZE];
+  LWES_BYTE bytes[LWES_MSG_SIZE_MAX];
   int size1;
   int size2;
   int i;
@@ -246,7 +228,7 @@ test_event_with_db (void)
   assert ( lwes_event_get_number_of_attributes ( event1, &nm_attr_o1) == 0 );
   assert ( nm_attr_o1 == 11 );
 
-  size1 = lwes_event_to_bytes (event1,bytes,MAX_MSG_SIZE, 0);
+  size1 = lwes_event_to_bytes (event1,bytes,LWES_MSG_SIZE_MAX, 0);
 
   /* this test may fail depending on whether the hashing function or the
    * default ordering changes
@@ -322,7 +304,7 @@ test_event_without_db (void)
   struct lwes_event *event1;
   struct lwes_event *event2;
   struct lwes_event_deserialize_tmp dtmp;
-  LWES_BYTE bytes[MAX_MSG_SIZE];
+  LWES_BYTE bytes[LWES_MSG_SIZE_MAX];
   int size1;
   int size2;
   int i;
@@ -380,7 +362,7 @@ test_event_without_db (void)
   assert ( lwes_event_get_number_of_attributes ( event1, &nm_attr_o1) == 0 );
   assert ( nm_attr_o1 == 13 );
 
-  size1 = lwes_event_to_bytes (event1,bytes,MAX_MSG_SIZE,0);
+  size1 = lwes_event_to_bytes (event1,bytes,LWES_MSG_SIZE_MAX,0);
 
   /* this test may fail depending on whether the hashing function or the
    * default ordering changes
@@ -402,148 +384,6 @@ test_event_without_db (void)
   assert ( strcmp (evnt_nm_o1, evnt_nm_o2) == 0 );
   assert ( lwes_event_get_number_of_attributes ( event2, &nm_attr_o2) == 0 );
   assert ( nm_attr_o2 == 13 );
-  assert ( nm_attr_o2 == nm_attr_o1 );
-
-  assert ( lwes_event_get_STRING   (event1, key01, &value01_o1) ==  0 );
-  assert ( lwes_event_get_BOOLEAN  (event1, key02, &value02_o1) ==  0 );
-  assert ( lwes_event_get_STRING   (event1, key02, &value02s_o1)==  0 );
-  assert ( lwes_event_get_IP_ADDR  (event1, key03, &value03_o1) ==  0 );
-  assert ( lwes_event_get_U_INT_16 (event1, key04, &value04_o1) ==  0 );
-  assert ( lwes_event_get_U_INT_16 (event1, key05, &value05_o1) ==  0 );
-  assert ( lwes_event_get_INT_16   (event1, key06, &value06_o1) ==  0 );
-  assert ( lwes_event_get_U_INT_32 (event1, key07, &value07_o1) ==  0 );
-  assert ( lwes_event_get_INT_32   (event1, key08, &value08_o1) ==  0 );
-  assert ( lwes_event_get_U_INT_64 (event1, key09, &value09_o1) ==  0 );
-  assert ( lwes_event_get_INT_64   (event1, key10, &value10_o1) ==  0 );
-  assert ( lwes_event_get_STRING   (event1, key11, &value11_o1) ==  0 );
-  assert ( lwes_event_get_IP_ADDR  (event1, key12, &value12_o1) ==  0 );
-
-  assert ( lwes_event_get_STRING   (event2, key01, &value01_o2) ==  0 );
-  assert ( lwes_event_get_BOOLEAN  (event2, key02, &value02_o2) ==  0 );
-  assert ( lwes_event_get_STRING   (event2, key02, &value02s_o2)==  0 );
-  assert ( lwes_event_get_IP_ADDR  (event2, key03, &value03_o2) ==  0 );
-  assert ( lwes_event_get_U_INT_16 (event2, key04, &value04_o2) ==  0 );
-  assert ( lwes_event_get_U_INT_16 (event2, key05, &value05_o2) ==  0 );
-  assert ( lwes_event_get_INT_16   (event2, key06, &value06_o2) ==  0 );
-  assert ( lwes_event_get_U_INT_32 (event2, key07, &value07_o2) ==  0 );
-  assert ( lwes_event_get_INT_32   (event2, key08, &value08_o2) ==  0 );
-  assert ( lwes_event_get_U_INT_64 (event2, key09, &value09_o2) ==  0 );
-  assert ( lwes_event_get_INT_64   (event2, key10, &value10_o2) ==  0 );
-  assert ( lwes_event_get_STRING   (event2, key11, &value11_o2) ==  0 );
-  assert ( lwes_event_get_IP_ADDR  (event2, key12, &value12_o2) ==  0 );
-
-  assert ( strcmp(value01_o1, value01_o2) == 0 ) ;
-  assert ( value02_o1 == value02_o2 );
-  assert ( strcmp(value02s_o1, value02s_o2) == 0 ) ;
-  assert ( value03_o1.s_addr == value03_o2.s_addr );
-  assert ( value04_o1 == value04_o2 );
-  assert ( value05_o1 == value05_o2 );
-  assert ( value06_o1 == value06_o2 );
-  assert ( value07_o1 == value07_o2 );
-  assert ( value08_o1 == value08_o2 );
-  assert ( value09_o1 == value09_o2 );
-  assert ( value10_o1 == value10_o2 );
-  assert ( strcmp ( value11_o1, value11_o2 ) == 0 );
-  assert ( value12_o1.s_addr == value12_o2.s_addr );
-
-  lwes_event_destroy (event1);
-  lwes_event_destroy (event2);
-}
-
-static void
-test_event_with_encoding (void)
-{
-  struct lwes_event *event1;
-  struct lwes_event *event2;
-  struct lwes_event_deserialize_tmp dtmp;
-  LWES_BYTE bytes[MAX_MSG_SIZE];
-  int size1;
-  int size2;
-  int i;
-
-  LWES_SHORT_STRING evnt_nm_o1;
-  LWES_INT_16       evnt_enc_o1;
-  LWES_U_INT_16     nm_attr_o1;
-  LWES_LONG_STRING  value01_o1;
-  LWES_BOOLEAN      value02_o1;
-  LWES_LONG_STRING  value02s_o1;
-  LWES_IP_ADDR      value03_o1;
-  LWES_U_INT_16     value04_o1;
-  LWES_U_INT_16     value05_o1;
-  LWES_INT_16       value06_o1;
-  LWES_U_INT_32     value07_o1;
-  LWES_INT_32       value08_o1;
-  LWES_U_INT_64     value09_o1;
-  LWES_INT_64       value10_o1;
-  LWES_LONG_STRING  value11_o1;
-  LWES_IP_ADDR      value12_o1;
-
-  LWES_SHORT_STRING evnt_nm_o2;
-  LWES_INT_16       evnt_enc_o2;
-  LWES_U_INT_16     nm_attr_o2;
-  LWES_LONG_STRING  value01_o2;
-  LWES_BOOLEAN      value02_o2;
-  LWES_LONG_STRING  value02s_o2;
-  LWES_IP_ADDR      value03_o2;
-  LWES_U_INT_16     value04_o2;
-  LWES_U_INT_16     value05_o2;
-  LWES_INT_16       value06_o2;
-  LWES_U_INT_32     value07_o2;
-  LWES_INT_32       value08_o2;
-  LWES_U_INT_64     value09_o2;
-  LWES_INT_64       value10_o2;
-  LWES_LONG_STRING  value11_o2;
-  LWES_IP_ADDR      value12_o2;
-
-
-  event1 = lwes_event_create_with_encoding (NULL, eventname, encoding);
-  assert ( event1 != NULL );
-
-  assert ( lwes_event_get_name ( event1, &evnt_nm_o1) == 0 );
-  assert ( strcmp (evnt_nm_o1, eventname) == 0 );
-  assert ( lwes_event_get_encoding ( event1, &evnt_enc_o1 ) == 0 );
-  assert ( evnt_enc_o1 == encoding );
-  assert ( lwes_event_set_STRING           (event1, key01, value01) ==  2 );
-  assert ( lwes_event_set_BOOLEAN          (event1, key02, value02) ==  3 );
-  assert ( lwes_event_set_STRING           (event1, key02, value02s)==  4 );
-  assert ( lwes_event_set_IP_ADDR_w_string (event1, key03, value03s)==  5 );
-  assert ( lwes_event_set_U_INT_16         (event1, key04, value04) ==  6 );
-  assert ( lwes_event_set_U_INT_16         (event1, key05, value05) ==  7 );
-  assert ( lwes_event_set_INT_16           (event1, key06, value06) ==  8 );
-  assert ( lwes_event_set_U_INT_32         (event1, key07, value07) ==  9 );
-  assert ( lwes_event_set_INT_32           (event1, key08, value08) == 10 );
-  assert ( lwes_event_set_U_INT_64         (event1, key09, value09) == 11 );
-  assert ( lwes_event_set_INT_64           (event1, key10, value10) == 12 );
-  assert ( lwes_event_set_STRING           (event1, key11, value11) == 13 );
-  assert ( lwes_event_set_IP_ADDR          (event1, key12, value12) == 14 );
-  assert ( lwes_event_get_number_of_attributes ( event1, &nm_attr_o1) == 0 );
-  assert ( nm_attr_o1 == 14 );
-
-  size1 = lwes_event_to_bytes (event1,bytes,MAX_MSG_SIZE,0);
-
-  /* this test may fail depending on whether the hashing function or the
-   * default ordering changes
-   */
-  for ( i = 0 ; i < size1 ; i++ )
-    {
-      assert ( bytes[i] == ref_bytes_encoding_no_db[i] );
-    }
-
-  event2 = lwes_event_create_no_name (NULL);
-  assert ( event2 != NULL );
-
-  size2  = lwes_event_from_bytes (event2,bytes,size1,0,&dtmp);
-
-  assert ( size1 == size2 );
-
-  assert ( lwes_event_get_name ( event2, &evnt_nm_o2) == 0 );
-  assert ( strcmp (evnt_nm_o2, eventname) == 0 );
-  assert ( strcmp (evnt_nm_o1, evnt_nm_o2) == 0 );
-  assert ( lwes_event_get_encoding ( event2, &evnt_enc_o2 ) == 0 );
-  assert ( evnt_enc_o2 == encoding );
-  assert ( evnt_enc_o2 == evnt_enc_o1 );
-  assert ( lwes_event_get_number_of_attributes ( event2, &nm_attr_o2) == 0 );
-  assert ( nm_attr_o2 == 14 );
   assert ( nm_attr_o2 == nm_attr_o1 );
 
   assert ( lwes_event_get_STRING   (event1, key01, &value01_o1) ==  0 );
@@ -619,33 +459,18 @@ test_error_and_boundary_conditions (void)
   null_at      = 1;
   assert (lwes_event_create_no_name (NULL) == NULL);
 
-  malloc_count = 0;
-  null_at      = 1;
-  assert (lwes_event_create_with_encoding (NULL, "Foo", 1) == NULL);
-
   /* cause lwes_hash_create to fail */
   malloc_count = 0;
   null_at      = 0;
   hash_null    = 1;
   assert (lwes_event_create_no_name (NULL) == NULL);
   assert (lwes_event_create (NULL, "Foo") == NULL);
-  assert (lwes_event_create_with_encoding (NULL, "Foo", 1) == NULL);
   hash_null    = 0;
 
   /* cause lwes_set_name to fail in creates */
   malloc_count = 0;
   null_at      = 2;
   assert (lwes_event_create (NULL, "Foo") == NULL);
-
-  malloc_count = 0;
-  null_at      = 2;
-  assert (lwes_event_create_with_encoding (NULL, "Foo", 1) == NULL);
-
-  /* cause lwes_set_encoding to fail in create */
-  malloc_count = 0;
-  null_at      = 3;
-  assert (lwes_event_create_with_encoding (NULL, "Foo", 1) == NULL);
-  null_at      = 0;
 
   assert ((event = lwes_event_create (NULL, "Foo")) != NULL);
 
@@ -726,21 +551,6 @@ test_set_once_attributes (void)
 {
   struct lwes_event *event = NULL;
   LWES_SHORT_STRING tmp_event_name;
-  LWES_INT_16       tmp_encoding;
-
-  /* All fields set in constructor */
-  event = lwes_event_create_with_encoding (NULL, "Foo", 1);
-
-  /* attempting to set the name once it's been set is verboten */
-  assert (lwes_event_set_name (event, "Fooz") == -1);
-  assert (lwes_event_get_name (event, &tmp_event_name) == 0);
-  assert (strcmp ("Foo", tmp_event_name) == 0 );
-  /* attempting to set the encoding once it's been set is verboten */
-  assert (lwes_event_set_encoding (event, 0) == -1);
-  assert (lwes_event_get_encoding (event, &tmp_encoding) == 0);
-  assert (tmp_encoding == 1);
-
-  assert (lwes_event_destroy (event) == 0);
 
   /* Name set in constructor */
   event = lwes_event_create (NULL, "Foo");
@@ -750,14 +560,6 @@ test_set_once_attributes (void)
   assert (lwes_event_set_name (event, "Fooz") == -1);
   assert (lwes_event_get_name (event, &tmp_event_name) == 0);
   assert (strcmp ("Foo", tmp_event_name) == 0 );
-
-  /* encoding should succeed */
-  assert (lwes_event_set_encoding (event, 1) == 1);
-  /* then fail */
-  assert (lwes_event_set_encoding (event, 0) == -1);
-  /* check that its correct */
-  assert (lwes_event_get_encoding (event, &tmp_encoding) == 0);
-  assert (tmp_encoding == 1);
 
   assert (lwes_event_destroy (event) == 0);
 
@@ -773,14 +575,6 @@ test_set_once_attributes (void)
   assert (lwes_event_get_name (event, &tmp_event_name) == 0);
   assert (strcmp ("Foo", tmp_event_name) == 0 );
 
-  /* encoding should succeed and be the first attribute set */
-  assert (lwes_event_set_encoding (event, 1) == 1);
-  /* then fail */
-  assert (lwes_event_set_encoding (event, 0) == -1);
-  /* check that its correct */
-  assert (lwes_event_get_encoding (event, &tmp_encoding) == 0);
-  assert (tmp_encoding == 1);
-
   assert (lwes_event_destroy (event) == 0);
 }
 
@@ -790,7 +584,6 @@ test_null_args (void)
   struct lwes_event *event = NULL;
   LWES_SHORT_STRING tmp_event_name;
   LWES_U_INT_16     tmp_num_attrs;
-  LWES_INT_16       tmp_encoding;
 
   LWES_U_INT_16     value_uint16;
   LWES_INT_16       value_int16;
@@ -809,7 +602,6 @@ test_null_args (void)
   assert (lwes_event_destroy (event) == 0);
 
   assert (lwes_event_create (NULL, NULL) == NULL);
-  assert (lwes_event_create_with_encoding (NULL, NULL, 1) == NULL);
 
   /* temporary event */
   assert ((event = lwes_event_create_no_name (NULL)) != NULL);
@@ -817,8 +609,6 @@ test_null_args (void)
   /* Test all the permutations of calling mutators with null args */
   assert (lwes_event_set_name (NULL, "Foo") == -1);
   assert (lwes_event_set_name (event, NULL) == -1);
-
-  assert (lwes_event_set_encoding (NULL, 1) == -1);
 
   assert (lwes_event_set_U_INT_16 (NULL, "Bar", 10) == -1);
   assert (lwes_event_set_U_INT_16 (event, NULL, 10) == -1);
@@ -866,9 +656,6 @@ test_null_args (void)
 
   assert (lwes_event_get_number_of_attributes (NULL,  &tmp_num_attrs) == -1);
   assert (lwes_event_get_number_of_attributes (event, NULL) == -1);
-
-  assert (lwes_event_get_encoding (NULL,  &tmp_encoding) == -1);
-  assert (lwes_event_get_encoding (event, NULL)      == -1);
 
   assert (lwes_event_get_U_INT_16 (NULL,  "Bar", &value_uint16) == -1);
   assert (lwes_event_get_U_INT_16 (event, NULL,  &value_uint16) == -1);
@@ -929,24 +716,7 @@ test_serialize_errors (void)
 {
   LWES_SHORT_STRING  name  = (LWES_SHORT_STRING)"a";
   struct lwes_event *event = NULL;
-  LWES_BYTE bytes[MAX_MSG_SIZE];
-
-  /* failures at marshalling encoding */
-  {
-    assert ((event = lwes_event_create_with_encoding (NULL, name, 1)) != NULL);
-    /* test all three branches of conditional */
-    assert (lwes_event_to_bytes (event, bytes, 5, 0) == -2);
-    assert (lwes_event_to_bytes (event, bytes, 8, 0) == -2);
-    assert (lwes_event_to_bytes (event, bytes, 10, 0) == -2);
-    /* test nulls at various states */
-    lwes_hash_get_type_error = 1;
-    assert (lwes_event_to_bytes (event, bytes, 15, 0) == -3);
-    lwes_hash_get_type_error = 0;
-    lwes_hash_get_value_error = 1;
-    assert (lwes_event_to_bytes (event, bytes, 15, 0) == -4);
-    lwes_hash_get_value_error = 0;
-    lwes_event_destroy (event);
-  }
+  LWES_BYTE bytes[LWES_MSG_SIZE_MAX];
 
   /* failure at marshalling an attribute name */
   {
@@ -1077,14 +847,14 @@ test_deserialize_errors (void)
 {
   LWES_SHORT_STRING  name  = (LWES_SHORT_STRING)"a";
   struct lwes_event *event = NULL;
-  LWES_BYTE bytes[MAX_MSG_SIZE];
+  LWES_BYTE bytes[LWES_MSG_SIZE_MAX];
 
   /* failure(s) at unmarshalling a uint_16 attribute type */
   {
     struct lwes_event_deserialize_tmp dtmp;
     assert ((event = lwes_event_create (NULL, name)) != NULL);
     assert (lwes_event_set_U_INT_16 (event, key04, value04) ==  1);
-    assert (lwes_event_to_bytes (event, bytes, MAX_MSG_SIZE, 0) > 0);
+    assert (lwes_event_to_bytes (event, bytes, LWES_MSG_SIZE_MAX, 0) > 0);
     lwes_event_destroy (event);
 
     /* FIRST fail to unmarshall */
@@ -1098,7 +868,7 @@ test_deserialize_errors (void)
     assert ((event = lwes_event_create_no_name (NULL)) != NULL);
     malloc_count = 0;
     null_at = 2;
-    assert (lwes_event_from_bytes (event, bytes, MAX_MSG_SIZE, 0, &dtmp)==-2);
+    assert (lwes_event_from_bytes (event, bytes, LWES_MSG_SIZE_MAX, 0, &dtmp)==-2);
     malloc_count = 0;
     null_at = 0;
     lwes_event_destroy (event);
@@ -1109,7 +879,7 @@ test_deserialize_errors (void)
     struct lwes_event_deserialize_tmp dtmp;
     assert ((event = lwes_event_create (NULL, name)) != NULL);
     assert (lwes_event_set_INT_16 (event, key06, value06) ==  1);
-    assert (lwes_event_to_bytes (event, bytes, MAX_MSG_SIZE, 0) > 0);
+    assert (lwes_event_to_bytes (event, bytes, LWES_MSG_SIZE_MAX, 0) > 0);
     lwes_event_destroy (event);
 
     /* FIRST fail to unmarshall */
@@ -1123,7 +893,7 @@ test_deserialize_errors (void)
     assert ((event = lwes_event_create_no_name (NULL)) != NULL);
     malloc_count = 0;
     null_at = 2;
-    assert (lwes_event_from_bytes (event, bytes, MAX_MSG_SIZE, 0, &dtmp)==-4);
+    assert (lwes_event_from_bytes (event, bytes, LWES_MSG_SIZE_MAX, 0, &dtmp)==-4);
     malloc_count = 0;
     null_at = 0;
     lwes_event_destroy (event);
@@ -1134,7 +904,7 @@ test_deserialize_errors (void)
     struct lwes_event_deserialize_tmp dtmp;
     assert ((event = lwes_event_create (NULL, name)) != NULL);
     assert (lwes_event_set_U_INT_32 (event, key07, value07) ==  1);
-    assert (lwes_event_to_bytes (event, bytes, MAX_MSG_SIZE, 0) > 0);
+    assert (lwes_event_to_bytes (event, bytes, LWES_MSG_SIZE_MAX, 0) > 0);
     lwes_event_destroy (event);
 
     /* FIRST fail to unmarshall */
@@ -1148,7 +918,7 @@ test_deserialize_errors (void)
     assert ((event = lwes_event_create_no_name (NULL)) != NULL);
     malloc_count = 0;
     null_at = 2;
-    assert (lwes_event_from_bytes (event, bytes, MAX_MSG_SIZE, 0, &dtmp)==-6);
+    assert (lwes_event_from_bytes (event, bytes, LWES_MSG_SIZE_MAX, 0, &dtmp)==-6);
     malloc_count = 0;
     null_at = 0;
     lwes_event_destroy (event);
@@ -1159,7 +929,7 @@ test_deserialize_errors (void)
     struct lwes_event_deserialize_tmp dtmp;
     assert ((event = lwes_event_create (NULL, name)) != NULL);
     assert (lwes_event_set_INT_32 (event, key08, value08) ==  1);
-    assert (lwes_event_to_bytes (event, bytes, MAX_MSG_SIZE, 0) > 0);
+    assert (lwes_event_to_bytes (event, bytes, LWES_MSG_SIZE_MAX, 0) > 0);
     lwes_event_destroy (event);
 
     /* FIRST fail to unmarshall */
@@ -1173,7 +943,7 @@ test_deserialize_errors (void)
     assert ((event = lwes_event_create_no_name (NULL)) != NULL);
     malloc_count = 0;
     null_at = 2;
-    assert (lwes_event_from_bytes (event, bytes, MAX_MSG_SIZE, 0, &dtmp)==-8);
+    assert (lwes_event_from_bytes (event, bytes, LWES_MSG_SIZE_MAX, 0, &dtmp)==-8);
     malloc_count = 0;
     null_at = 0;
     lwes_event_destroy (event);
@@ -1184,7 +954,7 @@ test_deserialize_errors (void)
     struct lwes_event_deserialize_tmp dtmp;
     assert ((event = lwes_event_create (NULL, name)) != NULL);
     assert (lwes_event_set_U_INT_64 (event, key09, value09) ==  1);
-    assert (lwes_event_to_bytes (event, bytes, MAX_MSG_SIZE, 0) > 0);
+    assert (lwes_event_to_bytes (event, bytes, LWES_MSG_SIZE_MAX, 0) > 0);
     lwes_event_destroy (event);
 
     /* FIRST fail to unmarshall */
@@ -1198,7 +968,7 @@ test_deserialize_errors (void)
     assert ((event = lwes_event_create_no_name (NULL)) != NULL);
     malloc_count = 0;
     null_at = 2;
-    assert (lwes_event_from_bytes (event, bytes, MAX_MSG_SIZE, 0, &dtmp)==-10);
+    assert (lwes_event_from_bytes (event, bytes, LWES_MSG_SIZE_MAX, 0, &dtmp)==-10);
     malloc_count = 0;
     null_at = 0;
     lwes_event_destroy (event);
@@ -1209,7 +979,7 @@ test_deserialize_errors (void)
     struct lwes_event_deserialize_tmp dtmp;
     assert ((event = lwes_event_create (NULL, name)) != NULL);
     assert (lwes_event_set_INT_64 (event, key10, value10) ==  1);
-    assert (lwes_event_to_bytes (event, bytes, MAX_MSG_SIZE, 0) > 0);
+    assert (lwes_event_to_bytes (event, bytes, LWES_MSG_SIZE_MAX, 0) > 0);
     lwes_event_destroy (event);
 
     /* FIRST fail to unmarshall */
@@ -1223,7 +993,7 @@ test_deserialize_errors (void)
     assert ((event = lwes_event_create_no_name (NULL)) != NULL);
     malloc_count = 0;
     null_at = 2;
-    assert (lwes_event_from_bytes (event, bytes, MAX_MSG_SIZE, 0, &dtmp)==-12);
+    assert (lwes_event_from_bytes (event, bytes, LWES_MSG_SIZE_MAX, 0, &dtmp)==-12);
     malloc_count = 0;
     null_at = 0;
     lwes_event_destroy (event);
@@ -1234,7 +1004,7 @@ test_deserialize_errors (void)
     struct lwes_event_deserialize_tmp dtmp;
     assert ((event = lwes_event_create (NULL, name)) != NULL);
     assert (lwes_event_set_BOOLEAN (event, key02, value02) ==  1);
-    assert (lwes_event_to_bytes (event, bytes, MAX_MSG_SIZE, 0) > 0);
+    assert (lwes_event_to_bytes (event, bytes, LWES_MSG_SIZE_MAX, 0) > 0);
     lwes_event_destroy (event);
 
     /* FIRST fail to unmarshall */
@@ -1248,7 +1018,7 @@ test_deserialize_errors (void)
     assert ((event = lwes_event_create_no_name (NULL)) != NULL);
     malloc_count = 0;
     null_at = 2;
-    assert (lwes_event_from_bytes (event, bytes, MAX_MSG_SIZE, 0, &dtmp)==-14);
+    assert (lwes_event_from_bytes (event, bytes, LWES_MSG_SIZE_MAX, 0, &dtmp)==-14);
     malloc_count = 0;
     null_at = 0;
     lwes_event_destroy (event);
@@ -1259,7 +1029,7 @@ test_deserialize_errors (void)
     struct lwes_event_deserialize_tmp dtmp;
     assert ((event = lwes_event_create (NULL, name)) != NULL);
     assert (lwes_event_set_IP_ADDR (event, key12, value12) == 1);
-    assert (lwes_event_to_bytes (event, bytes, MAX_MSG_SIZE, 0) > 0);
+    assert (lwes_event_to_bytes (event, bytes, LWES_MSG_SIZE_MAX, 0) > 0);
     lwes_event_destroy (event);
 
     /* FIRST fail to unmarshall */
@@ -1273,7 +1043,7 @@ test_deserialize_errors (void)
     assert ((event = lwes_event_create_no_name (NULL)) != NULL);
     malloc_count = 0;
     null_at = 2;
-    assert (lwes_event_from_bytes (event, bytes, MAX_MSG_SIZE, 0, &dtmp)==-16);
+    assert (lwes_event_from_bytes (event, bytes, LWES_MSG_SIZE_MAX, 0, &dtmp)==-16);
     malloc_count = 0;
     null_at = 0;
     lwes_event_destroy (event);
@@ -1284,7 +1054,7 @@ test_deserialize_errors (void)
     struct lwes_event_deserialize_tmp dtmp;
     assert ((event = lwes_event_create (NULL, name)) != NULL);
     assert (lwes_event_set_STRING (event, key11, value11) == 1);
-    assert (lwes_event_to_bytes (event, bytes, MAX_MSG_SIZE, 0) > 0);
+    assert (lwes_event_to_bytes (event, bytes, LWES_MSG_SIZE_MAX, 0) > 0);
     lwes_event_destroy (event);
 
     /* FIRST fail to unmarshall */
@@ -1298,7 +1068,7 @@ test_deserialize_errors (void)
     assert ((event = lwes_event_create_no_name (NULL)) != NULL);
     malloc_count = 0;
     null_at = 2;
-    assert (lwes_event_from_bytes (event, bytes, MAX_MSG_SIZE, 0, &dtmp)==-18);
+    assert (lwes_event_from_bytes (event, bytes, LWES_MSG_SIZE_MAX, 0, &dtmp)==-18);
     malloc_count = 0;
     null_at = 0;
     lwes_event_destroy (event);
@@ -1310,14 +1080,14 @@ test_deserialize_errors (void)
     /* create an event with just a name */
     assert ((event = lwes_event_create (NULL, name)) != NULL);
     assert (lwes_event_set_BOOLEAN (event, key02, value02) ==  1);
-    assert (lwes_event_to_bytes (event, bytes, MAX_MSG_SIZE, 0) > 0);
+    assert (lwes_event_to_bytes (event, bytes, LWES_MSG_SIZE_MAX, 0) > 0);
     lwes_event_destroy (event);
 
     /* fail to deserialize it */
     assert ((event = lwes_event_create_no_name (NULL)) != NULL);
     /* change to an unknown type */
     bytes[13] = 0x69;
-    assert (lwes_event_from_bytes (event, bytes, MAX_MSG_SIZE, 0, &dtmp)==-20);
+    assert (lwes_event_from_bytes (event, bytes, LWES_MSG_SIZE_MAX, 0, &dtmp)==-20);
     lwes_event_destroy (event);
   }
 
@@ -1327,7 +1097,7 @@ test_deserialize_errors (void)
     /* create an event with just a name */
     assert ((event = lwes_event_create (NULL, name)) != NULL);
     assert (lwes_event_set_BOOLEAN (event, key02, value02) ==  1);
-    assert (lwes_event_to_bytes (event, bytes, MAX_MSG_SIZE, 0) > 0);
+    assert (lwes_event_to_bytes (event, bytes, LWES_MSG_SIZE_MAX, 0) > 0);
     lwes_event_destroy (event);
 
     /* fail to deserialize it */
@@ -1344,7 +1114,7 @@ test_deserialize_errors (void)
     /* create an event with just a name */
     assert ((event = lwes_event_create (NULL, name)) != NULL);
     assert (lwes_event_set_BOOLEAN (event, key02, value02) ==  1);
-    assert (lwes_event_to_bytes (event, bytes, MAX_MSG_SIZE, 0) > 0);
+    assert (lwes_event_to_bytes (event, bytes, LWES_MSG_SIZE_MAX, 0) > 0);
     lwes_event_destroy (event);
 
     /* fail to deserialize it */
@@ -1358,7 +1128,7 @@ test_deserialize_errors (void)
     struct lwes_event_deserialize_tmp dtmp;
     /* create an event with just a name */
     assert ((event = lwes_event_create (NULL, name)) != NULL);
-    assert (lwes_event_to_bytes (event, bytes, MAX_MSG_SIZE, 0) > 0);
+    assert (lwes_event_to_bytes (event, bytes, LWES_MSG_SIZE_MAX, 0) > 0);
     lwes_event_destroy (event);
 
     /* fail to deserialize it */
@@ -1373,14 +1143,14 @@ test_deserialize_errors (void)
     struct lwes_event_deserialize_tmp dtmp;
     /* create an event with just a name */
     assert ((event = lwes_event_create (NULL, name)) != NULL);
-    assert (lwes_event_to_bytes (event, bytes, MAX_MSG_SIZE, 0) > 0);
+    assert (lwes_event_to_bytes (event, bytes, LWES_MSG_SIZE_MAX, 0) > 0);
     lwes_event_destroy (event);
 
     /* fail to deserialize it */
     assert ((event = lwes_event_create_no_name (NULL)) != NULL);
     malloc_count = 0;
     null_at = 1;
-    assert (lwes_event_from_bytes (event, bytes, MAX_MSG_SIZE, 0, &dtmp) == -24);
+    assert (lwes_event_from_bytes (event, bytes, LWES_MSG_SIZE_MAX, 0, &dtmp) == -24);
     malloc_count = 0;
     null_at = 0;
     lwes_event_destroy (event);
@@ -1391,7 +1161,7 @@ test_deserialize_errors (void)
     struct lwes_event_deserialize_tmp dtmp;
     /* create an event with just a name */
     assert ((event = lwes_event_create (NULL, name)) != NULL);
-    assert (lwes_event_to_bytes (event, bytes, MAX_MSG_SIZE, 0) > 0);
+    assert (lwes_event_to_bytes (event, bytes, LWES_MSG_SIZE_MAX, 0) > 0);
     lwes_event_destroy (event);
 
     /* fail to deserialize it */
@@ -1549,7 +1319,6 @@ int main (void)
 
   test_event_with_db ();
   test_event_without_db ();
-  test_event_with_encoding ();
   test_set_once_attributes ();
   test_null_args ();
   test_error_and_boundary_conditions ();

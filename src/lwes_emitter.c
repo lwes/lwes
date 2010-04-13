@@ -85,7 +85,8 @@ lwes_emitter_create_with_ttl
       return NULL;
     }
 
-  emitter->buffer = (LWES_BYTE_P) malloc (sizeof (LWES_BYTE)*MAX_MSG_SIZE);
+  emitter->buffer =
+    (LWES_BYTE_P) malloc (sizeof (LWES_BYTE)*LWES_MSG_SIZE_MAX);
   if (emitter->buffer == NULL)
     {
       free(emitter);
@@ -149,7 +150,8 @@ lwes_emitter_emitto
   }
 
   /* Send an event */
-  if ((size = lwes_event_to_bytes (event,emitter->buffer,MAX_MSG_SIZE,0)) < 0)
+  if ((size =
+         lwes_event_to_bytes (event,emitter->buffer,LWES_MSG_SIZE_MAX,0)) < 0)
     {
       return -1;
     }
@@ -218,7 +220,8 @@ lwes_emitter_emit_event
 {
   int size;
 
-  if ((size = lwes_event_to_bytes (event,emitter->buffer,MAX_MSG_SIZE,0)) < 0)
+  if ((size =
+         lwes_event_to_bytes (event,emitter->buffer,LWES_MSG_SIZE_MAX,0)) < 0)
   {
     return -1;
   }

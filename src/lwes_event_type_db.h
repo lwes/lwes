@@ -110,7 +110,7 @@ lwes_event_type_db_add_attribute
   (struct lwes_event_type_db *db,
    LWES_SHORT_STRING event_name,
    LWES_SHORT_STRING attr_name,
-   LWES_SHORT_STRING type);
+   LWES_TYPE type);
 
 /*! \brief Check for an event in the database
  *
@@ -121,7 +121,7 @@ lwes_event_type_db_add_attribute
  */
 int
 lwes_event_type_db_check_for_event
-  (struct lwes_event_type_db *db, 
+  (struct lwes_event_type_db *db,
    LWES_SHORT_STRING event_name);
 
 /*! \brief Check for an attribute in an event in the database
@@ -134,7 +134,7 @@ lwes_event_type_db_check_for_event
  */
 int
 lwes_event_type_db_check_for_attribute
-  (struct lwes_event_type_db *db, 
+  (struct lwes_event_type_db *db,
    LWES_CONST_SHORT_STRING attr_name,
    LWES_CONST_SHORT_STRING event_name);
 
@@ -150,8 +150,8 @@ lwes_event_type_db_check_for_attribute
  */
 int
 lwes_event_type_db_check_for_type
-  (struct lwes_event_type_db *db, 
-   LWES_BYTE type_value,
+  (struct lwes_event_type_db *db,
+   LWES_TYPE type_value,
    LWES_CONST_SHORT_STRING attr_name,
    LWES_CONST_SHORT_STRING event_name);
 
