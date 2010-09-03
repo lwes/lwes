@@ -80,10 +80,16 @@ liblwes_la_LDFLAGS = -version-info @MAJOR_VERSION@:@MINOR_VERSION@:0 @GCOV_LTFLA
 bin_PROGRAMS = \
   lwes-event-printing-listener \
   lwes-event-counting-listener \
+  lwes-filter-listener \
   lwes-event-testing-emitter
 
 bin_SCRIPTS = \
   lwes-calculate-max-event-size
+
+lwes_filter_listener_SOURCES = \
+  lwes-filter-listener.c
+lwes_filter_listener_LDADD =  \
+  lib@PACKAGE@.la
 
 lwes_event_printing_listener_SOURCES = \
   lwes-event-printing-listener.c
