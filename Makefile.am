@@ -27,6 +27,7 @@ pkgconfig_DATA = @PACKAGE_NAME@-@MAJOR_VERSION@.pc
 	ln -f pkgconfig-template.pc @PACKAGE_NAME@-@MAJOR_VERSION@.pc
 
 EXTRA_DIST =                            \
+    LICENSE                             \
     pkgconfig-template.pc.in            \
     ${myextradist}
 
