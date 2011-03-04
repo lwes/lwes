@@ -130,7 +130,7 @@ lwes_listener_recv_process_event
  *  \param[in] listener the listener to receive the event from
  *  \param[out] event the event to fill out
  *
- *  \return 0 on success, a negative number on failure
+ *  \return the number of bytes read on success, a negative number on failure
  */
 int
 lwes_listener_recv
@@ -143,7 +143,7 @@ lwes_listener_recv
  *  \param[out] event the event to fill out
  *  \param[in] timeout_ms the maximum amount of time to wait for an event
  *
- *  \return 0 on success, a negative number on failure
+ *  \return the number of bytes read on success, a negative number on failure
  */
 int
 lwes_listener_recv_by
