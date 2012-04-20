@@ -81,7 +81,8 @@ bin_PROGRAMS = \
   lwes-event-printing-listener \
   lwes-event-counting-listener \
   lwes-filter-listener \
-  lwes-event-testing-emitter
+  lwes-event-testing-emitter \
+  lwes-esf-validator
 
 bin_SCRIPTS = \
   lwes-calculate-max-event-size
@@ -89,6 +90,11 @@ bin_SCRIPTS = \
 lwes_filter_listener_SOURCES = \
   lwes-filter-listener.c
 lwes_filter_listener_LDADD =  \
+  lib@PACKAGE@.la
+
+lwes_esf_validator_SOURCES = \
+  lwes-esf-validator.c
+lwes_esf_validator_LDADD = \
   lib@PACKAGE@.la
 
 lwes_event_printing_listener_SOURCES = \
