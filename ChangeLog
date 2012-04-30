@@ -1,3 +1,7 @@
+Version 0.23.2 (fmaritato)
+  * Added lwes-esf-validator. This program returns non-zero if the ESF file is
+    not parsable; zero otherwise.
+
 Version 0.23.1 (molinaro)
   * Changing LICENSE to New BSD
   * Adding Yahoo! copyrights
