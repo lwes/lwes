@@ -13,6 +13,9 @@
 #include "lwes_marshall_functions.h"
 
 #include <string.h>
+#include <math.h>
+#include <ieee754.h>
+#include <stdlib.h>
 
 const LWES_BYTE NULL_CHAR = (LWES_BYTE)'\0';
 
@@ -245,6 +248,48 @@ int marshall_LONG_STRING  (LWES_LONG_STRING  aString,
       ret = (str_length+2);
     }
   return ret;
+}
+
+int marshall_FLOAT        (LWES_FLOAT        aFloat,
+                           LWES_BYTE_P       bytes,
+                           size_t            length,
+                           size_t            *offset)
+{
+  if ( bytes != NULL && (length-(*offset)) >= 4 )
+    {
+      union ieee754_float i;
+      i.f = aFloat;
+      int pos0 = *offset;
+      marshall_BYTE(((i.ieee.negative<<7)&0x80) | ((i.ieee.exponent>> 1)&0x7f), bytes, length, offset);
+      marshall_BYTE(((i.ieee.exponent<<1)&0x01) | ((i.ieee.mantissa>>16)&0x7f), bytes, length, offset);
+      marshall_BYTE(((i.ieee.mantissa>>8)&0xff),                                bytes, length, offset);
+      marshall_BYTE(((i.ieee.mantissa   )&0xff),                                bytes, length, offset);
+      return (*offset) - pos0;
+    }
+  return 0;
+}
+
+int marshall_DOUBLE       (LWES_DOUBLE       aDouble,
+                           LWES_BYTE_P       bytes,
+                           size_t            length,
+                           size_t            *offset)
+{
+  if ( bytes != NULL && (length-(*offset)) >= 8 )
+    {
+      union ieee754_double i;
+      i.d = aDouble;
+      int pos0 = *offset;
+      marshall_BYTE(((i.ieee.negative << 7)&0x80) | ((i.ieee.exponent >> 4)&0x7f), bytes, length, offset);
+      marshall_BYTE(((i.ieee.exponent << 4)&0xf0) | ((i.ieee.mantissa0>> 4)&0x0f), bytes, length, offset);
+      marshall_BYTE(((i.ieee.mantissa0>> 8)&0xff),                                 bytes, length, offset);
+      marshall_BYTE(((i.ieee.mantissa0    )&0xff),                                 bytes, length, offset);
+      marshall_BYTE(((i.ieee.mantissa1>>24)&0xff),                                 bytes, length, offset);
+      marshall_BYTE(((i.ieee.mantissa1>>16)&0xff),                                 bytes, length, offset);
+      marshall_BYTE(((i.ieee.mantissa1>> 8)&0xff),                                 bytes, length, offset);
+      marshall_BYTE(((i.ieee.mantissa1    )&0xff),                                 bytes, length, offset);
+      return (*offset) - pos0;
+    }
+  return 0;
 }
 
 int unmarshall_BYTE         (LWES_BYTE *aByte,
@@ -504,6 +549,34 @@ int unmarshall_LONG_STRING  (LWES_LONG_STRING aString,
           /* we reset the offset by the length byte */
           (*offset) -= 2;
         }
+    }
+  return ret;
+}
+
+int unmarshall_FLOAT        (LWES_FLOAT *aFloat,
+                             LWES_BYTE_P bytes,
+                             size_t length,
+                             size_t *offset)
+{
+  int ret = 0;
+  if ( bytes != NULL && (length-(*offset)) >= 8 )
+    {
+      fprintf(stderr, "unmarshall_FLOAT() is not yet implemented\n");
+      exit(1);
+    }
+  return ret;
+}
+
+int unmarshall_DOUBLE       (LWES_DOUBLE *aDouble,
+                             LWES_BYTE_P bytes,
+                             size_t length,
+                             size_t *offset)
+{
+  int ret = 0;
+  if ( bytes != NULL && (length-(*offset)) >= 8 )
+    {
+      fprintf(stderr, "unmarshall_DOUBLE() is not yet implemented\n");
+      exit(1);
     }
   return ret;
 }

@@ -108,6 +108,16 @@ typedef unsigned long long LWES_U_INT_64;
  */
 typedef long long          LWES_INT_64;
 
+/*! \typedef int LWES_FLOAT
+ *  \brief 4 byte floating-point value
+ */
+typedef float              LWES_FLOAT;
+
+/*! \typedef int LWES_DOUBLE
+ *  \brief 8 byte floating-point value
+ */
+typedef double             LWES_DOUBLE;
+
 /*! \typedef int LWES_BOOLEAN
  *  \brief boolean value should be either 0 (false) or 1 (true), this is
  *         actually stored as a 1 byte value
@@ -148,17 +158,19 @@ typedef char               LWES_CHAR;
 /* WARNING, WARNING
    These #define's should be considered deprecated, they will be removed
    in a future version of lwes */
-#define SHORT_STRING_MAX    255   /*                                          */
-#define LONG_STRING_MAX     65535 /*                                          */
-#define BYTE_STRING_MAX     2     /*                   00 - FF                */
-#define U_INT_16_STRING_MAX 5     /*                    0 - 65535             */
-#define INT_16_STRING_MAX   6     /*               -32768 - 32767             */
-#define U_INT_32_STRING_MAX 10    /*                    0 - 4294967295        */
-#define INT_32_STRING_MAX   11    /*          -2147483648 - 2147483647        */
-#define U_INT_64_STRING_MAX 20    /*                  0 - 18446744073709551615*/
-#define INT_64_STRING_MAX   20    /*-9223372036854775808 - 9223372036854775807*/
-#define BOOLEAN_STRING_MAX  5     /*                 true - false             */
-#define IP_ADDR_STRING_MAX  15    /*               xxx.xxx.xxx.xxx            */
+#define SHORT_STRING_MAX    255   /*                                                    */
+#define LONG_STRING_MAX     65535 /*                                                    */
+#define BYTE_STRING_MAX     2     /*                       00 - FF                      */
+#define U_INT_16_STRING_MAX 5     /*                        0 - 65535                   */
+#define INT_16_STRING_MAX   6     /*                   -32768 - 32767                   */
+#define U_INT_32_STRING_MAX 10    /*                        0 - 4294967295              */
+#define INT_32_STRING_MAX   11    /*              -2147483648 - 2147483647              */
+#define U_INT_64_STRING_MAX 20    /*                        0 - 18446744073709551615    */
+#define INT_64_STRING_MAX   20    /*     -9223372036854775808 - 9223372036854775807     */
+#define FLOAT_STRING_MAX    14    /*           -3.4028235e+38 - 3.4028235e+38           */
+#define DOUBLE_STRING_MAX   24    /* -1.7976931348623157e+308 - 1.7976931348623157e+308 */
+#define BOOLEAN_STRING_MAX  5     /*                     true - false                   */
+#define IP_ADDR_STRING_MAX  15    /*                   xxx.xxx.xxx.xxx                  */
 
 #define MAX_HEADER_LENGTH   22
 #define MAX_BODY_LENGTH     65513  /* 65535 - 22                              */
@@ -180,37 +192,82 @@ extern const LWES_BYTE LWES_U_INT_16_TOKEN;
 extern const LWES_BYTE LWES_INT_16_TOKEN;
 extern const LWES_BYTE LWES_U_INT_32_TOKEN;
 extern const LWES_BYTE LWES_INT_32_TOKEN;
-extern const LWES_BYTE LWES_U_INT_64_TOKEN;
-extern const LWES_BYTE LWES_INT_64_TOKEN;
-extern const LWES_BYTE LWES_BOOLEAN_TOKEN;
-extern const LWES_BYTE LWES_IP_ADDR_TOKEN;
 extern const LWES_BYTE LWES_STRING_TOKEN;
+extern const LWES_BYTE LWES_IP_ADDR_TOKEN;
+extern const LWES_BYTE LWES_INT_64_TOKEN;
+extern const LWES_BYTE LWES_U_INT_64_TOKEN;
+extern const LWES_BYTE LWES_BOOLEAN_TOKEN;
+extern const LWES_BYTE LWES_BYTE_TOKEN;
+extern const LWES_BYTE LWES_FLOAT_TOKEN;
+extern const LWES_BYTE LWES_DOUBLE_TOKEN;
+extern const LWES_BYTE LWES_U_INT_16_ARRAY_TOKEN;
+extern const LWES_BYTE LWES_INT_16_ARRAY_TOKEN;
+extern const LWES_BYTE LWES_U_INT_32_ARRAY_TOKEN;
+extern const LWES_BYTE LWES_INT_32_ARRAY_TOKEN;
+extern const LWES_BYTE LWES_STRING_ARRAY_TOKEN;
+extern const LWES_BYTE LWES_IP_ADDR_ARRAY_TOKEN;
+extern const LWES_BYTE LWES_INT_64_ARRAY_TOKEN;
+extern const LWES_BYTE LWES_U_INT_64_ARRAY_TOKEN;
+extern const LWES_BYTE LWES_BOOLEAN_ARRAY_TOKEN;
+extern const LWES_BYTE LWES_BYTE_ARRAY_TOKEN;
+extern const LWES_BYTE LWES_FLOAT_ARRAY_TOKEN;
+extern const LWES_BYTE LWES_DOUBLE_ARRAY_TOKEN;
 
 extern const LWES_SHORT_STRING LWES_UNDEFINED_STRING;
 extern const LWES_SHORT_STRING LWES_U_INT_16_STRING;
 extern const LWES_SHORT_STRING LWES_INT_16_STRING;
 extern const LWES_SHORT_STRING LWES_U_INT_32_STRING;
 extern const LWES_SHORT_STRING LWES_INT_32_STRING;
-extern const LWES_SHORT_STRING LWES_U_INT_64_STRING;
-extern const LWES_SHORT_STRING LWES_INT_64_STRING;
-extern const LWES_SHORT_STRING LWES_BOOLEAN_STRING;
-extern const LWES_SHORT_STRING LWES_IP_ADDR_STRING;
 extern const LWES_SHORT_STRING LWES_STRING_STRING;
+extern const LWES_SHORT_STRING LWES_IP_ADDR_STRING;
+extern const LWES_SHORT_STRING LWES_INT_64_STRING;
+extern const LWES_SHORT_STRING LWES_U_INT_64_STRING;
+extern const LWES_SHORT_STRING LWES_BOOLEAN_STRING;
+extern const LWES_SHORT_STRING LWES_BYTE_STRING;
+extern const LWES_SHORT_STRING LWES_FLOAT_STRING;
+extern const LWES_SHORT_STRING LWES_DOUBLE_STRING;
+extern const LWES_SHORT_STRING LWES_U_INT_16_ARRAY_STRING;
+extern const LWES_SHORT_STRING LWES_INT_16_ARRAY_STRING;
+extern const LWES_SHORT_STRING LWES_U_INT_32_ARRAY_STRING;
+extern const LWES_SHORT_STRING LWES_INT_32_ARRAY_STRING;
+extern const LWES_SHORT_STRING LWES_STRING_ARRAY_STRING;
+extern const LWES_SHORT_STRING LWES_IP_ADDR_ARRAY_STRING;
+extern const LWES_SHORT_STRING LWES_INT_64_ARRAY_STRING;
+extern const LWES_SHORT_STRING LWES_U_INT_64_ARRAY_STRING;
+extern const LWES_SHORT_STRING LWES_BOOLEAN_ARRAY_STRING;
+extern const LWES_SHORT_STRING LWES_BYTE_ARRAY_STRING;
+extern const LWES_SHORT_STRING LWES_FLOAT_ARRAY_STRING;
+extern const LWES_SHORT_STRING LWES_DOUBLE_ARRAY_STRING;
 
 extern const LWES_SHORT_STRING LWES_META_INFO_STRING;
 
 /*! \enum An enumeration of the types used by lwes */
 typedef enum {
-    LWES_TYPE_U_INT_16  = 1,   /*!< 2 byte unsigned integer type */
-    LWES_TYPE_INT_16    = 2,   /*!< 2 byte signed integer type type */ 
-    LWES_TYPE_U_INT_32  = 3,   /*!< 4 byte unsigned integer type */
-    LWES_TYPE_INT_32    = 4,   /*!< 4 byte signed integer type */
-    LWES_TYPE_STRING    = 5,   /*!< variable bytes string type */
-    LWES_TYPE_IP_ADDR   = 6,   /*!< 4 byte ipv4 address type */
-    LWES_TYPE_INT_64    = 7,   /*!< 8 byte signed integer type */
-    LWES_TYPE_U_INT_64  = 8,   /*!< 8 byte unsigned integer type */
-    LWES_TYPE_BOOLEAN   = 9,   /*!< 1 byte boolean type */
-    LWES_TYPE_UNDEFINED = 255, /*!< undefined type */
+    LWES_TYPE_U_INT_16        = 0x01,   /*!< 2 byte unsigned integer type */
+    LWES_TYPE_INT_16          = 0x02,   /*!< 2 byte signed integer type type */ 
+    LWES_TYPE_U_INT_32        = 0x03,   /*!< 4 byte unsigned integer type */
+    LWES_TYPE_INT_32          = 0x04,   /*!< 4 byte signed integer type */
+    LWES_TYPE_STRING          = 0x05,   /*!< variable bytes string type */
+    LWES_TYPE_IP_ADDR         = 0x06,   /*!< 4 byte ipv4 address type */
+    LWES_TYPE_INT_64          = 0x07,   /*!< 8 byte signed integer type */
+    LWES_TYPE_U_INT_64        = 0x08,   /*!< 8 byte unsigned integer type */
+    LWES_TYPE_BOOLEAN         = 0x09,   /*!< 1 byte boolean type */
+    LWES_TYPE_BYTE            = 0x0A,   /*!< 1 byte byte type */
+    LWES_TYPE_FLOAT           = 0x0B,   /*!< 4 byte floating-point type */
+    LWES_TYPE_DOUBLE          = 0x0C,   /*!< 8 byte floating-point type */
+    LWES_TYPE_U_INT_16_ARRAY  = 0x81,   /*!< array of 2 byte unsigned integer type */
+    LWES_TYPE_INT_16_ARRAY    = 0x82,   /*!< array of 2 byte signed integer type type */ 
+    LWES_TYPE_U_INT_32_ARRAY  = 0x83,   /*!< array of 4 byte unsigned integer type */
+    LWES_TYPE_INT_32_ARRAY    = 0x84,   /*!< array of 4 byte signed integer type */
+    LWES_TYPE_STRING_ARRAY    = 0x85,   /*!< array of variable bytes string type */
+    LWES_TYPE_IP_ADDR_ARRAY   = 0x86,   /*!< array of 4 byte ipv4 address type */
+    LWES_TYPE_INT_64_ARRAY    = 0x87,   /*!< array of 8 byte signed integer type */
+    LWES_TYPE_U_INT_64_ARRAY  = 0x88,   /*!< array of 8 byte unsigned integer type */
+    LWES_TYPE_BOOLEAN_ARRAY   = 0x89,   /*!< array of 1 byte boolean type */
+    LWES_TYPE_BYTE_ARRAY      = 0x8A,   /*!< array of 1 byte byte type */
+    LWES_TYPE_FLOAT_ARRAY     = 0x8B,   /*!< array of 4 byte floating-point type */
+    LWES_TYPE_DOUBLE_ARRAY    = 0x8C,   /*!< array of 8 byte floating-point type */
+    LWES_TYPE_UNDEFINED       = 0xff,   /*!< undefined type */
 } LWES_TYPE;
 
 #ifdef __cplusplus
