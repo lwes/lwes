@@ -268,45 +268,45 @@ lwes_event_attribute_to_string
 {
   if (attribute->type == LWES_U_INT_16_TOKEN)
   {
-    lwes_U_INT_16_to_string (strp, *((LWES_U_INT_16 *)attribute->value));
+    return lwes_U_INT_16_to_string (strp, *((LWES_U_INT_16 *)attribute->value));
   }
   else if (attribute->type == LWES_INT_16_TOKEN)
   {
-    lwes_INT_16_to_string (strp, *((LWES_INT_16 *)attribute->value));
+    return lwes_INT_16_to_string (strp, *((LWES_INT_16 *)attribute->value));
   }
   else if (attribute->type == LWES_U_INT_32_TOKEN)
   {
-    lwes_U_INT_32_to_string (strp, *((LWES_U_INT_32 *)attribute->value));
+    return lwes_U_INT_32_to_string (strp, *((LWES_U_INT_32 *)attribute->value));
   }
   else if (attribute->type == LWES_INT_32_TOKEN)
   {
-    lwes_INT_32_to_string (strp, *((LWES_INT_32 *)attribute->value));
+    return lwes_INT_32_to_string (strp, *((LWES_INT_32 *)attribute->value));
   }
   else if (attribute->type == LWES_U_INT_64_TOKEN)
   {
-    lwes_U_INT_64_to_string (strp, *((LWES_U_INT_64 *)attribute->value));
+    return lwes_U_INT_64_to_string (strp, *((LWES_U_INT_64 *)attribute->value));
   }
   else if (attribute->type == LWES_INT_64_TOKEN)
   {
-    lwes_INT_64_to_string (strp, *((LWES_INT_64 *)attribute->value));
+    return lwes_INT_64_to_string (strp, *((LWES_INT_64 *)attribute->value));
   }
   else if (attribute->type == LWES_BOOLEAN_TOKEN)
   {
-    lwes_BOOLEAN_to_string (strp, *((LWES_BOOLEAN *)attribute->value));
+    return lwes_BOOLEAN_to_string (strp, *((LWES_BOOLEAN *)attribute->value));
   }
   else if (attribute->type == LWES_IP_ADDR_TOKEN)
   {
-    lwes_IP_ADDR_to_string (strp, *((LWES_IP_ADDR *)attribute->value));
+    return lwes_IP_ADDR_to_string (strp, *((LWES_IP_ADDR *)attribute->value));
   }
   else if (attribute->type == LWES_STRING_TOKEN)
   {
-    lwes_LONG_STRING_to_string (strp, (LWES_LONG_STRING)attribute->value);
+    return lwes_LONG_STRING_to_string (strp, (LWES_LONG_STRING)attribute->value);
   }
   else
   {
     /* should really do something here, but not sure what */
+    return -1;
   }
-  return 0;
 }
 
 
@@ -337,11 +337,10 @@ lwes_event_to_stream
 
   /* if attr_list was provided, ensure that the fields match */
   if (attr_list) {
-    struct lwes_hash *hash = lwes_hash_create ();
-    int              match = 1;
-    (void) hash;
+    int match  = 1;
     
     while (*attr_list && match) {
+      char* formatted;
       struct lwes_event_attribute *value =
         (struct lwes_event_attribute *) lwes_hash_get (event->attributes,
                                                        attr_list[0]);
@@ -350,10 +349,11 @@ lwes_event_to_stream
         return 0; /* filter field was not set */
       }
 
-      char* formatted;
-      lwes_event_attribute_to_string (&formatted, value);
-      if (formatted == NULL) {
-	fprintf (stderr, "Internal error while formatting a field!\n");
+      /* Format this field as a string, and compare to expectations. */
+      int ret = lwes_event_attribute_to_string (&formatted, value);
+      if (ret <= 0
+	  || formatted == NULL) {
+	fprintf (stderr, "Internal error while formatting a field (result=%d)!\n", ret);
 	exit(1);
       } else {
 	if (strcmp(attr_list[1], formatted) != 0) {
