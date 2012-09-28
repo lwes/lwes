@@ -189,7 +189,7 @@ lwes_emitter_destroy
       free(emitter);
     }
 
-  return 0;
+  return ret;
 }
 
 int
