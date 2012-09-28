@@ -53,11 +53,12 @@ while (<FH>)
           }
         else
           {
-            if ($line =~ /^(\w+)\s+(\w+);\s+#\s+(\w+)\s+(\w+),\s+(\w+)(,\s+(\w+))?/)
-              {
-                my ($type, $sname, $lname, $contract, $source, $max_length)
-                  = ($1, $2, $3, $4, $5, $7);
-                if ($contract ne "OPTIONAL"
+	    if ($line =~ /((\w+)\s+)?(\w+)\s*(\((\d+)\))?(\[(\d+)?\])?\s+(\w+)(\s*=\s*.+?)?\s*;?\s*(#.*)?$/)
+	      {
+		my ($contract, $type, $array, $length, $count, $name, $defval, $comment)
+		    = (defined $2 ? uc($2) : undef, $3, defined($4) ? 1 : 0, defined($4) ? $5 : 1, $7, $8, $9, $10);
+                if (defined $contract
+		    && $contract ne "OPTIONAL"
                     && $contract ne "REQUIRED")
                   {
                     print STDERR "ERROR: line $lines\n";
@@ -66,42 +67,21 @@ while (<FH>)
                     print STDERR "\tREQUIRED\n";
                     exit 1;
                   }
-                foreach my $src (split /\|/, $source)
-                  {
-                    if (   $src ne "COMMAND_ARGS"
-                        && $src ne "FUNCTION_ARGS"
-                        && $src ne "CALCULATED"
-                        && $src ne "HTTP_REQ"
-                        && $src ne "XARGS"
-                       )
-                      {
-                        print STDERR "ERROR: line $lines\n";
-                        print STDERR "ERROR: '$src' should be one or"
-                                     ." more of\n";
-                        print STDERR "\tCOMMAND_ARGS\n";
-                        print STDERR "\tFUNCTION_ARGS\n";
-                        print STDERR "\tCALCULATED\n";
-                        print STDERR "\tHTTP_REQ\n";
-                        print STDERR "\tXARGS\n";
-                        exit 1;
-                      }
-                  }
                 if (defined ($current_event))
                   {
-                    $events->{$current_event}->{$sname} =
+                    $events->{$current_event}->{$name} =
                       {
+			'name' => $name,
                         'type' => $type,
-                        'lname' => $lname,
                         'contract' => $contract,
-                        'source' => $source,
+			'array' => $array,
+			'count' => $count,
+			'length' => $length,
                       };
-                    if (defined ($max_length))
-                      {
-                        $events->{$current_event}->{$sname}->{'max_length'} =
-                          $max_length;
-                      }
                   }
-              }
+              } else {
+		  print STDERR "ERROR: Unable to parse line $line\n";
+	      }
           }
       }
     else
@@ -139,11 +119,14 @@ foreach my $attr (keys %{$events->{'MetaEventInfo'}})
     next if $attr eq "SenderPort";
     next if $attr eq "ReceiptTime";
     next if $attr eq "SiteID";
+    #printf "Field %s (%s) takes up to %d bytes\n",
+    #  $events->{'MetaEventInfo'}->{$attr}->{'name'},
+    #  $events->{'MetaEventInfo'}->{$attr}->{'type'},
+    #  $events->{'MetaEventInfo'}->{$attr}->{'length'},
+    #  $events->{'MetaEventInfo'}->{$attr}->{'count'},
+    #  calculateEventEntrySize ('MetaEventInfo', $events->{'MetaEventInfo'}->{$attr});
     $meta_attributes_size +=
-      calculateEventEntrySize
-        ($events->{'MetaEventInfo'}->{$attr}->{'type'},
-         $attr,
-         $events->{'MetaEventInfo'}->{$attr}->{'max_length'});
+      calculateEventEntrySize ('MetaEventInfo', $events->{'MetaEventInfo'}->{$attr});
   }
 
 foreach my $event (keys %{$events})
@@ -153,11 +136,14 @@ foreach my $event (keys %{$events})
     $event_max_size += calculateEventHeaderSize ($event);
     foreach my $attr (keys %{$events->{$event}})
       {
+	#printf "Field %s (%s(%d)[%d]) takes up to %d bytes\n",
+	#  $events->{$event}->{$attr}->{'name'},
+	#  $events->{$event}->{$attr}->{'type'},
+	#  $events->{$event}->{$attr}->{'length'},
+	#  $events->{$event}->{$attr}->{'count'},
+	#  calculateEventEntrySize ($event, $events->{$event}->{$attr});
         $event_max_size +=
-          calculateEventEntrySize
-            ($events->{$event}->{$attr}->{'type'},
-             $attr,
-             $events->{$event}->{$attr}->{'max_length'});
+	  calculateEventEntrySize ($event, $events->{$event}->{$attr});
       }
     print "$event\t$event_max_size\n";
   }
@@ -181,7 +167,15 @@ sub calculateEventHeaderSize
 
 sub calculateEventEntrySize
 {
-  my ($type, $attr, $max_size) = @_;
+  my $event = shift;
+  my $attr  = shift;
+  my ($name,$type,$length,$count) = ($attr->{'name'},$attr->{'type'},$attr->{'length'},$attr->{'count'});
+
+  unless (defined $count)
+    {
+      print STDERR "WARN: $event.$name array has no maximum count; byte count is forced to ignore it\n";
+      return 0;
+    }
 
   my $size = 0;
 
@@ -189,61 +183,44 @@ sub calculateEventEntrySize
   $size += 1;
 
   # add length bytes for attribute name
-  $size += length $attr;
+  $size += length $attr->{'name'};
 
   # add one byte for attribute type id
   $size += 1;
 
   # now add bytes for data types
-  if ($type eq "boolean")
+  if ($type eq "boolean" || $type eq "byte")
     {
-      $size += 1;
+      $size += $count * 1;
     }
-  elsif ($type eq "uint16")
+  elsif ($type eq "uint16" || $type eq "int16")
     {
-      $size += 2;
+      $size += $count * 2;
     }
-  elsif ($type eq "int16")
+  elsif ($type eq "uint32" || $type eq "int32" || $type eq "ip_addr" || $type eq "float")
     {
-      $size += 2;
+      $size += $count * 4;
     }
-  elsif ($type eq "uint32")
+  elsif ($type eq "uint64" || $type eq "int64" || $type eq "double")
     {
-      $size += 4;
-    }
-  elsif ($type eq "int32")
-    {
-      $size += 4;
-    }
-  elsif ($type eq "uint64")
-    {
-      $size += 8;
-    }
-  elsif ($type eq "int64")
-    {
-      $size += 8;
-    }
-  elsif ($type eq "ip_addr")
-    {
-      $size += 4;
+      $size += $count * 8;
     }
   elsif ($type eq "string")
     {
       # two bytes of length
-      $size += 2;
+      $size += $count * 2;
 
       # add max size bytes of length
-      unless (defined ($max_size))
+      unless (defined ($length))
         {
-          print STDERR "ERROR: must specify a max size for string types\n";
-          exit 1;
+          print STDERR "WARN: $event.$name has no maximum length; byte count is forced to ignore it\n";
+	  return 0;
         }
-      if ($max_size > 65535)
+      if ($length > 65535)
         {
-          print STDERR "ERROR: max size must be less than 65535\n";
-          exit 1;
+          print STDERR "WARN: $event.$name has no maximum length; byte count is forced to ignore it\n";
         }
-      $size += $max_size;
+      $size += $count * $length;
     }
   else
     {
