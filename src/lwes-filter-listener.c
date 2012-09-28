@@ -10,6 +10,7 @@
  * limitations under the License. See accompanying LICENSE file.        *
  *======================================================================*/
 
+#define _GNU_SOURCE
 #include "lwes_listener.h"
 
 #ifdef HAVE_GETOPT_H
@@ -59,7 +60,7 @@ static const char help[] =
   "  arguments are specified as -option value or -optionvalue"         "\n"
   ""                                                                   "\n";
 
-int
+static int
 lwes_U_INT_16_to_stream
   (LWES_U_INT_16 a_uint16,
    FILE *stream)
@@ -67,7 +68,7 @@ lwes_U_INT_16_to_stream
   return fprintf (stream,"%hu",a_uint16);
 }
 
-int
+static int
 lwes_INT_16_to_stream
   (LWES_INT_16 an_int16,
    FILE *stream)
@@ -75,7 +76,7 @@ lwes_INT_16_to_stream
   return fprintf (stream,"%hd",an_int16);
 }
 
-int
+static int
 lwes_U_INT_32_to_stream
   (LWES_U_INT_32 a_uint32,
    FILE *stream)
@@ -83,7 +84,7 @@ lwes_U_INT_32_to_stream
   return fprintf (stream,"%u",a_uint32);
 }
 
-int
+static int
 lwes_INT_32_to_stream
   (LWES_INT_32 an_int32,
    FILE *stream)
@@ -91,7 +92,7 @@ lwes_INT_32_to_stream
   return fprintf (stream,"%d",an_int32);
 }
 
-int
+static int
 lwes_U_INT_64_to_stream
   (LWES_U_INT_64 a_uint64,
    FILE *stream)
@@ -99,7 +100,7 @@ lwes_U_INT_64_to_stream
   return fprintf (stream,"%llu",a_uint64);
 }
 
-int
+static int
 lwes_INT_64_to_stream
   (LWES_INT_64 an_int64,
    FILE *stream)
@@ -107,7 +108,7 @@ lwes_INT_64_to_stream
   return fprintf (stream,"%lld",an_int64);
 }
 
-int
+static int
 lwes_BOOLEAN_to_stream
   (LWES_BOOLEAN a_boolean,
    FILE *stream)
@@ -115,7 +116,7 @@ lwes_BOOLEAN_to_stream
   return fprintf (stream,"%s",((a_boolean==1)?"true":"false"));
 }
 
-int
+static int
 lwes_IP_ADDR_to_stream
   (LWES_IP_ADDR an_ipaddr,
    FILE *stream)
@@ -123,7 +124,7 @@ lwes_IP_ADDR_to_stream
   return fprintf (stream,"%s",inet_ntoa (an_ipaddr));
 }
 
-int
+static int
 lwes_SHORT_STRING_to_stream
   (LWES_SHORT_STRING a_string,
    FILE *stream)
@@ -131,7 +132,7 @@ lwes_SHORT_STRING_to_stream
   return fprintf (stream,"%s",a_string);
 }
 
-int
+static int
 lwes_LONG_STRING_to_stream
   (LWES_LONG_STRING a_string,
    FILE *stream)
@@ -139,7 +140,7 @@ lwes_LONG_STRING_to_stream
   return fprintf (stream,"%s",a_string);
 }
 
-int
+static int
 lwes_event_attribute_to_stream
   (struct lwes_event_attribute *attribute,
    FILE *stream)
@@ -187,18 +188,186 @@ lwes_event_attribute_to_stream
   return 0;
 }
 
-int
+
+static int
+lwes_U_INT_16_to_string
+  (char **strp,
+   LWES_U_INT_16 a_uint16)
+{
+  return asprintf (strp, "%hu",a_uint16);
+}
+
+static int
+lwes_INT_16_to_string
+  (char **strp,
+   LWES_INT_16 an_int16)
+{
+  return asprintf (strp, "%hd",an_int16);
+}
+
+static int
+lwes_U_INT_32_to_string
+  (char **strp,
+   LWES_U_INT_32 a_uint32)
+{
+  return asprintf (strp, "%u",a_uint32);
+}
+
+static int
+lwes_INT_32_to_string
+  (char **strp,
+   LWES_INT_32 an_int32)
+{
+  return asprintf (strp, "%d",an_int32);
+}
+
+static int
+lwes_U_INT_64_to_string
+  (char **strp,
+   LWES_U_INT_64 a_uint64)
+{
+  return asprintf (strp, "%llu",a_uint64);
+}
+
+static int
+lwes_INT_64_to_string
+  (char **strp,
+   LWES_INT_64 an_int64)
+{
+  return asprintf (strp, "%lld",an_int64);
+}
+
+static int
+lwes_BOOLEAN_to_string
+  (char **strp,
+   LWES_BOOLEAN a_boolean)
+{
+  return asprintf (strp, "%s",((a_boolean==1)?"true":"false"));
+}
+
+static int
+lwes_IP_ADDR_to_string
+  (char **strp,
+   LWES_IP_ADDR an_ipaddr)
+{
+  return asprintf (strp, "%s",inet_ntoa (an_ipaddr));
+}
+
+static int
+lwes_LONG_STRING_to_string
+  (char **strp,
+   LWES_LONG_STRING a_string)
+{
+  return asprintf (strp, "%s",a_string);
+}
+
+static int
+lwes_event_attribute_to_string
+  (char **strp,
+   struct lwes_event_attribute *attribute)
+{
+  if (attribute->type == LWES_U_INT_16_TOKEN)
+  {
+    lwes_U_INT_16_to_string (strp, *((LWES_U_INT_16 *)attribute->value));
+  }
+  else if (attribute->type == LWES_INT_16_TOKEN)
+  {
+    lwes_INT_16_to_string (strp, *((LWES_INT_16 *)attribute->value));
+  }
+  else if (attribute->type == LWES_U_INT_32_TOKEN)
+  {
+    lwes_U_INT_32_to_string (strp, *((LWES_U_INT_32 *)attribute->value));
+  }
+  else if (attribute->type == LWES_INT_32_TOKEN)
+  {
+    lwes_INT_32_to_string (strp, *((LWES_INT_32 *)attribute->value));
+  }
+  else if (attribute->type == LWES_U_INT_64_TOKEN)
+  {
+    lwes_U_INT_64_to_string (strp, *((LWES_U_INT_64 *)attribute->value));
+  }
+  else if (attribute->type == LWES_INT_64_TOKEN)
+  {
+    lwes_INT_64_to_string (strp, *((LWES_INT_64 *)attribute->value));
+  }
+  else if (attribute->type == LWES_BOOLEAN_TOKEN)
+  {
+    lwes_BOOLEAN_to_string (strp, *((LWES_BOOLEAN *)attribute->value));
+  }
+  else if (attribute->type == LWES_IP_ADDR_TOKEN)
+  {
+    lwes_IP_ADDR_to_string (strp, *((LWES_IP_ADDR *)attribute->value));
+  }
+  else if (attribute->type == LWES_STRING_TOKEN)
+  {
+    lwes_LONG_STRING_to_string (strp, (LWES_LONG_STRING)attribute->value);
+  }
+  else
+  {
+    /* should really do something here, but not sure what */
+  }
+  return 0;
+}
+
+
+static int
 lwes_event_to_stream
   (struct lwes_event *event,
    FILE *stream,
-   const char *event_name)
+   const char **event_names,
+   char **attr_list)
 {
-  struct lwes_event_attribute *tmp;
-  struct lwes_hash_enumeration e;
+  struct lwes_event_attribute  *tmp;
+  struct lwes_hash_enumeration  e;
 
-  if (event_name != NULL &&
-      strcmp(event->eventName, event_name) != 0) {
-    return 0;
+  /* if event_names was provided, ensure that this event is in the list */
+  if (event_names) {
+    int match = 0;
+    while (event_names && *event_names) {
+      if (strcmp(event->eventName, *event_names) == 0) {
+        match = 1;
+        break;
+      }
+      ++event_names;
+    }
+    if (! match) {
+      return 0;
+    }
+  }
+
+  /* if attr_list was provided, ensure that the fields match */
+  if (attr_list) {
+    struct lwes_hash *hash = lwes_hash_create ();
+    int              match = 1;
+    (void) hash;
+    
+    while (*attr_list && match) {
+      struct lwes_event_attribute *value =
+        (struct lwes_event_attribute *) lwes_hash_get (event->attributes,
+                                                       attr_list[0]);
+      
+      if (! value) {
+        return 0; /* filter field was not set */
+      }
+
+      char* formatted;
+      lwes_event_attribute_to_string (&formatted, value);
+      if (formatted == NULL) {
+	fprintf (stderr, "Internal error while formatting a field!\n");
+	exit(1);
+      } else {
+	if (strcmp(attr_list[1], formatted) != 0) {
+	  match = 0;
+	}
+	free (formatted);
+      }
+
+      attr_list += 2;
+    }
+    
+    if (! match) {
+      return 0;
+    }
   }
 
   lwes_SHORT_STRING_to_stream (event->eventName,stream);
@@ -234,13 +403,103 @@ lwes_event_to_stream
   return 0;
 }
 
+static int
+count_fields(const char* string, char delim) {
+  if (string && *string) {
+    int fields = 1;
+    while (*string) {
+      if (delim == *string) {
+        ++fields;
+      }
+      ++string;
+    }
+    return fields;
+  } else {
+    return 0;
+  }
+}
+
+/* This modifies 'arg' in place but does not allocate any new strings.
+ * It only allocates a NULL-terminated array referencing persistent
+ * string fragments.  To release, just free() the result (if non-null).
+ * The result points to a series of strings, terminated by NULL.
+ * 
+ * 'arg' should match /([^,]+(,[^,]+)*)?/
+ */
+static const char**
+parse_comma_separated_list (char* arg) {
+  const char** result = NULL;
+  char *saveptr, *token;
+
+  const int fields = count_fields(arg, ',');
+  if (fields > 0) {
+    int field = 0;
+    result = calloc(fields+1, sizeof(const char*));
+    while ((token = strtok_r(arg, ",", &saveptr))) {
+      arg = NULL;
+      result[field++] = token;
+    }
+    if (field == fields) {
+      result[field] = NULL;
+    } else {
+      fprintf (stderr, "Internal error while parsing a comma-separated list!\n");
+      exit(1);
+    }
+  }
+  
+  return result;
+}
+
+/* This modifies 'arg' in place but does not allocate any new strings.
+ * It only allocates a NULL-terminated array referencing persistent
+ * string fragments, which it returns.  To release, just free() the
+ * result (if non-null).
+ * 
+ * The result points to a series of pairs of strings, terminated by NULL,
+ * like key1,value1,key2,value2,NULL.
+ * 
+ * 'arg' should match /([^,]+(,[^,]+)*)?/
+ */
+static char**
+parse_attr_list (char* arg) {
+  int   num_fields;
+  char *token, *saveptr1, *saveptr2;
+  char **result = NULL;
+
+  num_fields = count_fields (arg, ',');
+  if (num_fields > 0) {
+    int field = 0;
+    result = calloc (2*num_fields+1, sizeof(char*));
+    while ((token = strtok_r(arg, ",", &saveptr1))) {
+      result[2*field] = strtok_r(token, "=", &saveptr2);
+      if (! result[2*field]) {
+        fprintf (stderr, "Internal error while parsing a key from a "
+                 "comma-separated list of pairs!\n");
+        exit(1);
+      }
+      result[2*field+1] = strtok_r(NULL, "=", &saveptr2);
+      if (! result[2*field+1]) {
+        fprintf (stderr, "Internal error while parsing a value from a "
+                 "comma-separated list of pairs!\n");
+        exit(1);
+      }
+
+      ++field;
+      arg = NULL;
+    }
+  }
+
+  return result;
+}
+
+
 int main (int   argc, char *argv[]) {
 
-  const char *mcast_ip    = "224.1.1.11";
-  const char *mcast_iface = NULL;
-  int         mcast_port  = 12345;
-  const char *event_name = NULL;
-  const char *attr_list = NULL;
+  const char  *mcast_ip    = "224.1.1.11";
+  const char  *mcast_iface = NULL;
+  int          mcast_port  = 12345;
+  const char **event_names  = NULL;
+  char       **attr_list   = NULL;
 
   sigset_t fullset;
   struct sigaction act;
@@ -273,11 +532,11 @@ int main (int   argc, char *argv[]) {
         break;
 
       case 'e':
-        event_name = optarg;
+        event_names = parse_comma_separated_list (optarg);
         break;
 
       case 'a':
-        attr_list = optarg;
+        attr_list = parse_attr_list (optarg);
         break;
 
       default:
@@ -316,7 +575,7 @@ int main (int   argc, char *argv[]) {
     if ( event != NULL ) {
       int ret = lwes_listener_recv ( listener, event);
       if ( ret > 0 ) {
-        lwes_event_to_stream (event, stdout, event_name);
+        lwes_event_to_stream (event, stdout, event_names, attr_list);
       }
     }
     lwes_event_destroy (event);
