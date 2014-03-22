@@ -1148,12 +1148,11 @@ int lwes_event_get_U_INT_16 (struct lwes_event       *event,
 
   tmp = (struct lwes_event_attribute *)lwes_hash_get (event->attributes, name);
 
-  if (tmp)
+  if (tmp != NULL && tmp->type == LWES_U_INT_16_TOKEN)
     {
       *value = (*((LWES_U_INT_16 *)tmp->value));
       return 0;
     }
-
   return -1;
 }
 
@@ -1170,7 +1169,7 @@ int lwes_event_get_INT_16 (struct lwes_event       *event,
 
   tmp = (struct lwes_event_attribute *)lwes_hash_get (event->attributes, name);
 
-  if (tmp)
+  if (tmp != NULL && tmp->type == LWES_INT_16_TOKEN)
     {
       *value = (*((LWES_INT_16 *)tmp->value));
       return 0;
@@ -1191,12 +1190,11 @@ int lwes_event_get_U_INT_32 (struct lwes_event       *event,
 
   tmp = (struct lwes_event_attribute *)lwes_hash_get (event->attributes, name);
 
-  if (tmp)
+  if (tmp != NULL && tmp->type == LWES_U_INT_32_TOKEN)
     {
       *value = (*((LWES_U_INT_32 *)tmp->value));
       return 0;
     }
-
   return -1;
 }
 
@@ -1213,12 +1211,11 @@ int lwes_event_get_INT_32 (struct lwes_event       *event,
 
   tmp = (struct lwes_event_attribute *)lwes_hash_get (event->attributes, name);
 
-  if (tmp)
+  if (tmp != NULL && tmp->type == LWES_INT_32_TOKEN)
     {
       *value = (*((LWES_INT_32 *)tmp->value));
       return 0;
     }
-
   return -1;
 }
 
@@ -1235,12 +1232,11 @@ int lwes_event_get_U_INT_64 (struct lwes_event       *event,
 
   tmp = (struct lwes_event_attribute *)lwes_hash_get (event->attributes, name);
 
-  if (tmp)
+  if (tmp != NULL && tmp->type == LWES_U_INT_64_TOKEN)
     {
       *value = (*((LWES_U_INT_64 *)tmp->value));
       return 0;
     }
-
   return -1;
 }
 
@@ -1257,12 +1253,11 @@ int lwes_event_get_INT_64 (struct lwes_event       *event,
 
   tmp = (struct lwes_event_attribute *)lwes_hash_get (event->attributes, name);
 
-  if (tmp)
+  if (tmp != NULL && tmp->type == LWES_INT_64_TOKEN)
     {
       *value = (*((LWES_INT_64 *)tmp->value));
       return 0;
     }
-
   return -1;
 }
 
@@ -1279,14 +1274,14 @@ int lwes_event_get_STRING (struct lwes_event       *event,
 
   tmp = (struct lwes_event_attribute *)lwes_hash_get (event->attributes, name);
 
-  if (tmp)
+  if (tmp != NULL && tmp->type == LWES_STRING_TOKEN)
     {
       *value = (((LWES_LONG_STRING)tmp->value));
       return 0;
     }
-
   return -1;
 }
+
 int lwes_event_get_IP_ADDR (struct lwes_event       *event,
                             LWES_CONST_SHORT_STRING  name,
                             LWES_IP_ADDR            *value)
@@ -1300,7 +1295,7 @@ int lwes_event_get_IP_ADDR (struct lwes_event       *event,
 
   tmp = (struct lwes_event_attribute *)lwes_hash_get (event->attributes, name);
 
-  if (tmp)
+  if (tmp != NULL && tmp->type == LWES_IP_ADDR_TOKEN)
     {
       *value = (*((LWES_IP_ADDR *)tmp->value));
       return 0;
@@ -1321,7 +1316,7 @@ int lwes_event_get_BOOLEAN (struct lwes_event       *event,
 
   tmp = (struct lwes_event_attribute *)lwes_hash_get(event->attributes, name);
 
-  if (tmp)
+  if (tmp != NULL && tmp->type == LWES_BOOLEAN_TOKEN)
     {
       *value = (*((LWES_BOOLEAN *)tmp->value));
       return 0;
@@ -1360,7 +1355,7 @@ lwes_event_add (struct lwes_event*       event,
 {
   struct lwes_event_attribute* attribute = NULL;
   LWES_SHORT_STRING            attrName  = NULL;
-  int ret                                = 0;
+  void *ret                              = NULL;
 
   /* check against the event db */
   if (event->type_db != NULL
@@ -1400,16 +1395,28 @@ lwes_event_add (struct lwes_event*       event,
   /* Try and put something into the hash */
   ret = lwes_hash_put (event->attributes, attrName, attribute);
 
-  /* return code greater than or equal to 0 is okay, so increment the
-   * number_of_attributes, otherwise, send out the failure value
+  /* if put returns the given attribute there was a failure of some sort, so free
+   * memory and return -4
    */
-  if (ret < 0)
+  if (ret == attribute)
     {
       free (attribute);
       free (attrName);
-      return ret;
+      return -4;
     }
-  event->number_of_attributes++;
+  else if (ret != NULL)
+    {
+      /* in this case we replaced the old value and it returned it, so free up the
+       * old value and the key (since we reused the old key
+       */
+      free (ret);
+      free (attrName);
+    }
+  else
+    {
+      /* we successfully added a new attribute, so increment the number of attributes */
+      event->number_of_attributes++;
+    }
 
   return event->number_of_attributes;
 }

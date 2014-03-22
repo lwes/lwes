@@ -57,7 +57,9 @@ int main(void)
   const char *key12= "key12";
   const char *badkey1= "badkey1";
   int    value1=5;
+  int   *old_value1 = NULL;
   int    value2=10;
+  int   *old_value2 = NULL;
   int    value3=11;
   int    value4=12;
   const char * value5="value5";
@@ -122,8 +124,8 @@ int main(void)
   assert ( lwes_hash_size(hash) == 0 );
 
   /* some boundary conditions, should return errors */
-  assert ( lwes_hash_put (NULL, (char*)key1,  NULL    ) == -1 );
-  assert ( lwes_hash_put (hash, NULL,         NULL    ) == -1 );
+  assert ( lwes_hash_put (NULL, (char*)key1, &value1 ) == &value1);
+  assert ( lwes_hash_put (hash, NULL, &value1) == &value1);
 
   /* hash should still be empty */
   assert ( lwes_hash_is_empty(hash) );
@@ -132,7 +134,7 @@ int main(void)
   /* malloc failure */
   malloc_count = 0;
   null_at = 1;
-  assert ( lwes_hash_put (hash, (char*)key1,  &value1 ) == -3 );
+  assert ( lwes_hash_put (hash, (char*)key1,  &value1) == &value1);
 
   /* hash should still be empty */
   assert ( lwes_hash_is_empty(hash) );
@@ -151,8 +153,8 @@ int main(void)
   assert ( lwes_hash_enumeration_next_element (&e) == NULL );
 
   /* add a couple of elements */
-  assert ( lwes_hash_put (hash, (char*)key1,  &value1 ) == 0 );
-  assert ( lwes_hash_put (hash, (char*)key2,  &value2 ) == 0 );
+  assert ( lwes_hash_put (hash, (char*)key1,  &value1) == NULL );
+  assert ( lwes_hash_put (hash, (char*)key2,  &value2) == NULL );
 
   /* test enumeration with just a couple of elements */
   assert (lwes_hash_keys (hash, &e));
@@ -178,16 +180,16 @@ int main(void)
     }
 
   /* put a bunch more elements */
-  assert ( lwes_hash_put (hash, (char*)key3,  &value3 ) == 0 );
-  assert ( lwes_hash_put (hash, (char*)key4,  &value4 ) == 0 );
-  assert ( lwes_hash_put (hash, (char*)key5,  &value5 ) == 0 );
-  assert ( lwes_hash_put (hash, (char*)key6,  &value6 ) == 0 );
-  assert ( lwes_hash_put (hash, (char*)key7,  &value7 ) == 0 );
-  assert ( lwes_hash_put (hash, (char*)key8,  &value8 ) == 0 );
-  assert ( lwes_hash_put (hash, (char*)key9,  &value9 ) == 0 );
-  assert ( lwes_hash_put (hash, (char*)key10, &value10) == 0 );
-  assert ( lwes_hash_put (hash, (char*)key11, &value11) == 0 );
-  assert ( lwes_hash_put (hash, (char*)key12, &value12) == 0 );
+  assert ( lwes_hash_put (hash, (char*)key3,  &value3) == NULL );
+  assert ( lwes_hash_put (hash, (char*)key4,  &value4) == NULL );
+  assert ( lwes_hash_put (hash, (char*)key5,  &value5) == NULL );
+  assert ( lwes_hash_put (hash, (char*)key6,  &value6) == NULL );
+  assert ( lwes_hash_put (hash, (char*)key7,  &value7) == NULL );
+  assert ( lwes_hash_put (hash, (char*)key8,  &value8) == NULL );
+  assert ( lwes_hash_put (hash, (char*)key9,  &value9) == NULL );
+  assert ( lwes_hash_put (hash, (char*)key10, &value10) == NULL );
+  assert ( lwes_hash_put (hash, (char*)key11, &value11) == NULL );
+  assert ( lwes_hash_put (hash, (char*)key12, &value12) == NULL );
 
   assert ( !lwes_hash_is_empty(hash) );
   assert ( lwes_hash_size(hash) == 12 );
@@ -297,12 +299,48 @@ int main(void)
    */
   hash = lwes_hash_create_with_bins (1);
   assert ( hash != NULL );
-  assert ( lwes_hash_put (hash, (char*)key1,  &value1 ) == 0 );
-  assert ( lwes_hash_put (hash, (char*)key2,  &value2 ) == 0 );
+  assert ( lwes_hash_put (hash, (char*)key1,  &value1) == NULL );
+  assert ( lwes_hash_put (hash, (char*)key2,  &value2) == NULL );
   assert ( lwes_hash_get (hash, (char*)key3) == NULL );
   assert ( lwes_hash_remove (hash, (char*)key3) == NULL );
   assert ( lwes_hash_remove (hash, (char*)key2) != NULL );
   assert ( lwes_hash_remove (hash, (char*)key1) != NULL );
+  assert ( lwes_hash_is_empty(hash) );
+  assert ( lwes_hash_destroy(hash) == 0 );
+
+  /* test the case where the same key is given twice the hashtable
+   * should contain one value and it's value should be the second one set
+   */
+  hash = lwes_hash_create();
+  assert ( hash != NULL );
+  assert ( lwes_hash_put (hash, (char*)key1,  &value1) == NULL );
+  assert ( lwes_hash_put (hash, (char*)key1,  &value2) == &value1 );
+  assert ( lwes_hash_size (hash) == 1 );
+  value2_out = (int *)lwes_hash_get (hash, (char*)key1);
+  assert ( *value2_out == value2 );
+  assert ( lwes_hash_remove (hash, (char*)key1) != NULL );
+  assert ( lwes_hash_is_empty(hash) );
+  assert ( lwes_hash_destroy(hash) == 0 );
+
+  /* now another replacement test, this time in a non-empty bin */
+  hash = lwes_hash_create_with_bins (1);
+  assert ( hash != NULL );
+  assert ( lwes_hash_put (hash, (char*)key1,  &value1) == NULL );
+  assert ( lwes_hash_put (hash, (char*)key2,  &value2) == NULL );
+  assert ( lwes_hash_put (hash, (char*)key3,  &value3) == NULL );
+  assert ( lwes_hash_put (hash, (char*)key2,  &value4) == &value2);
+  value1_out = (int *)lwes_hash_get (hash, (char*)key1);
+  assert ( *value1_out == value1 );
+  value2_out = (int *)lwes_hash_get (hash, (char*)key2);
+  assert ( *value2_out == value4 );
+  value3_out = (int *)lwes_hash_get (hash, (char*)key3);
+  assert ( *value3_out == value3 );
+  value1_rem = (int *)lwes_hash_remove (hash, (char*)key1);
+  assert ( *value1_rem == value1 );
+  value2_rem = (int *)lwes_hash_remove (hash, (char*)key2);
+  assert ( *value2_rem == value4 );
+  value3_rem = (int *)lwes_hash_remove (hash, (char*)key3);
+  assert ( *value3_rem == value3 );
   assert ( lwes_hash_is_empty(hash) );
   assert ( lwes_hash_destroy(hash) == 0 );
 

@@ -98,7 +98,7 @@ lwes_event_type_db_add_event
   (struct lwes_event_type_db *db,
    LWES_SHORT_STRING event_name)
 {
-  int ret = 0;
+  void *ret = NULL;
   struct lwes_hash *eventHash = NULL;
   /* try and allocate the key */
   LWES_SHORT_STRING eventHashKey =
@@ -118,13 +118,14 @@ lwes_event_type_db_add_event
 
   /* try and place the key and value into the hash, if we fail free both */
   ret = lwes_hash_put (db->events, eventHashKey, eventHash);
-  if ( ret < 0 )
+  if ( ret != NULL )
     {
       free (eventHashKey);
       lwes_hash_destroy (eventHash);
+      return -4;
     }
 
-  return ret;
+  return 0;
 }
 
 int
@@ -134,7 +135,7 @@ lwes_event_type_db_add_attribute
    LWES_SHORT_STRING attr_name,
    LWES_SHORT_STRING type)
 {
-  int ret;
+  void *ret = NULL;
   struct lwes_hash *eventHash =
     (struct lwes_hash *)lwes_hash_get (db->events, event_name);
   LWES_SHORT_STRING tmpAttrName = NULL;
@@ -195,13 +196,14 @@ lwes_event_type_db_add_attribute
   ret = lwes_hash_put (eventHash, tmpAttrName, tmpAttrType);
 
   /* if inserting into the hash fails we should free up our memory */
-  if (ret < 0)
+  if (ret != NULL)
   {
     free (tmpAttrName);
     free (tmpAttrType);
+    return -4;
   }
 
-  return ret;
+  return 0;
 }
 
 int

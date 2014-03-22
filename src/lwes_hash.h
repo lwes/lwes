@@ -87,7 +87,7 @@ int
 lwes_hash_rehash
   (struct lwes_hash* hash);
 
-int
+void *
 lwes_hash_put
   (struct lwes_hash* hash,
    char *key,
