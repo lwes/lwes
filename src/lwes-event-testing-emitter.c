@@ -214,7 +214,7 @@ int main (int   argc,
             /* if we are going over our total time, bail out */
             if ((stop - start) >= 1000)
               {
-                printf ("Was only able to emit %7d in 1 sec\n",i);
+                printf ("Was only able to emit %07d in 1 sec\n",i);
                 break;
               }
             

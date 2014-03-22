@@ -57,9 +57,7 @@ int main(void)
   const char *key12= "key12";
   const char *badkey1= "badkey1";
   int    value1=5;
-  int   *old_value1 = NULL;
   int    value2=10;
-  int   *old_value2 = NULL;
   int    value3=11;
   int    value4=12;
   const char * value5="value5";

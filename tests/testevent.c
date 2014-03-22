@@ -186,7 +186,7 @@ test_event_with_db (void)
   LWES_U_INT_16     nm_attr_o1;
   LWES_LONG_STRING  value01_o1;
   LWES_BOOLEAN      value02_o1;
-  LWES_LONG_STRING  value02s_o1;
+  LWES_LONG_STRING  value02s_o1 = NULL;
   LWES_IP_ADDR      value03_o1;
   LWES_U_INT_16     value04_o1;
   LWES_U_INT_16     value05_o1;
@@ -202,7 +202,7 @@ test_event_with_db (void)
   LWES_U_INT_16     nm_attr_o2;
   LWES_LONG_STRING  value01_o2;
   LWES_BOOLEAN      value02_o2;
-  LWES_LONG_STRING  value02s_o2;
+  LWES_LONG_STRING  value02s_o2 = NULL;
   LWES_IP_ADDR      value03_o2;
   LWES_U_INT_16     value04_o2;
   LWES_U_INT_16     value05_o2;
@@ -322,7 +322,7 @@ test_event_without_db (void)
   LWES_SHORT_STRING evnt_nm_o1;
   LWES_U_INT_16     nm_attr_o1;
   LWES_LONG_STRING  value01_o1;
-  LWES_BOOLEAN      value02_o1;
+  LWES_BOOLEAN      value02_o1 = 0;
   LWES_LONG_STRING  value02s_o1;
   LWES_IP_ADDR      value03_o1;
   LWES_U_INT_16     value04_o1;
@@ -338,7 +338,7 @@ test_event_without_db (void)
   LWES_SHORT_STRING evnt_nm_o2;
   LWES_U_INT_16     nm_attr_o2;
   LWES_LONG_STRING  value01_o2;
-  LWES_BOOLEAN      value02_o2;
+  LWES_BOOLEAN      value02_o2 = 1;
   LWES_LONG_STRING  value02s_o2;
   LWES_IP_ADDR      value03_o2;
   LWES_U_INT_16     value04_o2;
@@ -426,7 +426,8 @@ test_event_without_db (void)
   assert ( lwes_event_get_IP_ADDR  (event2, key12, &value12_o2) ==  0 );
 
   assert ( strcmp(value01_o1, value01_o2) == 0 ) ;
-  assert ( value02_o1 == value02_o2 );
+  assert ( value02_o1 == 0);
+  assert ( value02_o2 == 1);
   assert ( strcmp(value02s_o1, value02s_o2) == 0 ) ;
   assert ( value03_o1.s_addr == value03_o2.s_addr );
   assert ( value04_o1 == value04_o2 );
@@ -458,7 +459,7 @@ test_event_with_encoding (void)
   LWES_INT_16       evnt_enc_o1;
   LWES_U_INT_16     nm_attr_o1;
   LWES_LONG_STRING  value01_o1;
-  LWES_BOOLEAN      value02_o1;
+  LWES_BOOLEAN      value02_o1 = 0;
   LWES_LONG_STRING  value02s_o1;
   LWES_IP_ADDR      value03_o1;
   LWES_U_INT_16     value04_o1;
@@ -475,7 +476,7 @@ test_event_with_encoding (void)
   LWES_INT_16       evnt_enc_o2;
   LWES_U_INT_16     nm_attr_o2;
   LWES_LONG_STRING  value01_o2;
-  LWES_BOOLEAN      value02_o2;
+  LWES_BOOLEAN      value02_o2 = 1;
   LWES_LONG_STRING  value02s_o2;
   LWES_IP_ADDR      value03_o2;
   LWES_U_INT_16     value04_o2;
@@ -569,7 +570,8 @@ test_event_with_encoding (void)
   assert ( lwes_event_get_IP_ADDR  (event2, key12, &value12_o2) ==  0 );
 
   assert ( strcmp(value01_o1, value01_o2) == 0 ) ;
-  assert ( value02_o1 == value02_o2 );
+  assert ( value02_o1 == 0);
+  assert ( value02_o2 == 1);
   assert ( strcmp(value02s_o1, value02s_o2) == 0 ) ;
   assert ( value03_o1.s_addr == value03_o2.s_addr );
   assert ( value04_o1 == value04_o2 );
