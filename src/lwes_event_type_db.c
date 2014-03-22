@@ -31,6 +31,7 @@ lwes_event_type_db_create
         {
           if (lwes_parse_esf (db, db->esf_filename) != 0)
             {
+              lwes_hash_destroy (db->events);
               free (db);
               db = NULL;
             }

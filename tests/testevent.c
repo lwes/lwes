@@ -292,7 +292,8 @@ test_event_with_db (void)
 
   assert ( strcmp(value01_o1, value01_o2) == 0 ) ;
   assert ( value02_o1 == value02_o2 );
-  assert ( strcmp(value02s_o1, value02s_o2) == 0 ) ;
+  assert ( value02s_o1 == NULL );
+  assert ( value02s_o2 == NULL ) ;
   assert ( value03_o1.s_addr == value03_o2.s_addr );
   assert ( value04_o1 == value04_o2 );
   assert ( value06_o1 == value06_o2 );

@@ -1354,6 +1354,7 @@ lwes_event_add (struct lwes_event*       event,
                 void*                    attrValue)
 {
   struct lwes_event_attribute* attribute = NULL;
+  struct lwes_event_attribute* attribute_out = NULL;
   LWES_SHORT_STRING            attrName  = NULL;
   void *ret                              = NULL;
 
@@ -1406,10 +1407,15 @@ lwes_event_add (struct lwes_event*       event,
     }
   else if (ret != NULL)
     {
+      attribute_out = ret;
       /* in this case we replaced the old value and it returned it, so free up the
        * old value and the key (since we reused the old key
        */
-      free (ret);
+      if (attribute_out->value != NULL)
+        {
+          free (attribute_out->value);
+        }
+      free (attribute_out);
       free (attrName);
     }
   else
