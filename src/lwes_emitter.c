@@ -165,29 +165,30 @@ lwes_emitter_destroy
 {
   /* Send an event saying we are shutting down */
   int ret = 0;
-  if (emitter->emitHeartbeat)
-    {
-      struct lwes_event *tmp_event =
-        lwes_event_create(NULL,(LWES_SHORT_STRING)"System::Shutdown");
-      time_t current_time = time (NULL);
 
-      lwes_emitter_calculate_and_send_statistics (emitter,
-                                                  tmp_event,
-                                                  current_time);
-    }
-
-  /* shutdown the network, use the return code here for library users */
-  ret = lwes_net_close (&(emitter->connection));
-
-  /* free our memory */
-  if ( emitter != NULL && emitter->buffer != NULL )
+  if (emitter != NULL)
     {
-      free(emitter->buffer);
-    }
-  if ( emitter != NULL )
-    {
+      if (emitter->emitHeartbeat)
+        {
+          struct lwes_event *tmp_event =
+            lwes_event_create(NULL,(LWES_SHORT_STRING)"System::Shutdown");
+          time_t current_time = time (NULL);
+
+          lwes_emitter_calculate_and_send_statistics (emitter,
+                                                      tmp_event,
+                                                      current_time);
+        }
+
+      /* shutdown the network, use the return code here for library users */
+      ret = lwes_net_close (&(emitter->connection));
+
+      /* free our memory */
+      if ( emitter->buffer != NULL )
+        {
+          free(emitter->buffer);
+        }
       free(emitter);
-    }
+   }
 
   return 0;
 }

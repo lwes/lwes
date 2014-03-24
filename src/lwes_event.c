@@ -288,13 +288,13 @@ lwes_event_destroy
             {
               free(tmpAttrName);
             }
-          if (tmp->value != NULL)
-            {
-              free(tmp->value);
-            }
           /* free the attribute itself*/
           if (tmp != NULL)
             {
+              if (tmp->value != NULL)
+                {
+                  free(tmp->value);
+                }
               free(tmp);
             }
         }

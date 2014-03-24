@@ -24,7 +24,7 @@ lwes_event_type_db_create
   if (db != NULL)
     {
       db->esf_filename[0] = '\0';
-      strcat (db->esf_filename, filename);
+      strncat (db->esf_filename, filename, FILENAME_MAX);
 
       db->events = lwes_hash_create ();
       if (db->events != NULL)
@@ -57,37 +57,40 @@ lwes_event_type_db_destroy
   struct lwes_hash *attrHash  = NULL;
   LWES_SHORT_STRING attrName  = NULL;
   LWES_BYTE        *attrType  = NULL;
-  /* clear out the hash */
-  if (lwes_hash_keys (db->events, &e))
-    {
-      while (lwes_hash_enumeration_has_more_elements (&e))
-        {
-          eventName = lwes_hash_enumeration_next_element (&e);
-          attrHash = 
-            (struct lwes_hash *)lwes_hash_remove (db->events, eventName);
-          if (lwes_hash_keys (attrHash, &e2))
-            {
-              while (lwes_hash_enumeration_has_more_elements (&e2))
-                {
-                  attrName = lwes_hash_enumeration_next_element (&e2);
-                  attrType = (LWES_BYTE *)lwes_hash_remove (attrHash, attrName);
-
-                  /* free the type and the name */
-                  if (attrName != NULL)
-                    free (attrName);
-                  if (attrType != NULL)
-                    free (attrType);
-                }
-            }
-          lwes_hash_destroy (attrHash);
-
-          if (eventName != NULL)
-            free (eventName);
-        }
-    }
-  lwes_hash_destroy (db->events);
   if (db != NULL)
-    free (db);
+    {
+      /* clear out the hash */
+      if (lwes_hash_keys (db->events, &e))
+        {
+          while (lwes_hash_enumeration_has_more_elements (&e))
+            {
+              eventName = lwes_hash_enumeration_next_element (&e);
+              attrHash =
+                (struct lwes_hash *)lwes_hash_remove (db->events, eventName);
+              if (lwes_hash_keys (attrHash, &e2))
+                {
+                  while (lwes_hash_enumeration_has_more_elements (&e2))
+                    {
+                      attrName = lwes_hash_enumeration_next_element (&e2);
+                      attrType =
+                        (LWES_BYTE *)lwes_hash_remove (attrHash, attrName);
+
+                      /* free the type and the name */
+                      if (attrName != NULL)
+                        free (attrName);
+                      if (attrType != NULL)
+                        free (attrType);
+                    }
+                }
+              lwes_hash_destroy (attrHash);
+
+              if (eventName != NULL)
+                free (eventName);
+            }
+        }
+      lwes_hash_destroy (db->events);
+      free (db);
+    }
 
   lwes_parse_esf_destroy ();
 

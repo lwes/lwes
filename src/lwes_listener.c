@@ -324,12 +324,18 @@ lwes_listener_destroy
 
   ret = lwes_net_close (&(listener->connection));
 
-  if ( listener->buffer != NULL )
-    free (listener->buffer);
-  if ( listener->dtmp != NULL )
-    free (listener->dtmp);
   if ( listener != NULL )
-    free (listener);
+    {
+      if ( listener->buffer != NULL )
+        {
+          free (listener->buffer);
+        }
+      if ( listener->dtmp != NULL )
+        {
+          free (listener->dtmp);
+        }
+      free (listener);
+    }
 
   return ret;
 }
