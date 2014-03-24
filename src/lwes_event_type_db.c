@@ -24,7 +24,7 @@ lwes_event_type_db_create
   if (db != NULL)
     {
       db->esf_filename[0] = '\0';
-      strncat (db->esf_filename, filename, FILENAME_MAX);
+      strncat (db->esf_filename, filename, FILENAME_MAX - 1);
 
       db->events = lwes_hash_create ();
       if (db->events != NULL)
