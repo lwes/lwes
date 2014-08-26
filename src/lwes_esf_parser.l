@@ -20,7 +20,8 @@
 #include "lwes_esf_parser.h"
 #include "lwes_esf_parser_y.h"  /* token codes from the parser */
 
-#define YY_NO_UNPUT
+#define YY_NO_UNPUT 1
+#define YY_NO_INPUT 1
 
 #undef YY_DECL
 #define YY_DECL int lweslex( YYSTYPE *lvalp, void *param)
@@ -50,7 +51,7 @@ lweslexdestroy
 
 %}
 
-%option noyywrap
+%option noyywrap nounput
 
 %%
 

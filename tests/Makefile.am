@@ -97,7 +97,7 @@ testlwes_calculate_max_event_size_LDADD = \
 
 INCLUDES = -I../src ${myincludes}
 
-check_PROGRAMS = ${mytests}
+check_PROGRAMS = $(mytests)
 
 check_SCRIPTS  = ${myscripttests}
 
@@ -151,7 +151,7 @@ leakcheck-%: %
 
 # NB: TESTS are ordered in dependency order
 
-TESTS = $(patsubst %, testwrapper-%, ${mytests}) ${myscripttests}
+TESTS = $(patsubst %,testwrapper-%,$(mytests)) $(myscripttests)
 
 testwrapper-%: % test-wrapper.sh test-wrapper.sh.in
 	@ln -sf test-wrapper.sh $@
@@ -169,12 +169,12 @@ CLEANFILES =                            \
     *.gcda                              \
     *.gcov                              \
     test-wrapper.sh                     \
-    ${mycleanfiles}
+    $(mycleanfiles)
 
 MAINTAINERCLEANFILES =                  \
     Makefile.in                         \
     skeletor-tests.am                   \
-    ${mymaintainercleanfiles}
+    $(mymaintainercleanfiles)
 
 # Tell make to ignore these any files that match these targets.
 .PHONY: memcheck leakcheck

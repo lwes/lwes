@@ -1,6 +1,10 @@
 dnl Process this file with autoconf to produce a configure script.
 
 AC_INIT([lwes], [0.24.0], [lwes-devel@lists.sourceforge.net])
+dnl -- we want a header to include in our source files with configure
+dnl    info
+AC_CONFIG_HEADERS(src/config.h)
+
 AM_INIT_AUTOMAKE
 
 dnl Determine the host type for the host specific inclusion below
@@ -33,10 +37,6 @@ AC_SUBST(VERSION_UNDERLINE)
 dnl -- set maintainer mode
 AM_MAINTAINER_MODE
 AC_SUBST(USE_MAINTAINER_MODE)
-
-dnl -- we want a header to include in our source files with configure
-dnl    info
-AM_CONFIG_HEADER(src/config.h)
 
 dnl -- make sure we have a C compiler
 AC_PROG_CC
