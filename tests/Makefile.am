@@ -151,7 +151,19 @@ leakcheck-%: %
 
 # NB: TESTS are ordered in dependency order
 
-TESTS = $(patsubst %,testwrapper-%,$(mytests)) $(myscripttests)
+#TESTS = $(patsubst %,testwrapper-%,$(mytests)) $(myscripttests)
+TESTS = testwrapper-testmarshallfuncs \
+        testwrapper-testtimefuncs \
+        testwrapper-testhashtable \
+        testwrapper-testeventtypedb \
+        testwrapper-testevent \
+        testwrapper-testnetfuncs \
+        testwrapper-testemitandlisten \
+        testwrapper-testlwes-event-printing-listener \
+        testwrapper-testlwes-event-counting-listener \
+        testwrapper-testlwes-event-testing-emitter \
+        testwrapper-testlwes-calculate-max-event-size
+
 
 testwrapper-%: % test-wrapper.sh test-wrapper.sh.in
 	@ln -sf test-wrapper.sh $@
