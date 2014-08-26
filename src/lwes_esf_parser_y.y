@@ -72,7 +72,6 @@ eventname: EVENTWORD  {
                         lweserror(buffer);
           }
                       }
-  
     ;
 
 attributelist:

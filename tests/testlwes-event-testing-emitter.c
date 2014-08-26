@@ -361,7 +361,7 @@ check_event_check_overflow (void)
       "-m", TEST_LLOG_ADDRESS,
       "-p", TEST_LLOG_PORT,
       "-i", TEST_LLOG_INTERFACE,
-      "-n", "200000",
+      "-n", "300000",
     };
   static int NORMAL_ARGC = NUM_ELEMS (NORMAL_ARGV);
 

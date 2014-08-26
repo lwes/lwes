@@ -21,7 +21,7 @@
 /* wrap malloc and other functions to cause test memory problems */
 void *my_malloc (size_t size);
 struct lwes_hash *my_lwes_hash_create (void);
-int my_lwes_hash_put(struct lwes_hash* hash, char *key, void *value);
+void *my_lwes_hash_put(struct lwes_hash* hash, char *key, void *value);
 
 static size_t null_at = 0;
 static size_t malloc_count = 0;
@@ -55,9 +55,11 @@ struct lwes_hash *my_lwes_hash_create (void)
 #define lwes_hash_create my_lwes_hash_create
 
 static int put_null = 0;
-int my_lwes_hash_put(struct lwes_hash* hash, char *key, void *value)
+void *my_lwes_hash_put(struct lwes_hash* hash, char *key, void *value)
 {
-  int ret = -3;
+  int tmp = 5;
+  void *ret = &tmp; /* need a non-null pointer here to signify that it failed as
+                       null is success when using put */
   if ( ! put_null )
     {
       ret = lwes_hash_put (hash, key, value);
@@ -325,7 +327,7 @@ test_db (void)
   /* fail at putting the event hash into the db hash */
   put_null = 1;
   assert ( lwes_event_type_db_add_event ( db, (LWES_SHORT_STRING)"newEvent")
-           == -3 );
+           == -4 );
   put_null = 0;
 
   /* fail at allocating space for the attribute name */
@@ -352,7 +354,7 @@ test_db (void)
                                               (LWES_SHORT_STRING)"TypeChecker",
                                               (LWES_SHORT_STRING)"aMetaString",
                                               (LWES_SHORT_STRING)"string")
-           == -3);
+           == -4);
   put_null = 0;
 
   /* finally free it all */

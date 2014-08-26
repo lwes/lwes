@@ -24,13 +24,14 @@ lwes_event_type_db_create
   if (db != NULL)
     {
       db->esf_filename[0] = '\0';
-      strcat (db->esf_filename, filename);
+      strncat (db->esf_filename, filename, FILENAME_MAX - 1);
 
       db->events = lwes_hash_create ();
       if (db->events != NULL)
         {
           if (lwes_parse_esf (db, db->esf_filename) != 0)
             {
+              lwes_hash_destroy (db->events);
               free (db);
               db = NULL;
             }
@@ -56,37 +57,40 @@ lwes_event_type_db_destroy
   struct lwes_hash *attrHash  = NULL;
   LWES_SHORT_STRING attrName  = NULL;
   LWES_BYTE        *attrType  = NULL;
-  /* clear out the hash */
-  if (lwes_hash_keys (db->events, &e))
-    {
-      while (lwes_hash_enumeration_has_more_elements (&e))
-        {
-          eventName = lwes_hash_enumeration_next_element (&e);
-          attrHash = 
-            (struct lwes_hash *)lwes_hash_remove (db->events, eventName);
-          if (lwes_hash_keys (attrHash, &e2))
-            {
-              while (lwes_hash_enumeration_has_more_elements (&e2))
-                {
-                  attrName = lwes_hash_enumeration_next_element (&e2);
-                  attrType = (LWES_BYTE *)lwes_hash_remove (attrHash, attrName);
-
-                  /* free the type and the name */
-                  if (attrName != NULL)
-                    free (attrName);
-                  if (attrType != NULL)
-                    free (attrType);
-                }
-            }
-          lwes_hash_destroy (attrHash);
-
-          if (eventName != NULL)
-            free (eventName);
-        }
-    }
-  lwes_hash_destroy (db->events);
   if (db != NULL)
-    free (db);
+    {
+      /* clear out the hash */
+      if (lwes_hash_keys (db->events, &e))
+        {
+          while (lwes_hash_enumeration_has_more_elements (&e))
+            {
+              eventName = lwes_hash_enumeration_next_element (&e);
+              attrHash =
+                (struct lwes_hash *)lwes_hash_remove (db->events, eventName);
+              if (lwes_hash_keys (attrHash, &e2))
+                {
+                  while (lwes_hash_enumeration_has_more_elements (&e2))
+                    {
+                      attrName = lwes_hash_enumeration_next_element (&e2);
+                      attrType =
+                        (LWES_BYTE *)lwes_hash_remove (attrHash, attrName);
+
+                      /* free the type and the name */
+                      if (attrName != NULL)
+                        free (attrName);
+                      if (attrType != NULL)
+                        free (attrType);
+                    }
+                }
+              lwes_hash_destroy (attrHash);
+
+              if (eventName != NULL)
+                free (eventName);
+            }
+        }
+      lwes_hash_destroy (db->events);
+      free (db);
+    }
 
   lwes_parse_esf_destroy ();
 
@@ -98,7 +102,7 @@ lwes_event_type_db_add_event
   (struct lwes_event_type_db *db,
    LWES_SHORT_STRING event_name)
 {
-  int ret = 0;
+  void *ret = NULL;
   struct lwes_hash *eventHash = NULL;
   /* try and allocate the key */
   LWES_SHORT_STRING eventHashKey =
@@ -118,13 +122,14 @@ lwes_event_type_db_add_event
 
   /* try and place the key and value into the hash, if we fail free both */
   ret = lwes_hash_put (db->events, eventHashKey, eventHash);
-  if ( ret < 0 )
+  if ( ret != NULL )
     {
       free (eventHashKey);
       lwes_hash_destroy (eventHash);
+      return -4;
     }
 
-  return ret;
+  return 0;
 }
 
 int
@@ -134,7 +139,7 @@ lwes_event_type_db_add_attribute
    LWES_SHORT_STRING attr_name,
    LWES_SHORT_STRING type)
 {
-  int ret;
+  void *ret = NULL;
   struct lwes_hash *eventHash =
     (struct lwes_hash *)lwes_hash_get (db->events, event_name);
   LWES_SHORT_STRING tmpAttrName = NULL;
@@ -195,13 +200,14 @@ lwes_event_type_db_add_attribute
   ret = lwes_hash_put (eventHash, tmpAttrName, tmpAttrType);
 
   /* if inserting into the hash fails we should free up our memory */
-  if (ret < 0)
+  if (ret != NULL)
   {
     free (tmpAttrName);
     free (tmpAttrType);
+    return -4;
   }
 
-  return ret;
+  return 0;
 }
 
 int

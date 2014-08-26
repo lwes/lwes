@@ -21,7 +21,7 @@
 
 #ifdef __cplusplus
 extern "C" {
-#endif 
+#endif
 
 #define lweslval _lweslval
 
@@ -48,7 +48,7 @@ lwes_parse_esf_destroy
 
 #ifdef __cplusplus
 }
-#endif 
+#endif
 
 #endif /* __LWES_ESF_PARSER_H */
 

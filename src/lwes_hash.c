@@ -83,26 +83,28 @@ lwes_hash_size
   return hash->assigned_entries;
 }
 
-int
+void *
 lwes_hash_put
   (struct lwes_hash* hash,
    char *key,
    void *value)
 {
   int index;
-  struct lwes_hash_element *bin         = NULL;
+  int found_it = 0;
+  struct lwes_hash_element *bin = NULL;
   struct lwes_hash_element *new_element = NULL;
+  void *old_value = NULL;
 
   if ( key == NULL || hash == NULL )
     {
-      return -1;
+      return value;
     }
 
   new_element =
     (struct lwes_hash_element *) malloc (sizeof (struct lwes_hash_element));
   if ( new_element == NULL )
     {
-      return -3;
+      return value;
     }
   new_element->key   = key;
   new_element->value = value;
@@ -117,15 +119,46 @@ lwes_hash_put
   else
     {
       bin = (struct lwes_hash_element *)hash->bins[index];
-      while ( bin->next != NULL )
-        {
-          bin = bin->next;
-        }
-      bin->next     = new_element;
-    }
-  hash->assigned_entries++;
 
-  return 0;
+      if (strcmp (bin->key, key) == 0 )
+        {
+          found_it = 1;
+          old_value = bin->value;
+          bin->value = value;
+        }
+      else
+        {
+          while ( bin->next != NULL )
+            {
+              if ( strcmp (bin->key,key) == 0 )
+                {
+                  found_it = 1;
+                  old_value = bin->value;
+                  bin->value = value;
+                  break;
+                }
+              else
+                {
+                  bin = bin->next;
+                }
+            }
+          if (! found_it)
+            {
+              bin->next = new_element;
+            }
+        }
+    }
+
+  if (found_it)
+    {
+      free (new_element);
+    }
+  else
+    {
+      hash->assigned_entries++;
+    }
+
+  return old_value;
 }
 
 void *
