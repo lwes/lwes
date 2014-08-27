@@ -28,7 +28,7 @@
 
 # define GETSOCKOPT_NO_ERROR 0xf0f0f0f0
 static int getsockopt_error_when = GETSOCKOPT_NO_ERROR;
-int
+static int
 my_getsockopt
   (int s,
    int level,
@@ -47,7 +47,7 @@ my_getsockopt
 
 # define SETSOCKOPT_NO_ERROR 0xf0f0f0f0
 static int setsockopt_error_when       = SETSOCKOPT_NO_ERROR;
-int
+static int
 my_setsockopt
   (int s,
    int level,
@@ -65,7 +65,7 @@ my_setsockopt
 }
 
 static int socket_error = 0;
-int
+static int
 my_socket
   (int domain,
    int type,
@@ -79,7 +79,7 @@ my_socket
 }
 
 static int bind_error = 0;
-int
+static int
 my_bind
   (int sockfd,
    struct sockaddr *my_addr,
@@ -94,7 +94,7 @@ my_bind
 }
 
 static int sendto_error = 0;
-ssize_t
+static ssize_t
 my_sendto
   (int  s,
    const void *buf,
@@ -141,7 +141,7 @@ static void receiver_with_big_timeout
 static void receiver_with_small_timeout
   (const char *ip, const int port, const char *iface);
 
-void test_ttl_functions (void)
+static void test_ttl_functions (void)
 {
   struct lwes_net_connection connection;
   assert (lwes_net_open (&connection,
@@ -169,7 +169,7 @@ void test_ttl_functions (void)
   assert (lwes_net_get_ttl (&connection) == 3);
 }
 
-void test_socket_function_failures (void)
+static void test_socket_function_failures (void)
 {
   struct lwes_net_connection connection;
   LWES_BYTE buffer[500];
@@ -255,7 +255,7 @@ void test_socket_function_failures (void)
   assert (lwes_net_close (&connection) == 0);
 }
 
-void test_null_args (void)
+static void test_null_args (void)
 {
   LWES_BYTE buffer[500];
   unsigned int i;
@@ -374,7 +374,7 @@ test_sendto_bytes_failures (void)
   assert (lwes_net_close (&connection) == 0);
 }
 
-void test_sendto (void)
+static void test_sendto (void)
 {
   pid_t pid;
   int status;
@@ -398,7 +398,7 @@ void test_sendto (void)
     }
 }
 
-void test_sendto_unicast (void)
+static void test_sendto_unicast (void)
 {
   pid_t pid;
   int status;
@@ -422,7 +422,7 @@ void test_sendto_unicast (void)
     }
 }
 
-void test_wo_interface (void)
+static void test_wo_interface (void)
 {
   pid_t pid;
   int status;
@@ -445,7 +445,7 @@ void test_wo_interface (void)
     }
 }
 
-void test_w_interface  (void)
+static void test_w_interface  (void)
 {
   pid_t pid;
   int status;
@@ -468,7 +468,7 @@ void test_w_interface  (void)
     }
 }
 
-void test_w_timeout_good (void)
+static void test_w_timeout_good (void)
 {
   pid_t pid;
   int status;
@@ -491,7 +491,7 @@ void test_w_timeout_good (void)
     }
 }
 
-void test_w_timeout_bad (void)
+static void test_w_timeout_bad (void)
 {
   pid_t pid;
   int status;

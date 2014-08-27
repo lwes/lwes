@@ -20,6 +20,7 @@
 static size_t null_at = 0;
 static size_t malloc_count = 0;
 
+static
 void *my_malloc (size_t size)
 {
   void *ret = NULL;
@@ -34,6 +35,7 @@ void *my_malloc (size_t size)
 
 static int hash_null = 0;
 
+static
 struct lwes_hash *my_lwes_hash_create (void)
 {
   struct lwes_hash * my_hash = NULL;
@@ -46,6 +48,7 @@ struct lwes_hash *my_lwes_hash_create (void)
 #define lwes_hash_create my_lwes_hash_create
 
 static int put_null = 0;
+static
 void *my_lwes_hash_put(struct lwes_hash* hash, char *key, void *value)
 {
   void *ret = value;
@@ -62,6 +65,7 @@ static LWES_U_INT_16 enc = (LWES_U_INT_16)1;
 
 static int lwes_hash_get_type_error = 0;
 static int lwes_hash_get_value_error = 0;
+static
 void *
 my_lwes_hash_get
   (struct lwes_hash* hash,
