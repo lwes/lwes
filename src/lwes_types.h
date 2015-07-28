@@ -59,10 +59,10 @@ extern "C" {
  *  All should be wire format compatible.
  *
  *  For more information on developing with the LWES see
- *  http://www.lwes.org
+ *  http://lwes.github.io
  */
 
-/* Now here is the documentat for this file */
+/* Now here is the documentation for this file */
 
 /*! \file lwes_types.h
  *  \brief Definitions for all types used in lwes
