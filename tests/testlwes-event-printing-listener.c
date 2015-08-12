@@ -37,6 +37,8 @@
 #define  TRUE 1
 #define  FALSE 0
 
+int lwes_event_printing_listener_main (int   argc, char *argv[]);
+
 #define main lwes_event_printing_listener_main
 #include "lwes-event-printing-listener.c"
 #undef main

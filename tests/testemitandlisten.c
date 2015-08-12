@@ -22,14 +22,11 @@
 #include "lwes_listener.h"
 
 /* wrap malloc and other functions to cause test memory problems */
-void *my_malloc (size_t size);
-struct lwes_hash *my_lwes_hash_create (void);
-int my_lwes_hash_put(struct lwes_hash* hash, char *key, void *value);
 
 static size_t null_at = 0;
 static size_t malloc_count = 0;
 
-void *my_malloc (size_t size)
+static void *my_malloc (size_t size)
 {
   void *ret = NULL;
   malloc_count++;
@@ -42,9 +39,7 @@ void *my_malloc (size_t size)
 
 static int time_past = 0;
 static int time_future = 0;
-time_t
-my_time
-  (time_t *t)
+static time_t my_time (time_t *t)
 {
   if (time_past == 0 && time_future == 0)
     {
@@ -64,7 +59,7 @@ my_time
 }
 
 static int lwes_net_open_error = 0;
-int
+static int
 my_lwes_net_open
   (struct lwes_net_connection *conn,
    const char *address, 
@@ -79,7 +74,7 @@ my_lwes_net_open
 }
 
 static int lwes_net_set_ttl_error = 0;
-int
+static int
 my_lwes_net_set_ttl
   (struct lwes_net_connection *conn, int new_ttl)
 {
@@ -91,7 +86,7 @@ my_lwes_net_set_ttl
 }
 
 static int lwes_net_send_bytes_error = 0;
-int
+static int
 my_lwes_net_send_bytes
   (struct lwes_net_connection *conn,
    LWES_BYTE_P bytes,
@@ -105,7 +100,7 @@ my_lwes_net_send_bytes
 }
 
 static int lwes_net_sendto_bytes_error = 0;
-int
+static int
 my_lwes_net_sendto_bytes
   (struct lwes_net_connection *conn,
    char *address,
@@ -122,7 +117,7 @@ my_lwes_net_sendto_bytes
 }
 
 static int lwes_net_recv_bytes_error = 0;
-int
+static int
 my_lwes_net_recv_bytes
   (struct lwes_net_connection *conn,
    LWES_BYTE_P bytes,
@@ -136,7 +131,7 @@ my_lwes_net_recv_bytes
 }
 
 static int lwes_event_to_bytes_error = 0;
-int
+static int
 my_lwes_event_to_bytes
   (struct lwes_event *event,
    LWES_BYTE_P bytes,
@@ -153,7 +148,7 @@ my_lwes_event_to_bytes
 static size_t marshall_U_INT_16_fail_at = 0;
 static size_t marshall_U_INT_16_count = 0;
 
-int
+static int
 my_marshall_U_INT_16
   (LWES_U_INT_16     anInt,
    LWES_BYTE_P       bytes,
@@ -233,7 +228,7 @@ static void listener_to (const char *ip,
                          const int   n_port,
                          const char *n_iface);
 
-void test_emit (void)
+static void test_emit (void)
 {
   pid_t pid;
   int status;
@@ -258,7 +253,7 @@ void test_emit (void)
     }
 }
 
-void test_emitto (void)
+static void test_emitto (void)
 {
   pid_t pid;
   int status;
@@ -304,7 +299,7 @@ void test_emitto (void)
     }
 }
 
-void test_listener_failures (void)
+static void test_listener_failures (void)
 {
   /* open failures */
   {
@@ -499,7 +494,7 @@ void test_listener_failures (void)
   }
 }
 
-void test_event_name_peek (void)
+static void test_event_name_peek (void)
 {
   /* successful event name peek */
   {
@@ -569,7 +564,7 @@ void test_event_name_peek (void)
   }
 }
 
-void test_emitter_failures (void)
+static void test_emitter_failures (void)
 {
   /* open failures */
   {

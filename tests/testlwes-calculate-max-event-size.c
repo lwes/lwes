@@ -25,7 +25,7 @@ const char *output = "testeventmaxsizes.out";
 
 LWES_U_INT_16     encoding  = (LWES_U_INT_16)1;
 
-LWES_LONG_STRING
+static LWES_LONG_STRING
 random_ascii (int max_length)
 {
   /* the length should be between 1 and max_length, not including the '\0'

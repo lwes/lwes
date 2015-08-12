@@ -59,7 +59,7 @@ static const char help[] =
   "  arguments are specified as -option value or -optionvalue"         "\n"
   ""                                                                   "\n";
 
-int
+static int
 lwes_U_INT_16_to_stream
   (LWES_U_INT_16 a_uint16,
    FILE *stream)
@@ -67,7 +67,7 @@ lwes_U_INT_16_to_stream
   return fprintf (stream,"%hu",a_uint16);
 }
 
-int
+static int
 lwes_INT_16_to_stream
   (LWES_INT_16 an_int16,
    FILE *stream)
@@ -75,7 +75,7 @@ lwes_INT_16_to_stream
   return fprintf (stream,"%hd",an_int16);
 }
 
-int
+static int
 lwes_U_INT_32_to_stream
   (LWES_U_INT_32 a_uint32,
    FILE *stream)
@@ -83,7 +83,7 @@ lwes_U_INT_32_to_stream
   return fprintf (stream,"%u",a_uint32);
 }
 
-int
+static int
 lwes_INT_32_to_stream
   (LWES_INT_32 an_int32,
    FILE *stream)
@@ -91,7 +91,7 @@ lwes_INT_32_to_stream
   return fprintf (stream,"%d",an_int32);
 }
 
-int
+static int
 lwes_U_INT_64_to_stream
   (LWES_U_INT_64 a_uint64,
    FILE *stream)
@@ -99,7 +99,7 @@ lwes_U_INT_64_to_stream
   return fprintf (stream,"%llu",a_uint64);
 }
 
-int
+static int
 lwes_INT_64_to_stream
   (LWES_INT_64 an_int64,
    FILE *stream)
@@ -107,7 +107,7 @@ lwes_INT_64_to_stream
   return fprintf (stream,"%lld",an_int64);
 }
 
-int
+static int
 lwes_BOOLEAN_to_stream
   (LWES_BOOLEAN a_boolean,
    FILE *stream)
@@ -115,7 +115,7 @@ lwes_BOOLEAN_to_stream
   return fprintf (stream,"%s",((a_boolean==1)?"true":"false"));
 }
 
-int
+static int
 lwes_IP_ADDR_to_stream
   (LWES_IP_ADDR an_ipaddr,
    FILE *stream)
@@ -123,7 +123,7 @@ lwes_IP_ADDR_to_stream
   return fprintf (stream,"%s",inet_ntoa (an_ipaddr));
 }
 
-int
+static int
 lwes_SHORT_STRING_to_stream
   (LWES_SHORT_STRING a_string,
    FILE *stream)
@@ -131,7 +131,7 @@ lwes_SHORT_STRING_to_stream
   return fprintf (stream,"%s",a_string);
 }
 
-int
+static int
 lwes_LONG_STRING_to_stream
   (LWES_LONG_STRING a_string,
    FILE *stream)
@@ -139,7 +139,7 @@ lwes_LONG_STRING_to_stream
   return fprintf (stream,"%s",a_string);
 }
 
-int
+static int
 lwes_event_attribute_to_stream
   (struct lwes_event_attribute *attribute,
    FILE *stream)
@@ -187,7 +187,7 @@ lwes_event_attribute_to_stream
   return 0;
 }
 
-int
+static int
 lwes_event_to_stream
   (struct lwes_event *event,
    FILE *stream,

@@ -7,7 +7,7 @@ myparserprefix = lwes
 # -p prefixes the parser functions with lwes, so we don't have conflicts
 AM_YFLAGS = -d -p ${myparserprefix}
 # prefix the lex functions so we don't have conflicts with other libs
-AM_LFLAGS = -P${myparserprefix}
+AM_LFLAGS = -P${myparserprefix} ${FLEX_EXTRA_ARGS}
 LEX_OUTPUT_ROOT = lex.${myparserprefix}
 
 # any additional includes to add to the compile lines

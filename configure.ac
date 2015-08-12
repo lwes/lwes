@@ -1,6 +1,10 @@
 dnl Process this file with autoconf to produce a configure script.
 
 AC_INIT([lwes], [0.24.0], [lwes-devel@lists.sourceforge.net])
+dnl -- we want a header to include in our source files with configure
+dnl    info
+AC_CONFIG_HEADERS(src/config.h)
+
 AM_INIT_AUTOMAKE
 
 dnl Determine the host type for the host specific inclusion below
@@ -33,10 +37,6 @@ AC_SUBST(VERSION_UNDERLINE)
 dnl -- set maintainer mode
 AM_MAINTAINER_MODE
 AC_SUBST(USE_MAINTAINER_MODE)
-
-dnl -- we want a header to include in our source files with configure
-dnl    info
-AM_CONFIG_HEADER(src/config.h)
 
 dnl -- make sure we have a C compiler
 AC_PROG_CC
@@ -74,6 +74,13 @@ AC_CHECK_FUNCS(gettimeofday socket strerror)
 dnl Checks for libraries.
 dnl Don't know if I need this, but it won't compile if flex is used without it
 AC_CHECK_LIB(fl,main)
+flex --nounput -V > /dev/null 2>&1
+if test $? -eq 0 ; then
+  FLEX_EXTRA_ARGS="--nounput"
+else
+  FLEX_EXTRA_ARGS=""
+fi
+AC_SUBST(FLEX_EXTRA_ARGS)
 
 dnl These are mostly for solaris
 AC_CHECK_LIB(socket,main)
