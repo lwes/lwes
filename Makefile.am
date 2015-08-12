@@ -42,6 +42,8 @@ MAINTAINERCLEANFILES =                  \
     pkgconfig-template.pc               \
     ${mymaintainercleanfiles}
 
+test: check
+
 maintainer-clean-local:
 	rm -f config.guess config.sub install-sh ltmain.sh \
 	      missing mkinstalldirs depcomp INSTALL *.pc *.tar.gz \
