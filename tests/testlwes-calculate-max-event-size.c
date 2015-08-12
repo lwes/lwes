@@ -60,7 +60,7 @@ test_event1 (void)
   char bigdirbuf[4048];
   char file[4100];
 
-  getcwd (bigdirbuf, 4048);
+  assert (getcwd (bigdirbuf, 4048) != NULL);
   snprintf (file, 4100, "%s/test1.esf", bigdirbuf);
 
   ip_addr.s_addr = inet_addr ("127.0.0.1");
@@ -111,7 +111,7 @@ int main (void)
   memset (buffer, 0, 2048);
 
   /* remove a previous run if it exists */
-  system ("rm -f ./test1.out");
+  status = system ("rm -f ./test1.out");
 
   /* call the calculate function */
   status =
@@ -121,7 +121,7 @@ int main (void)
   /* open up the output and compare to expected output */
   output = fopen ("./test1.out", "r");
   assert (output != NULL);
-  fread (buffer, expected_length, sizeof (char), output);
+  status = fread (buffer, expected_length, sizeof (char), output);
 
   assert (strcmp (expected_output, buffer) == 0);
   fclose (output);
