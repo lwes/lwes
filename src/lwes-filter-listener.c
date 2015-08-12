@@ -288,6 +288,7 @@ int main (int   argc, char *argv[]) {
     }
   }
 
+  (void)attr_list; /* appease -Wall -Werror */
   sigfillset (&fullset);
   sigprocmask (SIG_SETMASK, &fullset, NULL);
 
