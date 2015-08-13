@@ -10,11 +10,13 @@
  * limitations under the License. See accompanying LICENSE file.        *
  *======================================================================*/
 
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <sys/wait.h>
-#include <signal.h>
 #include <assert.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <sys/socket.h>
+#include <signal.h>
+#include <stdlib.h>
+#include <unistd.h>
 
 #include "config.h"
 
@@ -35,11 +37,29 @@
 #define  TRUE 1
 #define  FALSE 0
 
+/* wrap malloc and other functions to cause test memory problems */
+
+static size_t null_at = 0;
+static size_t malloc_count = 0;
+
+static void *my_malloc (size_t size)
+{
+  void *ret = NULL;
+  malloc_count++;
+  if ( malloc_count != null_at )
+    {
+      ret = malloc (size);
+    }
+  return ret;
+}
+#define malloc my_malloc
+
 int lwes_event_testing_emitter_main (int argc, char *argv[]);
 
 #define main lwes_event_testing_emitter_main
 #include "lwes-event-testing-emitter.c"
 #undef main
+#undef my_malloc
 
 static const char TEST_LLOG_ADDRESS[] = "224.1.1.101";
 static const char TEST_LLOG_INTERFACE[] = "127.0.0.1";
@@ -361,7 +381,7 @@ check_event_check_overflow (void)
       "-m", TEST_LLOG_ADDRESS,
       "-p", TEST_LLOG_PORT,
       "-i", TEST_LLOG_INTERFACE,
-      "-n", "300000",
+      "-n", "3000000",
     };
   static int NORMAL_ARGC = NUM_ELEMS (NORMAL_ARGV);
 
@@ -383,7 +403,29 @@ check_event_even (void)
       "-m", TEST_LLOG_ADDRESS,
       "-p", TEST_LLOG_PORT,
       "-i", TEST_LLOG_INTERFACE,
+      "-n", "10",
       "-e"
+    };
+  static int NORMAL_ARGC = NUM_ELEMS (NORMAL_ARGV);
+
+  /* this will totally not work if the order changes, or the SenderPort
+     SenderIP or ReceiptTime are not the lengths represented here */
+  const char *output =
+    "\1\1:\1\1:\1\1 \1\1/\1\1/\1\1\1\1 :      10\n";
+
+  fork_and_wait (NORMAL_ARGC, NORMAL_ARGV, 1500000, TRUE, TRUE, TRUE, output, NULL);
+}
+
+static void
+check_event_pad (void)
+{
+  static const char *NORMAL_ARGV[] =
+    {
+      "testlwes-event-testing-emitter",
+      "-m", TEST_LLOG_ADDRESS,
+      "-p", TEST_LLOG_PORT,
+      "-i", TEST_LLOG_INTERFACE,
+      "-x", "5"
     };
   static int NORMAL_ARGC = NUM_ELEMS (NORMAL_ARGV);
 
@@ -393,6 +435,25 @@ check_event_even (void)
     "\1\1:\1\1:\1\1 \1\1/\1\1/\1\1\1\1 :       1\n";
 
   fork_and_wait (NORMAL_ARGC, NORMAL_ARGV, 100000, TRUE, TRUE, TRUE, output, NULL);
+}
+
+static void
+check_pad_fail (void)
+{
+  static const char *BOGUS_ARGV[] =
+    {
+      "testlwes-event-testing-emitter", "-x", "10"
+    };
+  static int BOGUS_ARGC = NUM_ELEMS (BOGUS_ARGV);
+
+  const char *error =
+    "Unable to allocate 10 bytes for pad string\n";
+
+  malloc_count = 0;
+  null_at = 1;
+  fork_and_wait (BOGUS_ARGC, BOGUS_ARGV, 500, TRUE, FALSE, TRUE, NULL, error);
+  null_at = 0;
+  malloc_count = 0;
 }
 
 int
@@ -415,6 +476,8 @@ main (void)
   check_event_check_overflow ();
   check_opt_bad ();
   check_event_even (); /* mostly here for coverage, test doesn't do much */
+  check_event_pad (); /* mostly here for coverage, test doesn't do much */
+  check_pad_fail ();
 
   return 0;
 }
