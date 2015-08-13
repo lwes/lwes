@@ -374,6 +374,27 @@ check_event_check_overflow (void)
   fork_and_wait (NORMAL_ARGC, NORMAL_ARGV, 100000, TRUE, TRUE, TRUE, output, NULL);
 }
 
+static void
+check_event_even (void)
+{
+  static const char *NORMAL_ARGV[] =
+    {
+      "testlwes-event-testing-emitter",
+      "-m", TEST_LLOG_ADDRESS,
+      "-p", TEST_LLOG_PORT,
+      "-i", TEST_LLOG_INTERFACE,
+      "-e"
+    };
+  static int NORMAL_ARGC = NUM_ELEMS (NORMAL_ARGV);
+
+  /* this will totally not work if the order changes, or the SenderPort
+     SenderIP or ReceiptTime are not the lengths represented here */
+  const char *output =
+    "\1\1:\1\1:\1\1 \1\1/\1\1/\1\1\1\1 :       1\n";
+
+  fork_and_wait (NORMAL_ARGC, NORMAL_ARGV, 100000, TRUE, TRUE, TRUE, output, NULL);
+}
+
 int
 main (void)
 {
@@ -393,6 +414,7 @@ main (void)
   check_event_opt_snb ();
   check_event_check_overflow ();
   check_opt_bad ();
+  check_event_even (); /* mostly here for coverage, test doesn't do much */
 
   return 0;
 }

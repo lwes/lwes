@@ -22,7 +22,7 @@ int marshall_BYTE         (LWES_BYTE         aByte,
                            size_t            *offset)
 {
   int ret = 0;
-  if ( bytes != NULL && (length-(*offset)) >= 1 )
+  if ( bytes != NULL && ((int)length-(int)(*offset)) >= 1 )
     {
       bytes[(*offset)] = aByte;
       (*offset)++;
@@ -37,7 +37,7 @@ int marshall_U_INT_16     (LWES_U_INT_16     anInt,
                            size_t            *offset)
 {
   int ret = 0;
-  if ( bytes != NULL && (length-(*offset)) >= 2 )
+  if ( bytes != NULL && ((int)length-(int)(*offset)) >= 2 )
     {
       bytes[(*offset)]   = (LWES_BYTE)( (anInt & (255 << 8)) >> 8);
       bytes[(*offset)+1] = (LWES_BYTE)( (anInt & (255)) );
@@ -53,7 +53,7 @@ int marshall_INT_16       (LWES_INT_16       anInt,
                            size_t            *offset)
 {
   int ret = 0;
-  if ( bytes != NULL && (length-(*offset)) >= 2 )
+  if ( bytes != NULL && ((int)length-(int)(*offset)) >= 2 )
     {
       bytes[(*offset)]   = (LWES_BYTE)( (anInt & (255 << 8)) >> 8);
       bytes[(*offset)+1] = (LWES_BYTE)( (anInt & (255)) );
@@ -69,7 +69,7 @@ int marshall_U_INT_32     (LWES_U_INT_32     anInt,
                            size_t            *offset)
 {
   int ret = 0;
-  if ( bytes != NULL && (length-(*offset)) >= 4 )
+  if ( bytes != NULL && ((int)length-(int)(*offset)) >= 4 )
     {
       bytes[(*offset)]   = (LWES_BYTE) ( (anInt & (255 << 24)) >> 24);
       bytes[(*offset)+1] = (LWES_BYTE) ( (anInt & (255 << 16)) >> 16);
@@ -87,7 +87,7 @@ int marshall_INT_32       (LWES_INT_32       anInt,
                            size_t            *offset)
 {
   int ret = 0;
-  if ( bytes != NULL && (length-(*offset)) >= 4 )
+  if ( bytes != NULL && ((int)length-(int)(*offset)) >= 4 )
     {
       bytes[(*offset)]   = (LWES_BYTE) ( (anInt & (255 << 24)) >> 24);
       bytes[(*offset)+1] = (LWES_BYTE) ( (anInt & (255 << 16)) >> 16);
@@ -105,7 +105,7 @@ int marshall_U_INT_64     (LWES_U_INT_64     anInt,
                            size_t            *offset)
 {
   int ret = 0;
-  if ( bytes != NULL && (length-(*offset)) >= 8 )
+  if ( bytes != NULL && ((int)length-(int)(*offset)) >= 8 )
     {
       bytes[(*offset)  ] = (LWES_BYTE) ( (anInt & (0xffULL << 56)) >> 56);
       bytes[(*offset)+1] = (LWES_BYTE) ( (anInt & (0xffULL << 48)) >> 48);
@@ -127,7 +127,7 @@ int marshall_INT_64       (LWES_INT_64       anInt,
                            size_t            *offset)
 {
   int ret = 0;
-  if ( bytes != NULL && (length-(*offset)) >= 8 )
+  if ( bytes != NULL && ((int)length-(int)(*offset)) >= 8 )
     {
       bytes[(*offset)  ] = (LWES_BYTE) ( (anInt & (0xffULL << 56)) >> 56);
       bytes[(*offset)+1] = (LWES_BYTE) ( (anInt & (0xffULL << 48)) >> 48);
@@ -149,7 +149,7 @@ int marshall_BOOLEAN      (LWES_BOOLEAN      aBoolean,
                            size_t            *offset)
 {
   int ret = 0;
-  if ( bytes != NULL && (length-(*offset)) >= 1 )
+  if ( bytes != NULL && ((int)length-(int)(*offset)) >= 1 )
     {
       bytes[(*offset)] = aBoolean;
       (*offset)++;
@@ -164,7 +164,7 @@ int marshall_IP_ADDR      (LWES_IP_ADDR      ipAddress,
                            size_t            *offset)
 {
   int ret = 0;
-  if ( bytes != NULL && (length-(*offset)) >= 4 )
+  if ( bytes != NULL && ((int)length-(int)(*offset)) >= 4 )
     {
       bytes[(*offset)+3]=
         (LWES_BYTE) ( (htonl(ipAddress.s_addr) & (255 << 24)) >> 24);
@@ -198,9 +198,13 @@ int marshall_SHORT_STRING (LWES_SHORT_STRING aString,
   /* need to length to insure it's in bounds */
   str_length  = strlen (aString);
 
+  /* if length - (*offset) was negative without the cast it would be an
+   * unsigned comparison which was wrong and would result in writing over
+   * the end of the array
+   */
   if ( bytes != NULL
        && str_length < 255 && str_length > 0
-       && (length-(*offset)) >= (str_length+1) )
+       && ((int)length-(int)(*offset)) >= ((int)str_length+1) )
     {
       bytes[(*offset)] = (LWES_BYTE)str_length;
       (*offset)++;
@@ -234,7 +238,7 @@ int marshall_LONG_STRING  (LWES_LONG_STRING  aString,
      a valid value, we'll allow zero length strings. */
   if ( bytes != NULL
        && str_length < 65535
-       && (length-(*offset)) >= (str_length+2) )
+       && ((int)length-(int)(*offset)) >= ((int)str_length+2) )
     {
       bytes[(*offset)]   = (LWES_BYTE)( (str_length & (255 << 8)) >> 8);
       bytes[(*offset)+1] = (LWES_BYTE)( (str_length & (255)) );
@@ -253,7 +257,7 @@ int unmarshall_BYTE         (LWES_BYTE *aByte,
                              size_t *offset)
 {
   int ret = 0;
-  if ( bytes != NULL && (length-(*offset)) >= 1 )
+  if ( bytes != NULL && ((int)length-(int)(*offset)) >= 1 )
     {
       *aByte = bytes[(*offset)];
       (*offset)++;
@@ -268,7 +272,7 @@ int unmarshall_U_INT_16     (LWES_U_INT_16 *anInt,
                              size_t *offset)
 {
   int ret = 0;
-  if ( bytes != NULL && (length-(*offset)) >= 2 )
+  if ( bytes != NULL && ((int)length-(int)(*offset)) >= 2 )
     {
       *anInt = (LWES_U_INT_16)( ( ( bytes[(*offset)  ] << 8 ) & (255 << 8 ))
                               | ( ( bytes[(*offset)+1] << 0 ) & (255)) );
@@ -284,7 +288,7 @@ int unmarshall_INT_16       (LWES_INT_16 *anInt,
                              size_t *offset)
 {
   int ret = 0;
-  if ( bytes != NULL && (length-(*offset)) >= 2 )
+  if ( bytes != NULL && ((int)length-(int)(*offset)) >= 2 )
     {
       *anInt = (LWES_INT_16)( ( ( bytes[(*offset)  ] << 8 ) & (255 << 8 ))
                             | ( ( bytes[(*offset)+1] << 0 ) & (255)) );
@@ -300,7 +304,7 @@ int unmarshall_U_INT_32     (LWES_U_INT_32 *anInt,
                              size_t *offset)
 {
   int ret = 0;
-  if ( bytes != NULL && (length-(*offset)) >= 4 )
+  if ( bytes != NULL && ((int)length-(int)(*offset)) >= 4 )
     {
       *anInt = (LWES_U_INT_32)( ( (bytes[(*offset)  ] << 24) & (255 << 24))
                               | ( (bytes[(*offset)+1] << 16) & (255 << 16))
@@ -318,7 +322,7 @@ int unmarshall_INT_32       (LWES_INT_32 *anInt,
                              size_t *offset)
 {
   int ret = 0;
-  if ( bytes != NULL && (length-(*offset)) >= 4 )
+  if ( bytes != NULL && ((int)length-(int)(*offset)) >= 4 )
     {
       *anInt = (LWES_INT_32)( ( (bytes[(*offset)  ] << 24) & (255 << 24))
                             | ( (bytes[(*offset)+1] << 16) & (255 << 16))
@@ -336,7 +340,7 @@ int unmarshall_U_INT_64     (LWES_U_INT_64 *anInt,
                              size_t *offset)
 {
   int ret = 0;
-  if ( bytes != NULL && (length-(*offset)) >= 8 )
+  if ( bytes != NULL && ((int)length-(int)(*offset)) >= 8 )
     {
       *anInt = (LWES_U_INT_64)
           ( ( ((LWES_U_INT_64)bytes[(*offset)  ] << 56) & (0xffULL << 56))
@@ -359,7 +363,7 @@ int unmarshall_INT_64       (LWES_INT_64 *anInt,
                              size_t *offset)
 {
   int ret = 0;
-  if ( bytes != NULL && (length-(*offset)) >= 8 )
+  if ( bytes != NULL && ((int)length-(int)(*offset)) >= 8 )
     {
       *anInt = (LWES_INT_64)
           ( ( ((LWES_INT_64)bytes[(*offset)  ] << 56) & (0xffULL << 56))
@@ -382,7 +386,7 @@ int unmarshall_BOOLEAN      (LWES_BOOLEAN *aBoolean,
                              size_t *offset)
 {
   int ret = 0;
-  if ( bytes != NULL && (length-(*offset)) >= 1 )
+  if ( bytes != NULL && ((int)length-(int)(*offset)) >= 1 )
     {
       *aBoolean = bytes[(*offset)];
       (*offset)++;
@@ -397,7 +401,7 @@ int unmarshall_IP_ADDR      (LWES_IP_ADDR *ipAddress,
                              size_t *offset)
 {
   int ret = 0;
-  if ( bytes != NULL && (length-(*offset)) >= 4 )
+  if ( bytes != NULL && ((int)length-(int)(*offset)) >= 4 )
     {
       ipAddress->s_addr = 
                     ntohl( ( ( bytes[(*offset)+3] << 24 ) & (255 << 24))
@@ -423,7 +427,7 @@ int unmarshall_SHORT_STRING (LWES_SHORT_STRING aString,
 
   LWES_BYTE_P tmp_ptr;
   /* check for byte of length */
-  if ( bytes != NULL && (length-(*offset)) >= 1)
+  if ( bytes != NULL && ((int)length-(int)(*offset)) >= 1)
     {
       /* get byte of length */
       string_length = (LWES_BYTE)bytes[(*offset)];
@@ -433,21 +437,27 @@ int unmarshall_SHORT_STRING (LWES_SHORT_STRING aString,
       data_length = string_length;
 
       /* truncate string length if necessary */
-      if ( string_length > (max_string_length-1) )
+      if ( max_string_length != 0 && string_length > (max_string_length-1) )
       {
         string_length = max_string_length - 1;
       }
 
-      if ( (length-(*offset)) >= string_length )
+      if ( ((int)length-(int)(*offset)) >= (int)string_length )
         {
           tmp_ptr = &(bytes[(*offset)]);
 
           /* skip full length event if we are truncating */
           (*offset) += data_length;
 
-          memcpy (aString,tmp_ptr,string_length);
+          /* if aString is null, we are just calculating an offset but not
+           * copying out data
+           */
+          if (aString != NULL)
+            {
+              memcpy (aString,tmp_ptr,string_length);
+              aString[string_length] = NULL_CHAR;
+            }
 
-          aString[string_length] = NULL_CHAR;
           ret = data_length + 1;
         }
       else
@@ -471,7 +481,7 @@ int unmarshall_LONG_STRING  (LWES_LONG_STRING aString,
 
   LWES_BYTE_P tmp_ptr;
   /* check for 2 bytes of length */
-  if ( bytes != NULL && (length-(*offset)) >= 2)
+  if ( bytes != NULL && ((int)length-(int)(*offset)) >= 2)
     {
       string_length = (LWES_U_INT_16)
         ( ( ( bytes[(*offset)  ] << 8 ) & (255 << 8))
@@ -487,7 +497,7 @@ int unmarshall_LONG_STRING  (LWES_LONG_STRING aString,
         string_length = max_string_length - 1;
       }
 
-      if ( (length-(*offset)) >= string_length )
+      if ( ((int)length-(int)(*offset)) >= (int)string_length )
         {
           tmp_ptr = &(bytes[(*offset)]);
 

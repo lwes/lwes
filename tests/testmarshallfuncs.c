@@ -98,7 +98,9 @@ int main(void)
   size_t     small_string_length = 5;
   LWES_CHAR  small_string[small_string_length];
   size_t     long_too_long_bytes = 65536;
-  size_t offset = 0;
+  size_t     offset = 0;
+  size_t     short_string_offset1 = 0;
+  size_t     short_string_offset2 = 0;
   unsigned int i=0;
 
   aTooLongString = (LWES_LONG_STRING)
@@ -255,7 +257,11 @@ int main(void)
   assert (unmarshall_INT_64       (&int64_1,             bytes, 500, &offset));
   assert (unmarshall_LONG_STRING  (aString_1,       500, bytes, 500, &offset));
   assert (unmarshall_LONG_STRING  (anEmptyString_1, 500, bytes, 500, &offset));
+  short_string_offset1 = offset;
   assert (unmarshall_SHORT_STRING (eventName_1,     500, bytes, 500, &offset));
+  short_string_offset2 = offset;
+  assert (unmarshall_SHORT_STRING (NULL,            0,   bytes, 500, &short_string_offset1));
+  assert (short_string_offset1 == short_string_offset2);
   assert (unmarshall_SHORT_STRING (attrName_1,      500, bytes, 500, &offset));
   assert (unmarshall_IP_ADDR      (&ip_addr_1,           bytes, 500, &offset));
   assert (unmarshall_IP_ADDR      (&ip_addr2_1,          bytes, 500, &offset));

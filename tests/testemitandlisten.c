@@ -145,22 +145,22 @@ my_lwes_event_to_bytes
   return -1;
 }
 
-static size_t marshall_U_INT_16_fail_at = 0;
-static size_t marshall_U_INT_16_count = 0;
-
+static int lwes_event_add_headers_error = 0;
 static int
-my_marshall_U_INT_16
-  (LWES_U_INT_16     anInt,
-   LWES_BYTE_P       bytes,
-   size_t            length,
-   size_t            *offset)
+my_lwes_event_add_headers
+  (LWES_BYTE_P bytes,
+   size_t max,
+   size_t *len,
+   LWES_INT_64 receipt_time,
+   LWES_IP_ADDR sender_ip,
+   LWES_U_INT_16 sender_port)
 {
-  ++marshall_U_INT_16_count;
-  if ( marshall_U_INT_16_count != marshall_U_INT_16_fail_at)
+  if (lwes_event_add_headers_error == 0)
     {
-      return marshall_U_INT_16 (anInt, bytes, length, offset);
+      return lwes_event_add_headers (bytes, max, len, receipt_time,
+                                     sender_ip, sender_port);
     }
-  return 0;
+  return -1;
 }
 
 #define malloc my_malloc
@@ -171,7 +171,7 @@ my_marshall_U_INT_16
 #define lwes_net_send_bytes my_lwes_net_send_bytes
 #define lwes_net_recv_bytes my_lwes_net_recv_bytes
 #define lwes_event_to_bytes my_lwes_event_to_bytes
-#define marshall_U_INT_16 my_marshall_U_INT_16
+#define lwes_event_add_headers my_lwes_event_add_headers
 
 #include "lwes_emitter.c"
 #include "lwes_listener.c"
@@ -184,7 +184,7 @@ my_marshall_U_INT_16
 #undef lwes_net_send_bytes
 #undef lwes_net_recv_bytes
 #undef lwes_event_to_bytes
-#undef marshall_U_INT_16
+#undef lwes_event_add_headers
 
 const char *esffile         = "testeventtypedb.esf";
 LWES_SHORT_STRING eventname = (LWES_SHORT_STRING)"TypeChecker";
@@ -467,25 +467,19 @@ static void test_listener_failures (void)
               (listener, bytes, 61, &m) == -5);
 
     /* reason 6: error reencoding number of attributes */
-    marshall_U_INT_16_fail_at = 2;
-    marshall_U_INT_16_count = 0;
+    lwes_event_add_headers_error = 1;
     assert (lwes_listener_add_header_fields
-              (listener, bytes, 500, &m) == -6);
-
-    marshall_U_INT_16_fail_at = 0;
+              (listener, bytes, 500, &m) == -1);
 
     /* one final test for coverage get it to fail when process event calls
        add header fields */
-
-    marshall_U_INT_16_fail_at = 2;
-    marshall_U_INT_16_count = 0;
 
     /* emit again */
     assert (lwes_emitter_emit (emitter, event) == 0);
     /* get the bytes */
     assert ((n = lwes_listener_recv_by
                    (listener, event2, 1000)) < 0);
-    marshall_U_INT_16_fail_at = 0;
+    lwes_event_add_headers_error = 0;
 
     lwes_event_destroy (event);
     lwes_event_destroy (event2);

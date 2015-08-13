@@ -539,9 +539,11 @@ unmarshall_IP_ADDR
  * bytes to fill out the given type.
  *
  *  \param[out] aString the LWES_SHORT_STRING to read from the array
- *                      and write into
+ *                      and write into, if this is NULL just the offset
+ *                      will be returned, no copies occur
  *  \param[in] max_string_length the total length of aString, this will not
- *                               be overflowed
+ *                               be overflowed, can be set to 0 when just
+ *                               an offset calculation is required
  *  \param[in] bytes the byte array to read from
  *  \param[in] length total length of the byte array
  *  \param[in,out] offset the offset into the array, then the new offset

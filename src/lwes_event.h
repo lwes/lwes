@@ -659,6 +659,28 @@ lwes_event_to_bytes
    size_t num_bytes,
    size_t offset);
 
+/*! \brief Add common headers to a serialized event
+ *
+ *  \param[in,out] bytes The serialized event to add the attributes to
+ *  \param[in] max      The maximum size of the serialzed event
+ *  \param[in,out] len  The current size of the serialized event
+ *  \param[in] receipt_time The time in milliseconds since epoch at which
+ *                          the event was received (or you wish it to be
+ *                          perceived to be received)
+ *  \param[in] sender_ip The ip address of the sender of the event
+ *  \param[in] sender_port The port of of the sender of the event
+ *
+ *  \return 0 upon success, a negative number upon failure
+ */
+int
+lwes_event_add_headers
+  (LWES_BYTE_P bytes,
+   size_t max,
+   size_t *len,
+   LWES_INT_64 receipt_time,
+   LWES_IP_ADDR sender_ip,
+   LWES_U_INT_16 sender_port);
+
 /*! \brief Deserialize an event
 
     \param[in] event the event to deserialize into

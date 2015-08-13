@@ -12,6 +12,7 @@
 
 #include <assert.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 #include "lwes_event.h"
 #include "lwes_hash.h"
@@ -90,12 +91,31 @@ my_lwes_hash_get
 }
 #define lwes_hash_get my_lwes_hash_get
 
+static size_t marshall_U_INT_16_fail_at = 0;
+static size_t marshall_U_INT_16_count = 0;
+static int
+my_marshall_U_INT_16
+  (LWES_U_INT_16     anInt,
+   LWES_BYTE_P       bytes,
+   size_t            length,
+   size_t            *offset)
+{
+  ++marshall_U_INT_16_count;
+  if ( marshall_U_INT_16_count != marshall_U_INT_16_fail_at)
+    {
+      return marshall_U_INT_16 (anInt, bytes, length, offset);
+    }
+  return 0;
+}
+#define marshall_U_INT_16 my_marshall_U_INT_16
+
 #include "lwes_event.c"
 
 #undef malloc
 #undef lwes_hash_create
 #undef lwes_hash_put
 #undef lwes_hash_get
+#undef marshall_U_INT_16
 
 static LWES_BYTE ref_bytes_no_db[207] = {
   0x0b,0x54,0x79,0x70,0x65,0x43,0x68,0x65,0x63,0x6b,0x65,0x72,0x00,0x0c,0x0b,
@@ -173,6 +193,9 @@ LWES_SHORT_STRING key11     = (LWES_SHORT_STRING)"aMetaString";
 LWES_LONG_STRING  value11   = (LWES_LONG_STRING)"hello";
 LWES_SHORT_STRING key12     = (LWES_SHORT_STRING)"SenderIP";
 LWES_IP_ADDR      value12;
+LWES_IP_ADDR      sender_ip;
+LWES_U_INT_16     sender_port = 11111;
+LWES_U_INT_64     receipt_time = (LWES_INT_64)144444444444;
 
 static void
 test_event_with_db (void)
@@ -1547,9 +1570,48 @@ test_enumeration (void)
   lwes_event_destroy (event1);
 }
 
+static void
+test_add_headers ()
+{
+  LWES_SHORT_STRING  name  = (LWES_SHORT_STRING)"a";
+  struct lwes_event *event = NULL;
+  LWES_BYTE bytes[MAX_MSG_SIZE];
+  size_t n = 0;
+  size_t original = 0;
+
+  assert ((event = lwes_event_create (NULL, name)) != NULL);
+  assert ((n = lwes_event_to_bytes (event, bytes, MAX_MSG_SIZE, 0)) > 0);
+  original = n;
+
+  /*
+   * 1 + (ReceiptTime = 11) + 1 + 8 = 21
+   * 1 + (SenderIP    = 8)  + 1 + 4 = 14
+   * 1 + (SenderPort  = 10) + 1 + 2 = 14
+   *                                = 49 extra bytes
+   */
+
+  /* first test bad cases since those won't modify anything */
+  assert (lwes_event_add_headers (NULL, MAX_MSG_SIZE, &n, receipt_time, sender_ip, sender_port) == -1);
+  assert (lwes_event_add_headers (bytes, 2, &n, receipt_time, sender_ip, sender_port) == -2);
+  assert (lwes_event_add_headers (bytes, 4, &n, receipt_time, sender_ip, sender_port) == -3);
+  assert (lwes_event_add_headers (bytes, 25, &n, receipt_time, sender_ip, sender_port) == -4);
+  assert (lwes_event_add_headers (bytes, 39, &n, receipt_time, sender_ip, sender_port) == -5);
+
+  marshall_U_INT_16_fail_at = 2;
+  marshall_U_INT_16_count = 0;
+  assert (lwes_event_add_headers (bytes, MAX_MSG_SIZE, &n, receipt_time, sender_ip, sender_port) == -6);
+  marshall_U_INT_16_fail_at = 0;
+  marshall_U_INT_16_count = 0;
+
+  assert (lwes_event_add_headers (bytes, MAX_MSG_SIZE, &n, receipt_time, sender_ip, sender_port) == 0);
+  assert (original == (n - 49));
+  lwes_event_destroy (event);
+}
+
 int main (void)
 {
   value12.s_addr = inet_addr ("127.0.0.1");
+  sender_ip.s_addr = inet_addr ("172.16.101.1");
 
   test_event_with_db ();
   test_event_without_db ();
@@ -1560,6 +1622,7 @@ int main (void)
   test_serialize_errors ();
   test_deserialize_errors ();
   test_enumeration ();
+  test_add_headers ();
 
   return 0;
 }
