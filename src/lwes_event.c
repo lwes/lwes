@@ -553,96 +553,150 @@ lwes_event_add_headers
   size_t offset_to_num_attrs;
   size_t tmp_offset;
   LWES_U_INT_16 num_attrs;
+  LWES_SHORT_STRING receipt_time_str = (LWES_SHORT_STRING)"ReceiptTime";
+  size_t receipt_time_len = strlen (receipt_time_str);
+  LWES_SHORT_STRING sender_ip_str = (LWES_SHORT_STRING)"SenderIP";
+  size_t sender_ip_len = strlen (sender_ip_str);
+  LWES_SHORT_STRING sender_port_str = (LWES_SHORT_STRING)"SenderPort";
+  size_t sender_port_len = strlen (sender_port_str);
 
-  /* deserialize the event name to get the offset
-   * for the number of attributes */
-  offset_to_num_attrs = 0;
-  if (unmarshall_SHORT_STRING (NULL,
-                               0,
-                               bytes,
-                               max,
-                               &offset_to_num_attrs) == 0)
+  /* The following fields will be added at the end of the event, iff they
+   * are not already there
+   *   int64   ReceiptTime = 1 (short string length)
+   *                         + 11 (length of string)
+   *                         + 1 (length of type byte)
+   *                         + 8 (length of int64)
+   *   ip_addr SenderIp    = 1 + 8 + 1 + 4 = 13
+   *   uint16  SenderPort  = 1 + 10 + 1 + 2 = 13
+   */
+
+  /* First we check to see if these fields have already been added by *
+   * calculating the offsets to the keys whose order is determined below
+   */
+  size_t sender_port_offset =
+    sender_port_len + sizeof(LWES_BYTE) + sizeof(LWES_U_INT_16);
+  size_t sender_ip_offset =
+    sender_port_offset + sizeof(LWES_BYTE) /* short string length of port key */
+    + sender_ip_len + sizeof(LWES_BYTE) + sizeof(LWES_IP_ADDR);
+  size_t receipt_time_offset =
+    sender_ip_offset + sizeof(LWES_BYTE)  /* short string length of ip key*/
+    + receipt_time_len + sizeof(LWES_BYTE) + sizeof(LWES_INT_64);
+
+  /* then comparing to the keys themselves */
+  if (
+      /* if the longest offset backwards puts us outside the boundaries
+       * of the serialized event */
+      ((int)n-(int)receipt_time_offset < 0)
+      ||
+      (
+        /* the longest offset backwards does not match */
+        memcmp ((const unsigned char *)&bytes[n-receipt_time_offset],
+                  receipt_time_str,
+                  receipt_time_len) != 0
+        &&
+        memcmp ((const unsigned char *)&bytes[n-sender_ip_offset],
+                sender_ip_str,
+                sender_ip_len) != 0
+        &&
+        memcmp ((const unsigned char *)&bytes[n-sender_port_offset],
+                  sender_port_str,
+                  sender_port_len) != 0
+      )
+    )
     {
-      return -1;
-    }
+      /* The values don't exist at the end of the event so add them */
 
-  /* keep track of offset of the number of attributes since
-     we will change it */
-  tmp_offset = offset_to_num_attrs;
-  if (unmarshall_U_INT_16     (&num_attrs,
-                               bytes,
-                               max,
-                               &tmp_offset) == 0)
-    {
-      return -2;
-    }
-
-  /* add receipt time to the event */
-  if (   marshall_SHORT_STRING   ((LWES_SHORT_STRING)"ReceiptTime",
-                                  bytes,
-                                  max,
-                                  &n) == 0
-      || marshall_BYTE           (LWES_INT_64_TOKEN,
-                                  bytes,
-                                  max,
-                                  &n) == 0
-      || marshall_INT_64         (receipt_time,
-                                  bytes,
-                                  max,
-                                  &n) == 0)
-    {
-      return -3;
-    }
-  ++num_attrs;
-
-  /* add sender ip to the event */
-  if (   marshall_SHORT_STRING   ((LWES_SHORT_STRING)"SenderIP",
-                                  bytes,
-                                  max,
-                                  &n) == 0
-      || marshall_BYTE           (LWES_IP_ADDR_TOKEN,
-                                  bytes,
-                                  max,
-                                  &n) == 0
-      ||  marshall_IP_ADDR       (sender_ip,
-                                  bytes,
-                                  max,
-                                  &n) == 0)
-    {
-      return -4;
-    }
-  ++num_attrs;
-
-  /* add sender port to the event */
-  if (    marshall_SHORT_STRING   ((LWES_SHORT_STRING)"SenderPort",
+      /* deserialize the event name to get the offset
+       * for the number of attributes */
+      offset_to_num_attrs = 0;
+      if (unmarshall_SHORT_STRING (NULL,
+                                   0,
                                    bytes,
                                    max,
-                                   &n) == 0
-       || marshall_BYTE           (LWES_U_INT_16_TOKEN,
+                                   &offset_to_num_attrs) == 0)
+        {
+          return -1;
+        }
+
+      /* keep track of offset of the number of attributes since
+         we will change it */
+      tmp_offset = offset_to_num_attrs;
+      if (unmarshall_U_INT_16     (&num_attrs,
                                    bytes,
                                    max,
-                                   &n) == 0
-       || marshall_U_INT_16       (sender_port,
-                                   bytes,
-                                   max,
-                                   &n) == 0)
-    {
-      return -5;
-    }
-  ++num_attrs;
+                                   &tmp_offset) == 0)
+        {
+          return -2;
+        }
 
-  /* finally put the new number of attributes into the appropriate place */
-  if (marshall_U_INT_16      (num_attrs,
-                              bytes,
-                              max,
-                              &offset_to_num_attrs) == 0)
-    {
-      return -6;
-    }
+      /* add receipt time to the event */
+      if (   marshall_SHORT_STRING   (receipt_time_str,
+                                      bytes,
+                                      max,
+                                      &n) == 0
+          || marshall_BYTE           (LWES_INT_64_TOKEN,
+                                      bytes,
+                                      max,
+                                      &n) == 0
+          || marshall_INT_64         (receipt_time,
+                                      bytes,
+                                      max,
+                                      &n) == 0)
+        {
+          return -3;
+        }
+      ++num_attrs;
 
-  *len = n;
+      /* add sender ip to the event */
+      if (   marshall_SHORT_STRING   (sender_ip_str,
+                                      bytes,
+                                      max,
+                                      &n) == 0
+          || marshall_BYTE           (LWES_IP_ADDR_TOKEN,
+                                      bytes,
+                                      max,
+                                      &n) == 0
+          ||  marshall_IP_ADDR       (sender_ip,
+                                      bytes,
+                                      max,
+                                      &n) == 0)
+        {
+          return -4;
+        }
+      ++num_attrs;
+
+      /* add sender port to the event */
+      if (    marshall_SHORT_STRING   (sender_port_str,
+                                       bytes,
+                                       max,
+                                       &n) == 0
+           || marshall_BYTE           (LWES_U_INT_16_TOKEN,
+                                       bytes,
+                                       max,
+                                       &n) == 0
+           || marshall_U_INT_16       (sender_port,
+                                       bytes,
+                                       max,
+                                       &n) == 0)
+        {
+          return -5;
+        }
+      ++num_attrs;
+
+      /* finally put the new number of attributes into the appropriate place */
+      if (marshall_U_INT_16      (num_attrs,
+                                  bytes,
+                                  max,
+                                  &offset_to_num_attrs) == 0)
+        {
+          return -6;
+        }
+
+      *len = n;
+    }
   return 0;
 }
+
 /* PUBLIC : deserialize the event from a byte array and into an event */
 int
 lwes_event_from_bytes
