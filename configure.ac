@@ -5,7 +5,7 @@ dnl -- we want a header to include in our source files with configure
 dnl    info
 AC_CONFIG_HEADERS(src/config.h)
 
-AM_INIT_AUTOMAKE
+AM_INIT_AUTOMAKE([foreign])
 
 dnl Determine the host type for the host specific inclusion below
 AC_CANONICAL_HOST

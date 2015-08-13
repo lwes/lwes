@@ -28,6 +28,7 @@ pkgconfig_DATA = @PACKAGE_NAME@-@MAJOR_VERSION@.pc
 
 EXTRA_DIST =                            \
     LICENSE                             \
+    README.md                           \
     pkgconfig-template.pc.in            \
     ${myextradist}
 

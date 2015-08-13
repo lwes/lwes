@@ -14,9 +14,10 @@ doxygen.config
 install-sh
 libtool
 ltmain.sh
-lwes-*.pc
+lwes-*
 missing
 pkgconfig-template.pc
 test-driver
 ylwrap
 .*.out
+*.gz

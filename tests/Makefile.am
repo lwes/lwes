@@ -6,7 +6,7 @@ myincludes =
 
 # any additional files to add to the distribution
 
-myextradist = testeventtypedb.esf
+myextradist = test1.esf testeventtypedb2.esf testeventtypedb.esf
 
 # any additional files to clean up with 'make clean'
 
