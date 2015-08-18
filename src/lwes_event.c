@@ -562,12 +562,13 @@ lwes_event_add_headers
 
   /* The following fields will be added at the end of the event, iff they
    * are not already there
-   *   int64   ReceiptTime = 1 (short string length)
+   *   int64   ReceiptTime =    1 (short string length)
    *                         + 11 (length of string)
-   *                         + 1 (length of type byte)
-   *                         + 8 (length of int64)
-   *   ip_addr SenderIp    = 1 + 8 + 1 + 4 = 13
-   *   uint16  SenderPort  = 1 + 10 + 1 + 2 = 13
+   *                         +  1 (length of type byte)
+   *                         +  8 (length of int64)
+   *                       = 21
+   *   ip_addr SenderIp    = 1 + 8 + 1 + 4 = 14
+   *   uint16  SenderPort  = 1 + 10 + 1 + 2 = 14
    */
 
   /* First we check to see if these fields have already been added by *
