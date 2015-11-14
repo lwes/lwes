@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/lwes/lwes.svg?branch=master)](https://travis-ci.org/lwes/lwes)
+
 The LWES Light Weight Event System is a framework for allowing the
 exchange of information from many machines to many machines in a
 controlled, platform neutral, language neutral way. The exchange
@@ -7,20 +9,16 @@ platform or language can translate it to it's local dialect.
 
 This leads to a system with the following features
 
-  * Fire and Forget messaging
-  * Decoupling of senders (emitters) from receivers (listeners, journallers)
-  * Centerless, no single point of failure
-  * Support for many to many communication where nodes can enter
-    and leave the system at any time.
-  * Computer language and hardware platform independent 
+* Fire and Forget messaging
+* Decoupling of senders (emitters) from receivers (listeners, journallers)
+* Centerless, no single point of failure
+* Support for many to many communication where nodes can enter and leave the system at any time.
+* Computer language and hardware platform independent 
 
 The system consists of two major components
 
-  Emitter - a source of events, this is usually a server or process
-            which wants to announce something
-
-  Listener - a sink of events which deserializes and processes events
-             on the fly as they are received.
+* Emitter - a source of events, this is usually a server or process which wants to announce something
+* Listener - a sink of events which deserializes and processes events on the fly as they are received.
 
 There is also a custom listener which defers deserialization until some
 point in the future, and simply captures and writes the events to a log.
@@ -31,14 +29,12 @@ wrappers for various scripting languages, and a pure java implementation
 packaged separately.
 All are wire format compatible.
 
-For more information on developing with the LWES see
-http://lwes.github.io
-
+For more information on developing with the LWES see http://lwes.github.io
 
 Mac Install Commands
 
-git clone https://github.com/lwes/lwes.git
-cd lwes
-./bootstrap && ./configure --disable-hardcore && make && make check
-sudo make install
+> git clone https://github.com/lwes/lwes.git
+> cd lwes
+> ./bootstrap && ./configure --disable-hardcore && make && make check
+> sudo make install
 
