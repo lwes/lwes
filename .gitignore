@@ -20,3 +20,4 @@ pkgconfig-template.pc
 test-driver
 ylwrap
 .*.out
+*.gz
