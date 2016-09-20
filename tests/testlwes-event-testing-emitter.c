@@ -459,16 +459,16 @@ check_pad_fail (void)
 int
 main (void)
 {
-  printf
-    ("WARNING -\n");
-  printf
-    ("WARNING - this test may fail, since it currently relies on timing\n");
-  printf
-    ("WARNING - which could vary on different platforms, if you see a\n");
-  printf
-    ("WARNING - failure, rerun a few times to see if that doesn't fix it\n");
-  printf
-    ("WARNING -\n");
+  fprintf
+    (stderr,"WARNING -\n");
+  fprintf
+    (stderr,"WARNING - this test may fail, since it currently relies on timing\n");
+  fprintf
+    (stderr,"WARNING - which could vary on different platforms, if you see a\n");
+  fprintf
+    (stderr,"WARNING - failure, rerun a few times to see if that doesn't fix it\n");
+  fprintf
+    (stderr,"WARNING -\n");
 
   check_opt_help ();
   check_event_1 ();

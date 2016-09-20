@@ -21,3 +21,5 @@ test-driver
 ylwrap
 .*.out
 *.gz
+*.log
+*.trs
