@@ -41,6 +41,7 @@ MAINTAINERCLEANFILES =                  \
     aclocal.m4                          \
     configure                           \
     pkgconfig-template.pc               \
+    ylwrap \
     ${mymaintainercleanfiles}
 
 test: check

@@ -32,9 +32,9 @@ All are wire format compatible.
 For more information on developing with the LWES see http://lwes.github.io
 
 Mac Install Commands
-
+```
 > git clone https://github.com/lwes/lwes.git
 > cd lwes
 > ./bootstrap && ./configure --disable-hardcore && make && make check
 > sudo make install
-
+```
