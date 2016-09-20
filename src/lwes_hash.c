@@ -32,7 +32,7 @@ struct lwes_hash *
 lwes_hash_create
   (void)
 {
-  return lwes_hash_create_with_bins (10);
+  return lwes_hash_create_with_bins (100);
 }
 
 struct lwes_hash *

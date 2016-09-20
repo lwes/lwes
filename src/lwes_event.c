@@ -707,8 +707,6 @@ lwes_event_from_bytes
    size_t offset,
    struct lwes_event_deserialize_tmp *dtmp)
 {
-  int i;
-  LWES_U_INT_16 tmp_number_of_attributes = 0;
   size_t tmpOffset = offset;
 
   LWES_BYTE         tmp_byte;
@@ -748,9 +746,10 @@ lwes_event_from_bytes
           /* unmarshall the number of elements */
           if (unmarshall_U_INT_16 (&tmp_uint16,bytes,num_bytes,&tmpOffset))
             {
-              tmp_number_of_attributes = tmp_uint16;
-
-              for (i = 0; i < tmp_number_of_attributes; i++)
+              /* this used to be based on number of attributes, but that
+               * is technically less flexible and unnecessary, so switching
+               * to pure byte offset based finish */
+              while (tmpOffset != num_bytes)
                 {
                   /* unmarshall the attribute name */
                   if (unmarshall_SHORT_STRING (tmp_short_str,

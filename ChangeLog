@@ -1,3 +1,8 @@
+Version 0.25.0 (molinaro)
+  * don't bother with num attributes when deserializing from bytes, just use
+  byte offset
+  * increase default hash bins to a more reasonable number
+
 Version 0.24.0 (molinaro)
   * check types when attempting to get data out of an event
   * adding the same key to an event overwrites the old value as in the java

@@ -329,17 +329,17 @@ check_event_1 (void)
     "TypeChecker[12]\n"
     "{\n"
     "\tanIPAddress = 224.0.0.100;\n"
+    "\tanInt16 = -1;\n"
+    "\tanInt64 = -1;\n"
+    "\tReceiptTime = \1\1\1\1\1\1\1\1\1\1\1\1\1;\n"
+    "\tSenderIP = \1\1\1\1\1\1\1\1\1;\n"
     "\taUInt32 = 4294967295;\n"
+    "\taUInt16 = 65535;\n"
+    "\taUInt64 = 18446744073709551615;\n"
     "\tSenderPort = \1\1\1\1\1;\n"
     "\taBoolean = true;\n"
-    "\tanInt16 = -1;\n"
     "\taString = http://www.test.com;\n"
-    "\tanInt64 = -1;\n"
     "\tanInt32 = -1;\n"
-    "\tReceiptTime = \1\1\1\1\1\1\1\1\1\1\1\1\1;\n"
-    "\taUInt16 = 65535;\n"
-    "\tSenderIP = \1\1\1\1\1\1\1\1\1;\n"
-    "\taUInt64 = 18446744073709551615;\n"
     "}\n";
 
   fork_and_wait (NORMAL_ARGC, NORMAL_ARGV, 500, TRUE, TRUE, TRUE, output, NULL);

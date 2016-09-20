@@ -42,7 +42,7 @@ struct lwes_hash *my_lwes_hash_create (void)
   struct lwes_hash * my_hash = NULL;
   if ( ! hash_null )
     {
-      my_hash = lwes_hash_create ();
+      my_hash = lwes_hash_create_with_bins (10);
     }
   return my_hash;
 }
@@ -1376,7 +1376,9 @@ test_deserialize_errors (void)
 
     /* fail to deserialize it */
     assert ((event = lwes_event_create_no_name (NULL)) != NULL);
-    assert (lwes_event_from_bytes (event, bytes, 4, 0, &dtmp) == -22);
+    /* 2 bytes for name plus 2 bytes for num attrs plus 1 bytes for
+       attribute name is not quite enough so this will fail */
+    assert (lwes_event_from_bytes (event, bytes, 5, 0, &dtmp) == -22);
     lwes_event_destroy (event);
   }
 
