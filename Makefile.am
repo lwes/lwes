@@ -42,6 +42,7 @@ MAINTAINERCLEANFILES =                  \
     configure                           \
     pkgconfig-template.pc               \
     ylwrap \
+	test-driver \
     ${mymaintainercleanfiles}
 
 test: check

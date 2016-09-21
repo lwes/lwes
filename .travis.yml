@@ -1,2 +1,17 @@
 language: c
 before_script: ./bootstrap
+
+before_deploy:
+  - "make dist"
+  - export RELEASE_FILE=$(ls lwes-*.tar.gz)
+
+deploy:
+  provider: releases
+  api_key:
+    secure: qOJd1/9BH7POk+9x6HrlEsqXF1mZwaITnGArtf6iS8/mm3jLAatBPHh66GV+oNR6YJivJ2+VqES54Yfn13zklbnN/xNqne5WGWb192bH3nStP+jyo7kuRF6YykAOB06TcHIPKTnm2oVUtYhV6F+WZfu/nns/YCmx0tyrHstfOVJSUuyqqmOuLEFqesR2l/LphjV07XbUTsL5kGsLmi1iRNSEcSJAhJqxqonJ8aInL+73PLkwiInOOKGBx0ARTWv2uFThSytEnSDxK7YXNz1RJqpHJcWKx+Re+v8BqJnDfOxCoVPjDsxDpAS6GrhMZ85hoN/5ANoq3MCF+TSa+C+chX7eLp1rhZv/icvN7HZyixjdWo327dmjPEZxJrZQ+MXVRQCvBBrNnY7XZtls1/9pXJeCVxoJxxppsfrxVMqKmawmS6/OwlIfIgTN0u3TrzgbQ/RpgwxZ1HNXVLVRp7ZvpG4AWPPyahzptdPbBbWDXx9hEbjGT7yEDiereFUMVrGw1v5pc0OWIoTXWK+lvYOnXGlUmd9WlqsUHTuVEevDJsW9owNLrbKV/7Vw6PBKHN+buLYFVYLOAzh32ABwVVLICgfq/d8ewm7yy/7R/C4dG+dp2eTA2TFwZUNfBg5CZSCxIHARUcNQipwPnquPQX+XzvTJ7A9NbguxBQxVYvbRCZ8=
+  skip_cleanup: true
+  file:
+    - "${RELEASE_FILE}"
+  on:
+    repo: lwes/lwes
+    tags: true

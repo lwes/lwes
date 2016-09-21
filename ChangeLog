@@ -1,3 +1,6 @@
+Version 0.25.1 (molinaro)
+  * use travis to upload dist tarballs
+
 Version 0.25.0 (molinaro)
   * don't bother with num attributes when deserializing from bytes, just use
   byte offset
