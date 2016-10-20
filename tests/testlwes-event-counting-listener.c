@@ -366,7 +366,7 @@ check_opt_c_and_q (void)
     "\1\1:\1\1:\1\1 \1\1/\1\1/\1\1\1\1 : 1\n"
     ;
 
-  fork_and_wait (NORMAL_ARGC, NORMAL_ARGV, 100000,
+  fork_and_wait (NORMAL_ARGC, NORMAL_ARGV, 90000,
                  TRUE, TRUE, TRUE, output, NULL);
 }
 

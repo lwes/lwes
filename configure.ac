@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 
-AC_INIT([lwes], [0.25.1], [anthonym@alumni.caltech.edu])
+AC_INIT([lwes], [1.0.0], [anthonym@alumni.caltech.edu])
 dnl -- we want a header to include in our source files with configure
 dnl    info
 AC_CONFIG_HEADERS(src/config.h)
@@ -63,6 +63,15 @@ AC_TYPE_MODE_T
 AC_TYPE_SIZE_T
 AC_HEADER_TIME
 AC_STRUCT_TM
+
+dnl Check for SO_REUSEPORT
+AC_CHECK_DECL([SO_REUSEPORT],
+              AC_DEFINE(HAVE_SO_REUSEPORT,1,[Define if kernel supports SO_REUSEPORT]),
+              ,
+              [
+                #include <sys/types.h>
+                #include <sys/socket.h>
+              ])
 
 dnl Checks for library functions.
 AC_FUNC_ALLOCA

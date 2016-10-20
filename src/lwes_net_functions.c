@@ -20,75 +20,87 @@
 int
 lwes_net_open
   (struct lwes_net_connection *conn,
-   const char *address, 
+   const char *address,
    const char *iface,
    int port)
 {
-  int i;
-  int arg;
+  struct in_addr validated_address;
+  struct in_addr validated_iface;
 
   /* error out on a NULL connection */
   if (conn == NULL)
     {
       return -1;
     }
+  /* validate the arguments */
+  if (inet_aton (address, &validated_address) == 0)
+    {
+      return -2;
+    }
+  if (iface != NULL && inet_aton (iface, &validated_iface) == 0)
+    {
+      return -3;
+    }
 
   /* set up the address structure */
-  memset((char *) &conn->mcast_addr, 0, sizeof(conn->mcast_addr));
-  conn->mcast_addr.sin_family      = AF_INET;
-  conn->mcast_addr.sin_addr.s_addr = inet_addr (address);
-  conn->mcast_addr.sin_port        = htons ((short)port);
-  conn->hasJoined                  = 0;
-
-  /* and the multicast structure (which may not be used if this is a unicast
-     connection) */
-  conn->mreq.imr_multiaddr = conn->mcast_addr.sin_addr;
-  if ( iface == NULL || strcmp("",iface) == 0 )
+  memset((char *) &conn->ip_addr, 0, sizeof(conn->ip_addr));
+  conn->ip_addr.sin_family      = AF_INET;
+  conn->ip_addr.sin_addr        = validated_address;
+  conn->ip_addr.sin_port        = htons ((short)port);
+  conn->has_bound               = 0;
+  conn->has_joined              = 0;
+  if (IN_MULTICAST (ntohl (conn->ip_addr.sin_addr.s_addr)))
     {
-      conn->mreq.imr_interface.s_addr = htonl (INADDR_ANY);
+      conn->is_multicast = 1;
     }
   else
     {
-      conn->mreq.imr_interface.s_addr = inet_addr (iface);
+      conn->is_multicast = 0;
     }
 
   /* construct the socket */
   if ( (conn->socketfd = socket (AF_INET, SOCK_DGRAM, 0)) < 0 )
     {
-      return -2;
+      return -4;
     }
 
-  /* if the address we are emitting on is a multicast address we
-     set the sockopt which uses that interface to emit on, this doesn't
-     work for unicast */
-  if (IN_MULTICAST (ntohl (conn->mcast_addr.sin_addr.s_addr)))
+  if (conn->is_multicast)
     {
-      if (iface)
-        {
-          struct in_addr mcastAddr;
+      /* if the address we are emitting on is a multicast address we
+         set the sockopt which uses that interface to emit on, this doesn't
+         work for unicast */
 
-          mcastAddr.s_addr = inet_addr (iface);
+      conn->mreq.imr_multiaddr = conn->ip_addr.sin_addr;
+      if (iface != NULL)
+        {
+          conn->mreq.imr_interface = validated_iface;
           if (setsockopt(conn->socketfd, IPPROTO_IP, IP_MULTICAST_IF,
-                            (char *)&mcastAddr, sizeof(mcastAddr)) < 0 )
+                         (char *)&validated_iface,
+                         sizeof(validated_iface)) < 0 )
             {
-              return -3;
+              return -5;
             }
+        }
+      else
+        {
+          conn->mreq.imr_interface.s_addr = htonl (INADDR_ANY);
         }
     }
 
   /* Setting the value for SO_SNDBF , trying for 10*MAX_MSG_SIZE */
+  int i;
   for ( i = 10 ; i > 0 ; i-- )
     {
-      arg = MAX_MSG_SIZE*i;
+      int sndbufsize = MAX_MSG_SIZE*i;
       if (setsockopt (conn->socketfd, SOL_SOCKET, SO_SNDBUF,
-                      (void*)&arg,sizeof(arg)) == 0)
+                      (void*)&sndbufsize,sizeof(sndbufsize)) == 0)
         {
           break;
         }
     }
   if ( i == 0 )
     {
-      return -4;
+      return -6;
     }
 
   /* set the size for use below */
@@ -106,21 +118,17 @@ lwes_net_close
       return -1;
     }
 
-  /* check hasJoined first, as we also "join" a unicast channel, so may
+  /* check has_joined first, as we also "join" a unicast channel, so may
      need to do cleanup here someday */
-  if ( conn->hasJoined == 1 )
+  if ( conn->has_joined )
     {
       /* if we are using a multicast address we need to drop the membership
          so that upstream routers get the message */
-      if (IN_MULTICAST (ntohl (conn->mcast_addr.sin_addr.s_addr)))
+      if ( conn->is_multicast )
         {
           /* drop the multicast channel */
-          if (setsockopt
-                (conn->socketfd,
-                 IPPROTO_IP,
-                 IP_DROP_MEMBERSHIP,
-                 (void*)&(conn->mreq),
-                 sizeof(conn->mreq)) < 0 )
+          if (setsockopt (conn->socketfd, IPPROTO_IP, IP_DROP_MEMBERSHIP,
+                          (void*)&(conn->mreq), sizeof(conn->mreq)) < 0 )
           {
             return -2;
           }
@@ -141,13 +149,10 @@ lwes_net_get_ttl
 
       len = sizeof (ttl);
 
-      if (IN_MULTICAST (ntohl (conn->mcast_addr.sin_addr.s_addr)))
+      if (conn->is_multicast)
         {
-          if (getsockopt (conn->socketfd,
-                          IPPROTO_IP,
-                          IP_MULTICAST_TTL,
-                          &ttl,
-                          &len) < 0)
+          if (getsockopt (conn->socketfd, IPPROTO_IP, IP_MULTICAST_TTL,
+                          &ttl, &len) < 0)
             {
               return -2;
             }
@@ -168,16 +173,52 @@ lwes_net_set_ttl
       unsigned char ttl;
 
       ttl = new_ttl;
-      if (IN_MULTICAST (ntohl (conn->mcast_addr.sin_addr.s_addr)))
+      if (conn->is_multicast)
         {
-          if (setsockopt (conn->socketfd,
-                          IPPROTO_IP,
-                          IP_MULTICAST_TTL,
-                          (void*)&ttl,
-                          sizeof (ttl)) < 0)
+          if (setsockopt (conn->socketfd, IPPROTO_IP, IP_MULTICAST_TTL,
+                          (void*)&ttl, sizeof (ttl)) < 0)
             {
               return -2;
             }
+        }
+
+      return 0;
+    }
+
+  return -1;
+}
+
+int
+lwes_net_get_rcvbuf
+  (struct lwes_net_connection *conn)
+{
+  if (conn != NULL)
+    {
+      int rcvbufsize = 0;
+      socklen_t len = sizeof (rcvbufsize);
+      if (getsockopt (conn->socketfd, SOL_SOCKET, SO_RCVBUF,
+                      &rcvbufsize, &len) < 0)
+        {
+          return -2;
+        }
+
+      return rcvbufsize;
+    }
+
+  return -1;
+}
+
+int
+lwes_net_set_rcvbuf
+  (struct lwes_net_connection *conn, int new_rcvbuf)
+{
+  if (conn != NULL)
+    {
+      int rcvbuf = new_rcvbuf;
+      if (setsockopt (conn->socketfd, SOL_SOCKET, SO_RCVBUF,
+                      &rcvbuf, sizeof (rcvbuf)) < 0)
+        {
+          return -2;
         }
 
       return 0;
@@ -198,6 +239,17 @@ lwes_net_get_sock_fd
 }
 
 int
+lwes_net_is_multicast
+  (struct lwes_net_connection *conn)
+{
+  if (conn == NULL)
+    {
+      return 0;
+    }
+  return conn->is_multicast;
+}
+
+int
 lwes_net_send_bytes
   (struct lwes_net_connection *conn,
    LWES_BYTE_P bytes,
@@ -212,12 +264,8 @@ lwes_net_send_bytes
 
   size =
     sendto
-      (conn->socketfd,
-       bytes,
-       len,
-       0, 
-       (struct sockaddr * )&(conn->mcast_addr),
-       sizeof(conn->mcast_addr));
+      (conn->socketfd, bytes, len, 0,
+       (struct sockaddr * )&(conn->ip_addr), sizeof(conn->ip_addr));
 
   return size;
 }
@@ -260,63 +308,75 @@ int
 lwes_net_recv_bind
   (struct lwes_net_connection *conn)
 {
-  int arg = -1;
+  int on = 1;
 
   if (conn == NULL)
     {
       return -1;
     }
 
-  if ( conn->hasJoined != 1 )
+  if ( conn->has_bound != 1 )
     {
-      int i = 0;
-
       /* set a socket option such that the socket can be reused */
-      if ( setsockopt (conn->socketfd,
-                       SOL_SOCKET,
-                       SO_REUSEADDR,
-                       (void*)&arg,
-                       sizeof(arg)) < 0 )
+      if ( setsockopt (conn->socketfd, SOL_SOCKET, SO_REUSEADDR,
+                       (void*)&on, sizeof(on)) < 0 )
         {
           return -2;
         }
-
-      /* try for as big a buffer as possible, start at 100*MAX_MSG_SIZE
-       * and work down, if you can't get a buffer of at least one max
-       * message, error out */
-      for ( i = 100 ; i > 0 ; i-- )
+#ifdef HAVE_SO_REUSEPORT
+      if (! conn->is_multicast )
         {
-          arg = MAX_MSG_SIZE*i;
-          if (setsockopt(conn->socketfd, SOL_SOCKET, SO_RCVBUF,
-                         (void*)&arg,sizeof(arg)) == 0)
+          /* Set port for reuse for unicast packets. */
+          if ( setsockopt(conn->socketfd, SOL_SOCKET, SO_REUSEPORT,
+                          &on, sizeof(on)) < 0 )
             {
-              break;
+              return -3;
             }
         }
-      if ( i == 0 )
+#endif
+
+      /* check to see if the rcvbuf is less than 100*MAX_MSG_SIZE, if it's
+       * not just continue, as it's probably plenty big
+       */
+      if (lwes_net_get_rcvbuf (conn) < (int)(100*MAX_MSG_SIZE))
         {
-          return -3;
+          int i = 0;
+          /* try for as big a buffer as possible, start at 100*MAX_MSG_SIZE
+           * and work down, if you can't get a buffer of at least one max
+           * message, error out */
+          for ( i = 100 ; i > 0 ; i-- )
+            {
+              int rcvbufsize  = MAX_MSG_SIZE*i;
+              if (lwes_net_set_rcvbuf (conn, rcvbufsize) == 0)
+                {
+                  break;
+                }
+            }
+          if ( i == 0 )
+            {
+              return -4;
+            }
         }
 
       /* if we are not in a multicast connection, then the address we are
          using to receive on will be wrong, so we will have to set
          it to INADDR_ANY */
-      if (!IN_MULTICAST (ntohl (conn->mcast_addr.sin_addr.s_addr)))
+      if (! conn->is_multicast)
         {
-          conn->mcast_addr.sin_addr.s_addr = htonl (INADDR_ANY);
-          conn->hasJoined = 1;
+          conn->ip_addr.sin_addr.s_addr = htonl (INADDR_ANY);
         }
 
       /* bind to the socket */
       if (bind (conn->socketfd,
-                (struct sockaddr * )&(conn->mcast_addr),
-                sizeof(conn->mcast_addr) ) < 0 )
+                (struct sockaddr * )&(conn->ip_addr),
+                sizeof(conn->ip_addr) ) < 0 )
         {
-          return -4;
+          return -5;
         }
+      conn->has_bound = 1;
 
       /* add the multicast channel given */
-      if (IN_MULTICAST (ntohl (conn->mcast_addr.sin_addr.s_addr)))
+      if (conn->is_multicast)
         {
           if (setsockopt (conn->socketfd,
                           IPPROTO_IP,
@@ -324,9 +384,9 @@ lwes_net_recv_bind
                           (void*)&(conn->mreq),
                           sizeof(conn->mreq)) < 0 )
             {
-              return -5;
+              return -6;
             }
-          conn->hasJoined = 1;
+          conn->has_joined = 1;
         }
     }
 

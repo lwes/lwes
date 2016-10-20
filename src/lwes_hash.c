@@ -177,7 +177,7 @@ lwes_hash_get
   searcher=bin;
   while ( searcher != NULL && strcmp (searcher->key, key) != 0 )
     {
-      searcher = searcher->next; 
+      searcher = searcher->next;
     }
   if ( searcher == NULL )
     return NULL;

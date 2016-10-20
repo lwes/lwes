@@ -1,3 +1,12 @@
+Version 1.0.0 (molinaro)
+  * Possibly NON-BACKWARD-COMPATIBLE - changed some members of
+    lwes_net_connection in order to reuse it in the lwes-journaller.
+    This will not affect most users of the library and realistically
+    doesn't actually require a rebuild in most cases, but I did change
+    a public header in a non-backward compatible way
+    (added an entry to the struct), so bumping the major version number.
+  * Added SO_REUSEPORT when available for listening network connections.
+
 Version 0.25.1 (molinaro)
   * use travis to upload dist tarballs
 

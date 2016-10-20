@@ -28,7 +28,7 @@
 
 #ifdef __cplusplus
 extern "C" {
-#endif 
+#endif
 
 /*! \file lwes_net_functions.h
  *  \brief Functions for dealing with multicast channels
@@ -37,13 +37,13 @@ extern "C" {
 /*! \struct lwes_net_connection lwes_net_functions.h
  *  \brief   IP Multicast Channel object
  */
-struct lwes_net_connection 
+struct lwes_net_connection
 {
   /*! low level socket descriptor */
   int socketfd;
 
   /*! inet address for the multicast channel */
-  struct sockaddr_in mcast_addr;
+  struct sockaddr_in ip_addr;
 
   /*! mcast struct */
   struct ip_mreq     mreq;
@@ -54,25 +54,31 @@ struct lwes_net_connection
   /*! used to stored the size of the above structure */
   socklen_t sender_ip_socket_size;
 
+  /*! boolean, will be TRUE if the configured address is multicast. */
+  int is_multicast;
+
   /*! boolean, will be TRUE if we have joined a multicast group.
       we only join a multicast group if we are receiving packets */
-  int hasJoined;
+  int has_joined;
+
+  /*! boolean, will be TRUE if we have bound to the given address */
+  int has_bound;
 };
 
-/*! \brief Open a multicast channel
+/*! \brief Open a lwes network connection
  *
- *  \param[in] conn the multicast channel object to hole this connection
- *  \param[in] address the multicast IP address of the channel to connect to
- *  \param[in] iface the IP address of the network interface this channel shoul
- *                   be connected to
- *  \param[in] port the multicast port of the channel to connect to
+ *  \param[in] conn the lwes connection object to hold this connection
+ *  \param[in] address the IP or multicast IP address of the channel to connect to
+ *  \param[in] iface the IP address of the network interface this channel
+ *                   should connect over
+ *  \param[in] port the network port of the channel to connect to
  *
  *  \return 0 on success, a negative number on error
  */
 int
 lwes_net_open
   (struct lwes_net_connection *conn,
-   const char *address, 
+   const char *address,
    const char *iface,
    int port);
 
@@ -108,6 +114,27 @@ int
 lwes_net_set_ttl
   (struct lwes_net_connection *conn, int new_ttl);
 
+/*! \brief Get the current rcvbuf size on an lwes net connection
+ *
+ *  \param[in] conn the lwes net connection to get the rcvbuf size for
+ *
+ *  \returns the current rcvbuf value on success, a negative number on error
+ */
+int
+lwes_net_get_rcvbuf
+  (struct lwes_net_connection *conn);
+
+/*! \brief Set a new rcvbuf size on a an lwes net connection
+ *
+ *  \param[in] conn the lwes net connection to set the rcvbuf size for
+ *  \param[in] new_rcvbuf the new rcvbuf to set for incoming packets
+ *
+ *  \return 0 on success, a negative number on error
+ */
+int
+lwes_net_set_rcvbuf
+  (struct lwes_net_connection *conn, int new_rcvbuf);
+
 /*! \brief Get the socket file descriptor for the multicast channel
  *
  *  \param[in] conn the multicast channel to get the socket file descriptor for
@@ -116,6 +143,17 @@ lwes_net_set_ttl
  */
 int
 lwes_net_get_sock_fd
+  (struct lwes_net_connection *conn);
+
+/*! \brief boolean describing whether this is a multicast socket or not
+ *
+ *  \param[in] conn the lwes net connection to get the multicast info for
+ *
+ *  \return 1 if the connection is multicast, 0 if the connection object is
+ *  invalid or if it is not multicast
+ */
+int
+lwes_net_is_multicast
   (struct lwes_net_connection *conn);
 
 /*! \brief Send bytes to the multicast channel
@@ -209,6 +247,6 @@ lwes_net_recv_bytes_by
 
 #ifdef __cplusplus
 }
-#endif 
+#endif
 
 #endif /* __NET_FUNCTIONS_H */

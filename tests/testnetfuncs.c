@@ -15,6 +15,9 @@
 #include <sys/wait.h>
 #include <unistd.h>
 #include <netdb.h>
+#ifdef HAVE_CONFIG_H
+# include "config.h"
+#endif
 
 #include "lwes_types.h"
 #include "lwes_net_functions.h"
@@ -129,7 +132,7 @@ my_sendto
 
 const int    mcast_port      = 12345;
 const char * mcast_ip        = "224.0.0.254";
-const char * mcast_iface     = 0;
+const char * mcast_iface     = NULL;
 const char * mcast_iface2    = "127.0.0.1";
 unsigned int num_to_send     = 10;
 
@@ -167,6 +170,64 @@ static void test_ttl_functions (void)
   assert (lwes_net_set_ttl (&connection,5) < 0);
   setsockopt_error_when = GETSOCKOPT_NO_ERROR;
   assert (lwes_net_get_ttl (&connection) == 3);
+
+  assert (lwes_net_close (&connection) == 0);
+}
+
+static void test_rcvbuf_functions (void)
+{
+  struct lwes_net_connection connection;
+  assert (lwes_net_open (&connection,
+                         (char*)mcast_ip,
+                         (char*)mcast_iface,
+                         (int)mcast_port) == 0);
+
+  /* test success of get */
+  assert (lwes_net_get_rcvbuf (&connection) > 0);
+
+  /* now test failure of getsockopt in get */
+  getsockopt_error_when = SO_RCVBUF;
+  assert (lwes_net_get_rcvbuf (&connection) < 0);
+  getsockopt_error_when = GETSOCKOPT_NO_ERROR;
+
+  /* test success of set */
+  assert (lwes_net_set_rcvbuf (&connection, 10240) == 0);
+  /* check success of set */
+  /* linux will double when setting value, not sure about other OS's so
+   * just check both in the test */
+  assert (lwes_net_get_rcvbuf (&connection) == 10240
+          || lwes_net_get_rcvbuf (&connection) == 20480);
+
+  /* now test failure of setsockopt in set */
+  setsockopt_error_when = SO_RCVBUF;
+  assert (lwes_net_set_rcvbuf (&connection,2048) < 0);
+  setsockopt_error_when = GETSOCKOPT_NO_ERROR;
+  /* linux will double when setting value, not sure about other OS's so
+   * just check both in the test */
+  assert (lwes_net_get_rcvbuf (&connection) == 10240
+          || lwes_net_get_rcvbuf (&connection) == 20480);
+
+  assert (lwes_net_close (&connection) == 0);
+}
+
+static void test_is_multicast (void)
+{
+  struct lwes_net_connection connection;
+  assert (lwes_net_open (&connection,
+                         (char*)mcast_ip,
+                         (char*)mcast_iface,
+                         (int)mcast_port) == 0);
+  assert (lwes_net_is_multicast (&connection) == 1);
+  assert (lwes_net_close (&connection) == 0);
+
+  assert (lwes_net_open (&connection,
+                         (char*)mcast_iface2,
+                         (char*)mcast_iface2,
+                         (int)mcast_port) == 0);
+  assert (lwes_net_is_multicast (&connection) == 0);
+  assert (lwes_net_close (&connection) == 0);
+
+  assert (lwes_net_is_multicast (NULL) == 0);
 }
 
 static void test_socket_function_failures (void)
@@ -174,12 +235,24 @@ static void test_socket_function_failures (void)
   struct lwes_net_connection connection;
   LWES_BYTE buffer[500];
 
+  /* address is invalid */
+  assert (lwes_net_open (&connection,
+                         "a",
+                         (char*)mcast_iface,
+                         (int)mcast_port) == -2);
+
+  /* interface is set, but is invalid */
+  assert (lwes_net_open (&connection,
+                         (char*)mcast_ip,
+                         "",
+                         (int)mcast_port) == -3);
+
   /* socket system call failure */
   socket_error = 1;
   assert (lwes_net_open (&connection,
                          (char*)mcast_ip,
                          (char*)mcast_iface,
-                         (int)mcast_port) == -2);
+                         (int)mcast_port) == -4);
   socket_error = 0;
 
   /* setsockopt of IP_MULTICAST_IF failure */
@@ -187,7 +260,7 @@ static void test_socket_function_failures (void)
   assert (lwes_net_open (&connection,
                          (char*)mcast_ip,
                          (char*)mcast_iface2,
-                         (int)mcast_port) == -3);
+                         (int)mcast_port) == -5);
   setsockopt_error_when = SETSOCKOPT_NO_ERROR;
 
   /* setsockopt of SO_SNDBUF failure */
@@ -195,35 +268,50 @@ static void test_socket_function_failures (void)
   assert (lwes_net_open (&connection,
                          (char*)mcast_ip,
                          (char*)mcast_iface2,
-                         (int)mcast_port) == -4);
+                         (int)mcast_port) == -6);
   setsockopt_error_when = SETSOCKOPT_NO_ERROR;
 
   /* test failures in recv_bind */
 
-  /* need a successful open */
+  /* need a successful open of a unicast socket to test some scenarios */
   assert (lwes_net_open (&connection,
-                         (char*)mcast_ip,
-                         (char*)mcast_iface,
+                         (char*)mcast_iface2,
+                         (char*)mcast_iface2,
                          (int)mcast_port) == 0);
 
   /* First setsockopt SO_REUSEADDR failure */
   setsockopt_error_when = SO_REUSEADDR;
   assert (lwes_net_recv_bind (&connection) == -2);
   setsockopt_error_when = SETSOCKOPT_NO_ERROR;
-  
-  /* Second setsockopt SO_RCVBUF failure */
-  setsockopt_error_when = SO_RCVBUF;
+
+#ifdef HAVE_SO_REUSEPORT
+  /* First setsockopt SO_REUSEPORT failure */
+  setsockopt_error_when = SO_REUSEPORT;
   assert (lwes_net_recv_bind (&connection) == -3);
   setsockopt_error_when = SETSOCKOPT_NO_ERROR;
-  
+#endif
+
+  /* Second setsockopt SO_RCVBUF failure */
+  setsockopt_error_when = SO_RCVBUF;
+  assert (lwes_net_recv_bind (&connection) == -4);
+  setsockopt_error_when = SETSOCKOPT_NO_ERROR;
+
   /* Third bind () failure */
   bind_error = 1;
-  assert (lwes_net_recv_bind (&connection) == -4);
+  assert (lwes_net_recv_bind (&connection) == -5);
   bind_error = 0;
+
+  assert (lwes_net_close (&connection) == 0);
+
+  /* and a multicast to check group join failures */
+  assert (lwes_net_open (&connection,
+                         (char*)mcast_ip,
+                         (char*)mcast_iface,
+                         (int)mcast_port) == 0);
 
   /* Fourth IP_ADD_MEMBERSHIP failure */
   setsockopt_error_when = IP_ADD_MEMBERSHIP;
-  assert (lwes_net_recv_bind (&connection) == -5);
+  assert (lwes_net_recv_bind (&connection) == -6);
   setsockopt_error_when = SETSOCKOPT_NO_ERROR;
 
   assert (lwes_net_close (&connection) == 0);
@@ -248,8 +336,8 @@ static void test_socket_function_failures (void)
                          (char*)mcast_iface,
                          (int)mcast_port) == 0);
   bind_error = 1;
-  assert (lwes_net_recv_bytes (&connection, buffer, 500) == -4);
-  assert (lwes_net_recv_bytes_by (&connection, buffer, 500, 10000) == -4);
+  assert (lwes_net_recv_bytes (&connection, buffer, 500) == -5);
+  assert (lwes_net_recv_bytes_by (&connection, buffer, 500, 10000) == -5);
   bind_error = 0;
 
   assert (lwes_net_close (&connection) == 0);
@@ -274,7 +362,7 @@ static void test_null_args (void)
 
   /* test NULL connection to all calls */
 
-  assert (lwes_net_open (NULL, 
+  assert (lwes_net_open (NULL,
                          (char*)mcast_ip,
                          (char*)mcast_iface,
                          (int)mcast_port) == -1);
@@ -283,6 +371,9 @@ static void test_null_args (void)
   assert (lwes_net_get_ttl (NULL) == -1);
 
   assert (lwes_net_set_ttl (NULL, 5) == -1);
+
+  assert (lwes_net_get_rcvbuf (NULL) == -1);
+  assert (lwes_net_set_rcvbuf (NULL, 5) == -1);
 
   assert (lwes_net_get_sock_fd (NULL) == -1);
 
@@ -781,6 +872,16 @@ int main (void)
   printf ("test_ttl_functions\n");
 #endif
   test_ttl_functions ();
+
+#if DEBUG
+  printf ("test_rcvbuf_functions\n");
+#endif
+  test_rcvbuf_functions ();
+
+#if DEBUG
+  printf ("test_is_multicast\n");
+#endif
+  test_is_multicast ();
 
 #if DEBUG
   printf ("test_null_args\n");
