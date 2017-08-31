@@ -55,10 +55,10 @@ struct lwes_hash *my_lwes_hash_create (void)
 #define lwes_hash_create my_lwes_hash_create
 
 static int put_null = 0;
+static int put_tmp = 5;
 void *my_lwes_hash_put(struct lwes_hash* hash, char *key, void *value)
 {
-  int tmp = 5;
-  void *ret = &tmp; /* need a non-null pointer here to signify that it failed as
+  void *ret = &put_tmp; /* need a non-null pointer here to signify that it failed as
                        null is success when using put */
   if ( ! put_null )
     {
