@@ -26,3 +26,5 @@ ylwrap
 *.gcov
 *.gcda
 *.gcno
+.*.swo
+.*.swp

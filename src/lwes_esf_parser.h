@@ -23,7 +23,11 @@
 extern "C" {
 #endif
 
-#define lweslval _lweslval
+#ifdef LEGACY_BISON
+#  define lweslval _lweslval
+#else
+#  define lweslval yylval
+#endif
 
 /* define a structure to control the parser and lexer */
 
@@ -32,8 +36,14 @@ struct lwes_parser_state
   struct lwes_event_type_db *db;
   char *lastType;
   char *lastEvent;
+  char *lastField;
+  int flags;
+  int arrayTypeSize;
+  int strMaxSize;
   int lineno;
   int in_event;
+  int in_array;
+  int in_str_size;
   int errors;
 };
 

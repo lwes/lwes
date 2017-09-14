@@ -74,13 +74,13 @@ my_lwes_hash_get
 {
   if (lwes_hash_get_type_error == 1)
     {
-      null_type.type = LWES_U_INT_16_TOKEN;
+      null_type.type = LWES_TYPE_U_INT_16;
       null_type.value = (void*)&enc;
       return (void *)&null_type;
     }
   else if (lwes_hash_get_value_error == 1)
     {
-      null_type.type = LWES_INT_16_TOKEN;
+      null_type.type = LWES_TYPE_INT_16;
       null_type.value = NULL;
       return (void *)&null_type;
     }
@@ -1560,6 +1560,7 @@ test_enumeration (void)
                   assert (type == LWES_TYPE_UNDEFINED);
                 }
                 break;
+              default: exit(1); // TODO replace this with new types
             }
           if (ret == 0)
             {

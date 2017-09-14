@@ -56,6 +56,18 @@ lweslexdestroy
 %%
 
 \n              { ((struct lwes_parser_state *) param)->lineno++; }
+required        { 
+                  *lvalp = (YYSTYPE)lwestext;
+                  return(YY_REQUIRED);
+                }
+optional        { 
+                  *lvalp = (YYSTYPE)lwestext;
+                  return(YY_OPTIONAL);
+                }
+nullable        { 
+                  *lvalp = (YYSTYPE)lwestext;
+                  return(YY_NULLABLE);
+                }
 uint16          { 
                   *lvalp = (YYSTYPE)lwestext;
                   return(YY_UINT16);
@@ -92,12 +104,40 @@ boolean         {
                   *lvalp = (YYSTYPE)lwestext;
                   return(YY_BOOLEAN);
                 }
+byte            {
+                  *lvalp = (YYSTYPE)lwestext;
+                  return(YY_BYTE);
+                }
+float           {
+                  *lvalp = (YYSTYPE)lwestext;
+                  return(YY_FLOAT);
+                }
+double          {
+                  *lvalp = (YYSTYPE)lwestext;
+                  return(YY_DOUBLE);
+                }
 [a-zA-Z0-9_:]+  {
-                   *lvalp = (YYSTYPE)lwestext;
-                  if (((struct lwes_parser_state *) param)->in_event)
+                  if (((struct lwes_parser_state *) param)->in_array) {
+                    char* end;
+                    int len = strtol(lwestext, &end, 0);
+                    /* validate numeric */
+                    if (0 != *end) { return(BADSIZE); }
+                    ((struct lwes_parser_state *) param)->arrayTypeSize = len;
+                    return(ATTRIBUTESIZE);
+                  } else if (((struct lwes_parser_state *) param)->in_str_size) {
+                    char* end;
+                    int len = strtol(lwestext, &end, 0);
+                    /* validate numeric */
+                    if (0 != *end) { return(BADSIZE); }
+                    ((struct lwes_parser_state *) param)->strMaxSize = len;
+                    return(ATTRIBUTESIZE);
+                  } else if (((struct lwes_parser_state *) param)->in_event) {
+                    *lvalp = (YYSTYPE)lwestext;
                     return(ATTRIBUTEWORD);
-                  else
+                  } else {
+                    *lvalp = (YYSTYPE)lwestext;
                     return(EVENTWORD);
+                  }
                 }
 "{"             {
                   ((struct lwes_parser_state *) param)->in_event = 1;
@@ -107,9 +147,30 @@ boolean         {
                   ((struct lwes_parser_state *) param)->in_event = 0;
                   return '}';
                 }
+"["             {
+                  ((struct lwes_parser_state *) param)->in_array = 1;
+                  return '[';
+                }
+"]"             {
+                  ((struct lwes_parser_state *) param)->in_array = 0;
+                  return ']';
+                }
+"("             {
+                  ((struct lwes_parser_state *) param)->in_str_size = 1;
+                  return '(';
+                }
+")"             {
+                  ((struct lwes_parser_state *) param)->in_str_size = 0;
+                  return ')';
+                }
 ";"             {
                   return ';';
                 }
 "#"[^\n]*       /* eat up one-line comments */
-.               ;
+[ \t]           ; /* ignore whitespace */
+[^ \t\n0-9a-zA-Z_:;{}\[\]]+               {
+                  /* return yytext[0]; */
+                  /* yyterminate(); */
+                  return(INVALID);
+                }
 %%

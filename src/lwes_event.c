@@ -38,6 +38,22 @@ lwes_event_add
    LWES_BYTE                attrType,
    void*                    attrValue);
 
+static int
+lwes_event_set_generic
+  (struct lwes_event*       event,
+   LWES_CONST_SHORT_STRING  attrName,
+   LWES_BYTE                attrType,
+   int                      attrSize,
+   void*                    attrValue);
+
+static int
+lwes_event_get_generic
+  (struct lwes_event*       event,
+   LWES_CONST_SHORT_STRING  attrName,
+   LWES_BYTE                attrType,
+   int                      attrSize,
+   void*                    attrValue);
+
 int
 lwes_INT_64_from_hex_string
   (const char *buffer,
@@ -309,6 +325,16 @@ lwes_event_destroy
   return 0;
 }
 
+#define TYPED_EVENT_FIELD_TO_BYTES(typ, fail_ret)\
+  else if (tmp->type == LWES_TYPE_##typ)         \
+  {                                              \
+    if (0 == marshall_##typ                      \
+                (*((LWES_##typ *)tmp->value),    \
+                bytes, num_bytes, &tmpOffset))   \
+      { ret = fail_ret; }                        \
+  }
+
+
 /* PUBLIC : serialize the event and put it into a byte array */
 int
 lwes_event_to_bytes
@@ -355,26 +381,17 @@ lwes_event_to_bytes
               LWES_BYTE encodingType = encodingAttr->type;
               if (encodingValue)
                 {
-                  if (encodingType == LWES_INT_16_TOKEN)
+                  if (encodingType == LWES_TYPE_INT_16)
                     {
-                      if (marshall_SHORT_STRING
-                            ((LWES_SHORT_STRING)LWES_ENCODING,
-                             bytes,
-                             num_bytes,
-                             &tmpOffset) == 0
-                          ||
-                          marshall_BYTE
-                            (encodingType,
-                             bytes,
-                             num_bytes,
-                             &tmpOffset) == 0
-                          ||
-                          marshall_INT_16
-                            (*((LWES_INT_16 *)encodingValue),
-                             bytes,
-                             num_bytes,
-                             &tmpOffset) == 0)
-                        {
+                      if (   0 == marshall_SHORT_STRING
+                                    ((LWES_SHORT_STRING)LWES_ENCODING,
+                                     bytes, num_bytes, &tmpOffset)
+                          || 0 == marshall_BYTE
+                                    (encodingType,
+                                     bytes, num_bytes, &tmpOffset)
+                          || 0 == marshall_INT_16
+                                    (*((LWES_INT_16 *)encodingValue),
+                                     bytes, num_bytes, &tmpOffset) ) {
                           return -2;
                         }
                     }
@@ -407,111 +424,38 @@ lwes_event_to_bytes
                     (struct lwes_event_attribute *)
                       lwes_hash_get (event->attributes, tmpAttrName);
 
-                  if (marshall_SHORT_STRING (tmpAttrName,
-                                             bytes,
-                                             num_bytes,
-                                             &tmpOffset) == 0)
+                  if (!marshall_SHORT_STRING (tmpAttrName,
+                                             bytes, num_bytes, &tmpOffset))
                     {
                       ret = -5;
                     }
                   else
                     {
-                      if (marshall_BYTE (tmp->type,
-                                         bytes,
-                                         num_bytes,
-                                         &tmpOffset) == 0)
+                      if (!marshall_BYTE (tmp->type,
+                                         bytes, num_bytes, &tmpOffset))
                         {
                           ret = -6;
                         }
                       else
                         {
-                          if (tmp->type == LWES_U_INT_16_TOKEN)
+                          if (tmp->type == LWES_TYPE_UNDEFINED) 
                             {
-                              if (marshall_U_INT_16 (*((LWES_U_INT_16 *)tmp->value),
-                                                     bytes,
-                                                     num_bytes,
-                                                     &tmpOffset) == 0)
-                                {
-                                  ret = -7;
-                                }
                             }
-                          else if (tmp->type == LWES_INT_16_TOKEN)
+                          TYPED_EVENT_FIELD_TO_BYTES(U_INT_16, -7)
+                          TYPED_EVENT_FIELD_TO_BYTES(INT_16,   -8)
+                          TYPED_EVENT_FIELD_TO_BYTES(U_INT_32, -9)
+                          TYPED_EVENT_FIELD_TO_BYTES(INT_32,   -10)
+                          TYPED_EVENT_FIELD_TO_BYTES(U_INT_64, -11)
+                          TYPED_EVENT_FIELD_TO_BYTES(INT_64,   -12)
+                          TYPED_EVENT_FIELD_TO_BYTES(BOOLEAN,  -13)
+                          TYPED_EVENT_FIELD_TO_BYTES(IP_ADDR,  -14)
+                          TYPED_EVENT_FIELD_TO_BYTES(BYTE,     -18)
+                          TYPED_EVENT_FIELD_TO_BYTES(FLOAT,    -19)
+                          TYPED_EVENT_FIELD_TO_BYTES(DOUBLE,   -20)
+                          else if (tmp->type == LWES_TYPE_STRING)
                             {
-                              if (marshall_INT_16 (*((LWES_INT_16 *)tmp->value),
-                                                   bytes,
-                                                   num_bytes,
-                                                   &tmpOffset) == 0)
-                                {
-                                  ret = -8;
-                                }
-                            }
-                          else if (tmp->type == LWES_U_INT_32_TOKEN)
-                            {
-                              if (marshall_U_INT_32 (*((LWES_U_INT_32 *)tmp->value),
-                                                     bytes,
-                                                     num_bytes,
-                                                     &tmpOffset) == 0)
-                                {
-                                  ret = -9;
-                                }
-                            }
-                          else if (tmp->type == LWES_INT_32_TOKEN)
-                            {
-                              if (marshall_INT_32 (*((LWES_INT_32 *)tmp->value),
-                                                   bytes,
-                                                   num_bytes,
-                                                   &tmpOffset) == 0)
-                                {
-                                  ret = -10;
-                                }
-                            }
-                          else if (tmp->type == LWES_U_INT_64_TOKEN)
-                            {
-                              if (marshall_U_INT_64 (*((LWES_U_INT_64 *)tmp->value),
-                                                     bytes,
-                                                     num_bytes,
-                                                     &tmpOffset) == 0)
-                                {
-                                  ret = -11;
-                                }
-                            }
-                          else if (tmp->type == LWES_INT_64_TOKEN)
-                            {
-                              if (marshall_INT_64 (*((LWES_INT_64 *)tmp->value),
-                                                   bytes,
-                                                   num_bytes,
-                                                   &tmpOffset) == 0)
-                                {
-                                  ret = -12;
-                                }
-                            }
-                          else if (tmp->type == LWES_BOOLEAN_TOKEN)
-                            {
-                              if (marshall_BOOLEAN (*((LWES_BOOLEAN *)tmp->value),
-                                                    bytes,
-                                                    num_bytes,
-                                                    &tmpOffset) == 0)
-                                {
-                                  ret = -13;
-                                }
-                            }
-                          else if (tmp->type == LWES_IP_ADDR_TOKEN)
-                            {
-                              if (marshall_IP_ADDR (*((LWES_IP_ADDR *)tmp->value),
-                                                    bytes,
-                                                    num_bytes,
-                                                    &tmpOffset) == 0)
-                                {
-                                  ret = -14;
-                                }
-                            }
-                          else if (tmp->type == LWES_STRING_TOKEN)
-                            {
-                              if (marshall_LONG_STRING ((LWES_LONG_STRING)tmp->value,
-                                                        bytes,
-                                                        num_bytes,
-                                                        &tmpOffset) == 0)
-                                {
+                              if (!marshall_LONG_STRING ((LWES_LONG_STRING)tmp->value,
+                                                        bytes, num_bytes, &tmpOffset)) {
                                   ret = -15;
                                 }
                             }
@@ -635,7 +579,7 @@ lwes_event_add_headers
                                       bytes,
                                       max,
                                       &n) == 0
-          || marshall_BYTE           (LWES_INT_64_TOKEN,
+          || marshall_BYTE           (LWES_TYPE_INT_64,
                                       bytes,
                                       max,
                                       &n) == 0
@@ -653,7 +597,7 @@ lwes_event_add_headers
                                       bytes,
                                       max,
                                       &n) == 0
-          || marshall_BYTE           (LWES_IP_ADDR_TOKEN,
+          || marshall_BYTE           (LWES_TYPE_IP_ADDR,
                                       bytes,
                                       max,
                                       &n) == 0
@@ -671,7 +615,7 @@ lwes_event_add_headers
                                        bytes,
                                        max,
                                        &n) == 0
-           || marshall_BYTE           (LWES_U_INT_16_TOKEN,
+           || marshall_BYTE           (LWES_TYPE_U_INT_16,
                                        bytes,
                                        max,
                                        &n) == 0
@@ -698,6 +642,20 @@ lwes_event_add_headers
   return 0;
 }
 
+#define TYPED_BYTES_TO_EVENT_FIELD(typ,set_fail_ret,mar_fail_ret)    \
+  else if (tmp_byte == LWES_TYPE_##typ)                              \
+    {                                                                \
+      LWES_##typ var;                                                \
+      if (unmarshall_##typ                                           \
+            (&var, bytes, num_bytes, &tmpOffset)) {                  \
+          if (0 > lwes_event_set_##typ                               \
+                (event, tmp_short_str, var))                         \
+            { return set_fail_ret; }                                 \
+        }                                                            \
+      else                                                           \
+        { return mar_fail_ret; }                                     \
+    }
+
 /* PUBLIC : deserialize the event from a byte array and into an event */
 int
 lwes_event_from_bytes
@@ -711,13 +669,6 @@ lwes_event_from_bytes
 
   LWES_BYTE         tmp_byte;
   LWES_U_INT_16     tmp_uint16;
-  LWES_INT_16       tmp_int16;
-  LWES_U_INT_32     tmp_uint32;
-  LWES_INT_32       tmp_int32;
-  LWES_U_INT_64     tmp_uint64;
-  LWES_INT_64       tmp_int64;
-  LWES_BOOLEAN      tmp_boolean;
-  LWES_IP_ADDR      tmp_ip_addr;
   LWES_SHORT_STRING tmp_short_str;
   LWES_LONG_STRING  tmp_long_str;
 
@@ -764,167 +715,21 @@ lwes_event_from_bytes
                                                     num_bytes,
                                                     &tmpOffset))
                         {
-                          if (tmp_byte == LWES_U_INT_16_TOKEN)
+                          if (tmp_byte == LWES_TYPE_UNDEFINED) 
                             {
-                              if (unmarshall_U_INT_16     (&tmp_uint16,
-                                                            bytes,
-                                                            num_bytes,
-                                                            &tmpOffset))
-                                {
-                                  if (lwes_event_set_U_INT_16 (event,
-                                                                tmp_short_str,
-                                                                tmp_uint16)
-                                       < 0)
-                                    {
-                                      return -2;
-                                    }
-                                }
-                              else
-                                {
-                                  return -3;
-                                }
                             }
-                          else if (tmp_byte == LWES_INT_16_TOKEN)
-                            {
-                              if (unmarshall_INT_16       (&tmp_int16,
-                                                            bytes,
-                                                            num_bytes,
-                                                            &tmpOffset))
-                                {
-                                  if (lwes_event_set_INT_16   (event,
-                                                                tmp_short_str,
-                                                                tmp_int16)
-                                       < 0)
-                                    {
-                                      return -4;
-                                    }
-                                 }
-                              else
-                                {
-                                  return -5;
-                                }
-                            }
-                          else if (tmp_byte == LWES_U_INT_32_TOKEN)
-                            {
-                              if (unmarshall_U_INT_32     (&tmp_uint32,
-                                                            bytes,
-                                                            num_bytes,
-                                                            &tmpOffset))
-                                {
-                                  if (lwes_event_set_U_INT_32 (event,
-                                                                tmp_short_str,
-                                                                tmp_uint32)
-                                       < 0)
-                                    {
-                                      return -6;
-                                    }
-                                }
-                              else
-                                {
-                                  return -7;
-                                }
-                            }
-                          else if (tmp_byte == LWES_INT_32_TOKEN)
-                            {
-                              if (unmarshall_INT_32       (&tmp_int32,
-                                                            bytes,
-                                                            num_bytes,
-                                                            &tmpOffset))
-                                {
-                                  if (lwes_event_set_INT_32   (event,
-                                                                tmp_short_str,
-                                                                tmp_int32)
-                                       < 0)
-                                    {
-                                      return -8;
-                                    }
-                                }
-                              else
-                                {
-                                  return -9;
-                                }
-                            }
-                          else if (tmp_byte == LWES_U_INT_64_TOKEN)
-                            {
-                              if (unmarshall_U_INT_64     (&tmp_uint64,
-                                                            bytes,
-                                                            num_bytes,
-                                                            &tmpOffset))
-                                {
-                                  if (lwes_event_set_U_INT_64 (event,
-                                                                tmp_short_str,
-                                                                tmp_uint64)
-                                       < 0)
-                                    {
-                                      return -10;
-                                    }
-                                }
-                              else
-                                {
-                                  return -11;
-                                }
-                            }
-                          else if (tmp_byte == LWES_INT_64_TOKEN)
-                            {
-                              if (unmarshall_INT_64         (&tmp_int64,
-                                                              bytes,
-                                                              num_bytes,
-                                                              &tmpOffset))
-                                {
-                                  if (lwes_event_set_INT_64     (event,
-                                                                  tmp_short_str,
-                                                                  tmp_int64)
-                                       < 0)
-                                    {
-                                      return -12;
-                                    }
-                                }
-                              else
-                                {
-                                  return -13;
-                                }
-                            }
-                          else if (tmp_byte == LWES_BOOLEAN_TOKEN)
-                            {
-                              if (unmarshall_BOOLEAN        (&tmp_boolean,
-                                                              bytes,
-                                                              num_bytes,
-                                                              &tmpOffset))
-                                {
-                                  if (lwes_event_set_BOOLEAN    (event,
-                                                                  tmp_short_str,
-                                                                  tmp_boolean)
-                                       < 0)
-                                    {
-                                      return -14;
-                                    }
-                                }
-                              else
-                                {
-                                  return -15;
-                                }
-                            }
-                          else if (tmp_byte == LWES_IP_ADDR_TOKEN)
-                            {
-                              if (unmarshall_IP_ADDR        (&tmp_ip_addr,
-                                                              bytes,
-                                                              num_bytes,
-                                                              &tmpOffset))
-                                {
-                                  if (lwes_event_set_IP_ADDR (event,
-                                                               tmp_short_str,
-                                                               tmp_ip_addr)
-                                       < 0)
-                                    {
-                                      return -16;
-                                    }
-                                }
-                              else
-                                {
-                                  return -17;
-                                }
-                            }
-                          else if (tmp_byte == LWES_STRING_TOKEN)
+                          TYPED_BYTES_TO_EVENT_FIELD(U_INT_16, -2,  -3)
+                          TYPED_BYTES_TO_EVENT_FIELD(INT_16,   -4,  -5)
+                          TYPED_BYTES_TO_EVENT_FIELD(U_INT_32, -6,  -7)
+                          TYPED_BYTES_TO_EVENT_FIELD(INT_32,   -8,  -9)
+                          TYPED_BYTES_TO_EVENT_FIELD(U_INT_64, -10, -11)
+                          TYPED_BYTES_TO_EVENT_FIELD(INT_64,   -12, -13)
+                          TYPED_BYTES_TO_EVENT_FIELD(BOOLEAN,  -14, -15)
+                          TYPED_BYTES_TO_EVENT_FIELD(IP_ADDR,  -16, -17)
+                          TYPED_BYTES_TO_EVENT_FIELD(BYTE,     -26, -27)
+                          TYPED_BYTES_TO_EVENT_FIELD(FLOAT,    -28, -29)
+                          TYPED_BYTES_TO_EVENT_FIELD(DOUBLE,   -30, -31)
+                          else if (tmp_byte == LWES_TYPE_STRING)
                             {
                               if (unmarshall_LONG_STRING (tmp_long_str,
                                                            (LONG_STRING_MAX+1),
@@ -979,145 +784,98 @@ lwes_event_from_bytes
   return (int)(tmpOffset-offset);
 }
 
-int lwes_event_set_U_INT_16 (struct lwes_event *       event,
-                             LWES_CONST_SHORT_STRING   attrName,
-                             LWES_U_INT_16             value)
+/* ACCESSOR METHODS */
+
+
+static int
+lwes_event_set_generic
+  (struct lwes_event*       event,
+   LWES_CONST_SHORT_STRING  attrName,
+   LWES_BYTE                attrType,
+   int                      attrSize,
+   void*                    attrValue)
 {
   int ret = 0;
-  LWES_U_INT_16 *attrValue;
+  char *attrCopy;
 
-  if (event == NULL || attrName == NULL)
+  if (event == NULL || attrName == NULL || attrValue == NULL)
     {
       return -1;
     }
 
-  attrValue = (LWES_U_INT_16 *)malloc (sizeof (LWES_U_INT_16));
+  attrCopy = (char *)malloc (attrSize);
 
-  if (attrValue == NULL)
+  if (attrCopy == NULL)
     {
       return -3;
     }
-  *attrValue = value;
+  memcpy(attrCopy, attrValue, attrSize);
 
-  ret = lwes_event_add (event, attrName, LWES_U_INT_16_TOKEN, attrValue);
+  ret = lwes_event_add (event, attrName, attrType, attrCopy);
   if (ret < 0)
     {
-      free (attrValue);
+      free (attrCopy);
     }
   return ret;
 }
 
-int lwes_event_set_INT_16 (struct lwes_event *       event,
-                           LWES_CONST_SHORT_STRING   attrName,
-                           LWES_INT_16               value)
+static int
+lwes_event_get_generic
+  (struct lwes_event*       event,
+   LWES_CONST_SHORT_STRING  attrName,
+   LWES_BYTE                attrType,
+   int                      attrSize,
+   void*                    attrValue) 
 {
-  int ret = 0;
-  LWES_INT_16 *attrValue;
-
-  if (event == NULL || attrName == NULL)
+  struct lwes_event_attribute *tmp;
+  if (event == NULL || attrName == NULL || attrValue == NULL)
     {
       return -1;
     }
-
-  attrValue = (LWES_INT_16 *)malloc (sizeof (LWES_INT_16));
-
-  if (attrValue == NULL)
+  tmp = (struct lwes_event_attribute *)lwes_hash_get (event->attributes, attrName);
+  if (tmp != NULL && tmp->type == attrType)
     {
-      return -3;
+      memcpy(attrValue, tmp->value, attrSize);
+      return 0;
     }
-  *attrValue = value;
-
-  ret = lwes_event_add (event, attrName, LWES_INT_16_TOKEN, attrValue);
-  if (ret < 0)
-    {
-      free(attrValue);
-    }
-  return ret;
+  return -1;
 }
 
-int lwes_event_set_U_INT_32 (struct lwes_event *       event,
-                             LWES_CONST_SHORT_STRING   attrName,
-                             LWES_U_INT_32             value)
-{
-  int ret = 0;
-  LWES_U_INT_32 *attrValue;
 
-  if (event == NULL || attrName == NULL)
-    {
-      return -1;
-    }
-
-  attrValue = (LWES_U_INT_32 *)malloc(sizeof(LWES_U_INT_32));
-
-  if (attrValue == NULL)
-    {
-      return -3;
-    }
-  *attrValue = value;
-
-  ret = lwes_event_add (event, attrName, LWES_U_INT_32_TOKEN, attrValue);
-  if (ret < 0)
-    {
-      free (attrValue);
-    }
-  return ret;
+#define MAKE_ACCESSORS(typ)                             \
+int lwes_event_set_##typ                                \
+   (struct lwes_event      *event,                      \
+    LWES_CONST_SHORT_STRING attrName,                   \
+    LWES_##typ              value)                      \
+{                                                       \
+  return lwes_event_set_generic(event, attrName,        \
+                                LWES_TYPE_##typ,        \
+                                sizeof(value), &value); \
+}                                                       \
+                                                        \
+int lwes_event_get_##typ                                \
+   (struct lwes_event       *event,                     \
+    LWES_CONST_SHORT_STRING  name,                      \
+    LWES_##typ              *value)                     \
+{                                                       \
+  return lwes_event_get_generic(event, name,            \
+                                LWES_TYPE_##typ,        \
+                                sizeof(*value), value); \
 }
 
-int lwes_event_set_INT_32 (struct lwes_event *       event,
-                           LWES_CONST_SHORT_STRING   attrName,
-                           LWES_INT_32               value)
-{
-  int ret = 0;
-  LWES_INT_32 *attrValue;
 
-  if (event == NULL || attrName == NULL)
-    {
-      return -1;
-    }
+MAKE_ACCESSORS(U_INT_16)
+MAKE_ACCESSORS(INT_16)
+MAKE_ACCESSORS(U_INT_32)
+MAKE_ACCESSORS(INT_32)
+MAKE_ACCESSORS(U_INT_64)
+MAKE_ACCESSORS(INT_64)
+MAKE_ACCESSORS(BOOLEAN)
+MAKE_ACCESSORS(IP_ADDR)
+MAKE_ACCESSORS(BYTE)
+MAKE_ACCESSORS(FLOAT)
+MAKE_ACCESSORS(DOUBLE)
 
-  attrValue = (LWES_INT_32 *)malloc (sizeof (LWES_INT_32));
-
-  if (attrValue == NULL)
-    {
-      return -3;
-    }
-  *attrValue = value;
-
-  ret = lwes_event_add (event, attrName, LWES_INT_32_TOKEN, attrValue);
-  if (ret < 0)
-    {
-      free(attrValue);
-    }
-  return ret;
-}
-
-int lwes_event_set_U_INT_64 (struct lwes_event *       event,
-                             LWES_CONST_SHORT_STRING   attrName,
-                             LWES_U_INT_64             value)
-{
-  int ret = 0;
-  LWES_U_INT_64 *attrValue;
-
-  if (event == NULL || attrName == NULL)
-    {
-      return -1;
-    }
-
-  attrValue = (LWES_U_INT_64 *)malloc (sizeof (LWES_U_INT_64));
-
-  if (attrValue == NULL)
-    {
-      return -3;
-    }
-  *attrValue = value;
-
-  ret = lwes_event_add (event, attrName, LWES_U_INT_64_TOKEN, attrValue);
-  if (ret < 0)
-    {
-      free (attrValue);
-    }
-  return ret;
-}
 
 int lwes_event_set_U_INT_64_w_string (struct lwes_event *     event,
                                       LWES_CONST_SHORT_STRING attrName,
@@ -1133,34 +891,6 @@ int lwes_event_set_U_INT_64_w_string (struct lwes_event *     event,
       return -2;
     }
   return lwes_event_set_U_INT_64 (event, attrName, u_int_64);
-}
-
-int lwes_event_set_INT_64 (struct lwes_event *       event,
-                           LWES_CONST_SHORT_STRING   attrName,
-                           LWES_INT_64               value)
-{
-  int ret = 0;
-  LWES_INT_64 *attrValue;
-
-  if (event == NULL || attrName == NULL)
-    {
-      return -1;
-    }
-
-  attrValue = (LWES_INT_64 *)malloc (sizeof (LWES_INT_64));
-
-  if (attrValue == NULL)
-    {
-      return -3;
-    }
-  *attrValue = value;
-
-  ret = lwes_event_add (event, attrName, LWES_INT_64_TOKEN, attrValue);
-  if (ret < 0)
-    {
-      free (attrValue);
-    }
-  return ret;
 }
 
 int lwes_event_set_INT_64_w_string (struct lwes_event       *event,
@@ -1185,56 +915,31 @@ int lwes_event_set_STRING (struct lwes_event *       event,
                            LWES_CONST_SHORT_STRING   attrName,
                            LWES_CONST_LONG_STRING    value)
 {
-  int ret = 0;
-  LWES_LONG_STRING attrValue;
-
-  if (event == NULL || attrName == NULL || value == NULL)
-    {
-      return -1;
-    }
-
-  attrValue = (LWES_LONG_STRING)malloc (sizeof (LWES_CHAR)*(strlen (value)+1));
-  if (attrValue == NULL)
-    {
-      return -3;
-    }
-  strcpy(attrValue,value);
-
-  ret = lwes_event_add (event, attrName, LWES_STRING_TOKEN, (void*)attrValue);
-  if (ret < 0)
-    {
-      free (attrValue);
-    }
-  return ret;
+  int size = (NULL == value) ? 0 : sizeof (LWES_CHAR)*(strlen (value)+1);
+  return lwes_event_set_generic(event, attrName, LWES_TYPE_STRING, size, (char*)value);
 }
 
-int lwes_event_set_IP_ADDR (struct lwes_event *       event,
-                            LWES_CONST_SHORT_STRING   attrName,
-                            LWES_IP_ADDR              value)
+int lwes_event_get_STRING (struct lwes_event       *event,
+                           LWES_CONST_SHORT_STRING  name,
+                           LWES_LONG_STRING        *value)
 {
-  int ret = 0;
-  LWES_IP_ADDR *attrValue;
+  struct lwes_event_attribute *tmp;
 
-  if (event == NULL || attrName == NULL)
+  if (event == NULL || name == NULL || value == NULL)
     {
       return -1;
     }
 
-  attrValue = (LWES_IP_ADDR *)malloc (sizeof (LWES_IP_ADDR));
+  tmp = (struct lwes_event_attribute *)lwes_hash_get (event->attributes, name);
 
-  if (attrValue == NULL)
+  if (tmp != NULL && tmp->type == LWES_TYPE_STRING)
     {
-      return -3;
+      *value = (((LWES_LONG_STRING)tmp->value));
+      return 0;
     }
-  *attrValue = value;
-
-  ret = lwes_event_add (event, attrName, LWES_IP_ADDR_TOKEN, attrValue);
-  if (ret < 0)
-    {
-      free (attrValue);
-    }
-  return ret;
+  return -1;
 }
+
 
 int lwes_event_set_IP_ADDR_w_string (struct lwes_event *       event,
                                      LWES_CONST_SHORT_STRING   attrName,
@@ -1255,7 +960,7 @@ int lwes_event_set_IP_ADDR_w_string (struct lwes_event *       event,
     }
   attrValue->s_addr = inet_addr (value);
 
-  ret = lwes_event_add (event, attrName, LWES_IP_ADDR_TOKEN, attrValue);
+  ret = lwes_event_add (event, attrName, LWES_TYPE_IP_ADDR, attrValue);
   if (ret < 0)
     {
       free (attrValue);
@@ -1263,224 +968,6 @@ int lwes_event_set_IP_ADDR_w_string (struct lwes_event *       event,
   return ret;
 }
 
-int lwes_event_set_BOOLEAN (struct lwes_event       * event,
-                            LWES_CONST_SHORT_STRING   attrName,
-                            LWES_BOOLEAN              value)
-{
-  int ret = 0;
-  LWES_BOOLEAN *attrValue;
-
-  if (event == NULL || attrName == NULL)
-    {
-      return -1;
-    }
-
-  attrValue = (LWES_BOOLEAN *)malloc (sizeof (LWES_BOOLEAN));
-  if (attrValue == NULL)
-    {
-      return -3;
-    }
-  *attrValue = value;
-
-  ret = lwes_event_add (event, attrName, LWES_BOOLEAN_TOKEN, attrValue);
-  if (ret < 0)
-    {
-      free (attrValue);
-    }
-  return ret;
-}
-
-
-/* ACCESSOR METHODS */
-
-int lwes_event_get_U_INT_16 (struct lwes_event       *event,
-                             LWES_CONST_SHORT_STRING  name,
-                             LWES_U_INT_16           *value)
-{
-  struct lwes_event_attribute *tmp;
-
-  if (event == NULL || name == NULL || value == NULL)
-    {
-      return -1;
-    }
-
-  tmp = (struct lwes_event_attribute *)lwes_hash_get (event->attributes, name);
-
-  if (tmp != NULL && tmp->type == LWES_U_INT_16_TOKEN)
-    {
-      *value = (*((LWES_U_INT_16 *)tmp->value));
-      return 0;
-    }
-  return -1;
-}
-
-int lwes_event_get_INT_16 (struct lwes_event       *event,
-                           LWES_CONST_SHORT_STRING  name,
-                           LWES_INT_16             *value)
-{
-  struct lwes_event_attribute *tmp;
-
-  if (event == NULL || name == NULL || value == NULL)
-    {
-      return -1;
-    }
-
-  tmp = (struct lwes_event_attribute *)lwes_hash_get (event->attributes, name);
-
-  if (tmp != NULL && tmp->type == LWES_INT_16_TOKEN)
-    {
-      *value = (*((LWES_INT_16 *)tmp->value));
-      return 0;
-    }
-  return -1;
-}
-
-int lwes_event_get_U_INT_32 (struct lwes_event       *event,
-                             LWES_CONST_SHORT_STRING  name,
-                             LWES_U_INT_32           *value)
-{
-  struct lwes_event_attribute *tmp;
-
-  if (event == NULL || name == NULL || value == NULL)
-    {
-      return -1;
-    }
-
-  tmp = (struct lwes_event_attribute *)lwes_hash_get (event->attributes, name);
-
-  if (tmp != NULL && tmp->type == LWES_U_INT_32_TOKEN)
-    {
-      *value = (*((LWES_U_INT_32 *)tmp->value));
-      return 0;
-    }
-  return -1;
-}
-
-int lwes_event_get_INT_32 (struct lwes_event       *event,
-                           LWES_CONST_SHORT_STRING  name,
-                           LWES_INT_32             *value)
-{
-  struct lwes_event_attribute *tmp;
-
-  if (event == NULL || name == NULL || value == NULL)
-    {
-      return -1;
-    }
-
-  tmp = (struct lwes_event_attribute *)lwes_hash_get (event->attributes, name);
-
-  if (tmp != NULL && tmp->type == LWES_INT_32_TOKEN)
-    {
-      *value = (*((LWES_INT_32 *)tmp->value));
-      return 0;
-    }
-  return -1;
-}
-
-int lwes_event_get_U_INT_64 (struct lwes_event       *event,
-                             LWES_CONST_SHORT_STRING  name,
-                             LWES_U_INT_64           *value)
-{
-  struct lwes_event_attribute *tmp;
-
-  if (event == NULL || name == NULL || value == NULL)
-    {
-      return -1;
-    }
-
-  tmp = (struct lwes_event_attribute *)lwes_hash_get (event->attributes, name);
-
-  if (tmp != NULL && tmp->type == LWES_U_INT_64_TOKEN)
-    {
-      *value = (*((LWES_U_INT_64 *)tmp->value));
-      return 0;
-    }
-  return -1;
-}
-
-int lwes_event_get_INT_64 (struct lwes_event       *event,
-                           LWES_CONST_SHORT_STRING  name,
-                           LWES_INT_64             *value)
-{
-  struct lwes_event_attribute *tmp;
-
-  if (event == NULL || name == NULL || value == NULL)
-    {
-      return -1;
-    }
-
-  tmp = (struct lwes_event_attribute *)lwes_hash_get (event->attributes, name);
-
-  if (tmp != NULL && tmp->type == LWES_INT_64_TOKEN)
-    {
-      *value = (*((LWES_INT_64 *)tmp->value));
-      return 0;
-    }
-  return -1;
-}
-
-int lwes_event_get_STRING (struct lwes_event       *event,
-                           LWES_CONST_SHORT_STRING  name,
-                           LWES_LONG_STRING        *value)
-{
-  struct lwes_event_attribute *tmp;
-
-  if (event == NULL || name == NULL || value == NULL)
-    {
-      return -1;
-    }
-
-  tmp = (struct lwes_event_attribute *)lwes_hash_get (event->attributes, name);
-
-  if (tmp != NULL && tmp->type == LWES_STRING_TOKEN)
-    {
-      *value = (((LWES_LONG_STRING)tmp->value));
-      return 0;
-    }
-  return -1;
-}
-
-int lwes_event_get_IP_ADDR (struct lwes_event       *event,
-                            LWES_CONST_SHORT_STRING  name,
-                            LWES_IP_ADDR            *value)
-{
-  struct lwes_event_attribute *tmp;
-
-  if (event == NULL || name == NULL || value == NULL)
-    {
-      return -1;
-    }
-
-  tmp = (struct lwes_event_attribute *)lwes_hash_get (event->attributes, name);
-
-  if (tmp != NULL && tmp->type == LWES_IP_ADDR_TOKEN)
-    {
-      *value = (*((LWES_IP_ADDR *)tmp->value));
-      return 0;
-    }
-  return -1;
-}
-
-int lwes_event_get_BOOLEAN (struct lwes_event       *event,
-                            LWES_CONST_SHORT_STRING  name,
-                            LWES_BOOLEAN            *value)
-{
-  struct lwes_event_attribute *tmp;
-
-  if (event == NULL || name == NULL || value == NULL)
-    {
-      return -1;
-    }
-
-  tmp = (struct lwes_event_attribute *)lwes_hash_get(event->attributes, name);
-
-  if (tmp != NULL && tmp->type == LWES_BOOLEAN_TOKEN)
-    {
-      *value = (*((LWES_BOOLEAN *)tmp->value));
-      return 0;
-    }
-  return -1;
-}
 
 /*************************************************************************
   PRIVATE API

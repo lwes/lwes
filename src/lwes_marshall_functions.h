@@ -218,6 +218,54 @@ marshall_BOOLEAN
    size_t            length,
    size_t            *offset);
 
+/*! \brief Marshall a float into a byte array
+ *
+ * Attempt to marshall val into the given byte array at the given
+ * offset if there is enough total space.  The length should be the total
+ * length of the array.
+ *
+ * The offset will be modified by the number of bytes set, and that value
+ * will be returned.  Thus a value of 0 is an error, meaning not enough
+ * space to write this.
+ *
+ *  \param[in] val the float to write into the array
+ *  \param[in] bytes the byte array to write into
+ *  \param[in] length total length of the array
+ *  \param[in,out] offset the offset into the array, then the new offset
+ *
+ *  \return 0 on error, the number of bytes written on success.
+ */
+int
+marshall_FLOAT
+  (LWES_FLOAT        val,
+   LWES_BYTE_P       bytes,
+   size_t            length,
+   size_t            *offset);
+
+/*! \brief Marshall a double into a byte array
+ *
+ * Attempt to marshall val into the given byte array at the given
+ * offset if there is enough total space.  The length should be the total
+ * length of the array.
+ *
+ * The offset will be modified by the number of bytes set, and that value
+ * will be returned.  Thus a value of 0 is an error, meaning not enough
+ * space to write this.
+ *
+ *  \param[in] val the double to write into the array
+ *  \param[in] bytes the byte array to write into
+ *  \param[in] length total length of the array
+ *  \param[in,out] offset the offset into the array, then the new offset
+ *
+ *  \return 0 on error, the number of bytes written on success.
+ */
+int
+marshall_DOUBLE
+  (LWES_DOUBLE       val,
+   LWES_BYTE_P       bytes,
+   size_t            length,
+   size_t            *offset);
+
 /*! \brief Marshall an ip4v address into a byte array
  *
  * Attempt to marshall ipAddress into the given byte array at the given
@@ -494,6 +542,58 @@ unmarshall_INT_64
 int
 unmarshall_BOOLEAN
   (LWES_BOOLEAN *    aBoolean,
+   LWES_BYTE_P       bytes,
+   size_t            length,
+   size_t *          offset);
+
+/*! \brief Unmarshall a float from a byte array
+ *
+ * Attempt to unmarshall val from the given byte array at the
+ * given offset, without overflowing the bound.  If the bound would be
+ * overflown, an error is returned.
+ *
+ * The length should be the total length of the array.
+ *
+ * The offset will be modified by the number of bytes consumed, and that value
+ * will be returned.  Thus a value of 0 is an error, meaning not enough
+ * bytes to fill out the given type.
+ *
+ *  \param[out] val the float to read from the array and write into
+ *  \param[in] bytes the byte array to read from
+ *  \param[in] length total length of the byte array
+ *  \param[in,out] offset the offset into the array, then the new offset
+ *
+ *  \return 0 on error, the number of bytes consumed on success.
+ */
+int
+unmarshall_FLOAT
+  (LWES_FLOAT *      val,
+   LWES_BYTE_P       bytes,
+   size_t            length,
+   size_t *          offset);
+
+/*! \brief Unmarshall a double from a byte array
+ *
+ * Attempt to unmarshall val from the given byte array at the
+ * given offset, without overflowing the bound.  If the bound would be
+ * overflown, an error is returned.
+ *
+ * The length should be the total length of the array.
+ *
+ * The offset will be modified by the number of bytes consumed, and that value
+ * will be returned.  Thus a value of 0 is an error, meaning not enough
+ * bytes to fill out the given type.
+ *
+ *  \param[out] val the double to read from the array and write into
+ *  \param[in] bytes the byte array to read from
+ *  \param[in] length total length of the byte array
+ *  \param[in,out] offset the offset into the array, then the new offset
+ *
+ *  \return 0 on error, the number of bytes consumed on success.
+ */
+int
+unmarshall_DOUBLE
+  (LWES_DOUBLE *     val,
    LWES_BYTE_P       bytes,
    size_t            length,
    size_t *          offset);

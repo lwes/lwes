@@ -85,6 +85,11 @@ test_event1 (void)
   assert (lwes_event_set_IP_ADDR  (event1, "t_ip_addr",ip_addr) == 10);
   assert (lwes_event_set_STRING   (event1, "t_string", string2) == 11);
 
+  assert (lwes_event_set_BYTE     (event1, "t_byte",   1)       == 12);
+  assert (lwes_event_set_FLOAT    (event1, "t_float",  1)       == 13);
+  assert (lwes_event_set_DOUBLE   (event1, "t_double", 1)       == 14);
+
+
   size1 = lwes_event_to_bytes (event1, bytes, MAX_MSG_SIZE, 0);
 
   sprintf (bigbuf, "Event1\t%d\n",size1);

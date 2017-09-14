@@ -357,6 +357,51 @@ lwes_event_set_BOOLEAN
    LWES_CONST_SHORT_STRING name,
    LWES_BOOLEAN      value);
 
+/*! \brief Add an LWES_BYTE attribute to the event
+ *
+ *  \param[in] event the event to add the attribute to
+ *  \param[in] name the name of the attribute
+ *  \param[in] value the value of the attribute
+ *
+ *  \return the new number of attributes on succes, a negative number on
+ *          failure.
+ */
+int
+lwes_event_set_BYTE
+  (struct lwes_event *event,
+   LWES_CONST_SHORT_STRING name,
+   LWES_BYTE      value);
+
+/*! \brief Add an LWES_FLOAT attribute to the event
+ *
+ *  \param[in] event the event to add the attribute to
+ *  \param[in] name the name of the attribute
+ *  \param[in] value the value of the attribute
+ *
+ *  \return the new number of attributes on succes, a negative number on
+ *          failure.
+ */
+int
+lwes_event_set_FLOAT
+  (struct lwes_event *event,
+   LWES_CONST_SHORT_STRING name,
+   LWES_FLOAT      value);
+
+/*! \brief Add an LWES_DOUBLE attribute to the event
+ *
+ *  \param[in] event the event to add the attribute to
+ *  \param[in] name the name of the attribute
+ *  \param[in] value the value of the attribute
+ *
+ *  \return the new number of attributes on succes, a negative number on
+ *          failure.
+ */
+int
+lwes_event_set_DOUBLE
+  (struct lwes_event *event,
+   LWES_CONST_SHORT_STRING name,
+   LWES_DOUBLE      value);
+
 /*! \brief Get the name of the event
  *
  *  \param[in] event the event to get the name of
@@ -523,6 +568,65 @@ lwes_event_get_BOOLEAN
   (struct lwes_event       *event,
    LWES_CONST_SHORT_STRING  name,
    LWES_BOOLEAN            *value);
+
+/*! \brief Get an LWES_BYTE attribute from the event
+ *
+ *  \param[in] event the event to get the attribute from
+ *  \param[in] name the name of the attribute
+ *  \param[out] value the value of the attribute
+ *
+ *  \return 0 on success, a negative number on failure
+ */
+int
+lwes_event_get_BYTE
+  (struct lwes_event       *event,
+   LWES_CONST_SHORT_STRING  name,
+   LWES_BYTE            *value);
+
+/*! \brief Get an LWES_FLOAT attribute from the event
+ *
+ *  \param[in] event the event to get the attribute from
+ *  \param[in] name the name of the attribute
+ *  \param[out] value the value of the attribute
+ *
+ *  \return 0 on success, a negative number on failure
+ */
+int
+lwes_event_get_FLOAT
+  (struct lwes_event       *event,
+   LWES_CONST_SHORT_STRING  name,
+   LWES_FLOAT            *value);
+
+/*! \brief Get an LWES_DOUBLE attribute from the event
+ *
+ *  \param[in] event the event to get the attribute from
+ *  \param[in] name the name of the attribute
+ *  \param[out] value the value of the attribute
+ *
+ *  \return 0 on success, a negative number on failure
+ */
+int
+lwes_event_get_DOUBLE
+  (struct lwes_event       *event,
+   LWES_CONST_SHORT_STRING  name,
+   LWES_DOUBLE            *value);
+
+///* set an entire array in one call */
+//int
+//lwes_event_set_<TYPE>_arr
+//  (struct lwes_event *event,
+//   LWES_CONST_SHORT_STRING name,
+//   LWES_INT_16 arr_length,
+//   LWES_<TYPE> *arr);
+//
+///* set an entire array in one call */
+//int
+//lwes_event_get_<TYPE>_arr
+//  (struct lwes_event *event,
+//   LWES_CONST_SHORT_STRING name,
+//   LWES_INT_16 arr_length,
+//   LWES_<TYPE> **arr);
+
 
 /*! \brief Serialize an event
  

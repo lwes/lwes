@@ -14,11 +14,17 @@
 #include "lwes_esf_parser.h"
 #include "lwes_hash.h"
 
+const LWES_U_INT_32 ATTRIBUTE_OPTIONAL =     0 ;
+const LWES_U_INT_32 ATTRIBUTE_REQUIRED = (1<<0);
+const LWES_U_INT_32 ATTRIBUTE_ARRAYED  = (1<<1);
+const LWES_U_INT_32 ATTRIBUTE_NULLABLE = (1<<2);
+
+
 struct lwes_event_type_db *
 lwes_event_type_db_create
   (const char *filename)
 {
-  struct lwes_event_type_db *db = 
+  struct lwes_event_type_db *db =
      (struct lwes_event_type_db *)
        malloc (sizeof (struct lwes_event_type_db));
   if (db != NULL)
@@ -133,17 +139,20 @@ lwes_event_type_db_add_event
 }
 
 int
-lwes_event_type_db_add_attribute
+lwes_event_type_db_add_attribute_ex
   (struct lwes_event_type_db *db,
    LWES_SHORT_STRING event_name,
    LWES_SHORT_STRING attr_name,
-   LWES_SHORT_STRING type)
+   LWES_SHORT_STRING type,
+   LWES_INT_32 flags,
+   LWES_INT_16 arr_size,
+   LWES_INT_16 max_str_size)
 {
   void *ret = NULL;
   struct lwes_hash *eventHash =
     (struct lwes_hash *)lwes_hash_get (db->events, event_name);
   LWES_SHORT_STRING tmpAttrName = NULL;
-  LWES_BYTE        *tmpAttrType = NULL;
+  struct lwes_event_field_db_attribute *tmpAttrRec = NULL;
 
   tmpAttrName =
       (LWES_SHORT_STRING)malloc (sizeof (LWES_CHAR)*(strlen (attr_name)+1));
@@ -153,57 +162,26 @@ lwes_event_type_db_add_attribute
     }
   strcpy (tmpAttrName, attr_name);
 
-  tmpAttrType = (LWES_BYTE *)malloc (sizeof (LWES_BYTE));
-  if (tmpAttrType == NULL)
+  tmpAttrRec = (struct lwes_event_field_db_attribute*)
+    malloc(sizeof(struct lwes_event_field_db_attribute));
+  if (tmpAttrRec == NULL)
     {
       free (tmpAttrName);
       return -3;
     }
 
-  if (strcmp (type, LWES_U_INT_16_STRING) == 0)
-    {
-      *tmpAttrType = LWES_U_INT_16_TOKEN;
-    }
-  else if (strcmp (type, LWES_INT_16_STRING) == 0)
-    {
-      *tmpAttrType = LWES_INT_16_TOKEN;
-    }
-  else if (strcmp (type, LWES_U_INT_32_STRING) == 0)
-    {
-      *tmpAttrType = LWES_U_INT_32_TOKEN;
-    }
-  else if (strcmp (type, LWES_INT_32_STRING) == 0)
-    {
-      *tmpAttrType = LWES_INT_32_TOKEN;
-    }
-  else if (strcmp (type, LWES_U_INT_64_STRING) == 0)
-    {
-      *tmpAttrType = LWES_U_INT_64_TOKEN;
-    }
-  else if (strcmp (type, LWES_INT_64_STRING) == 0)
-    {
-      *tmpAttrType = LWES_INT_64_TOKEN;
-    }
-  else if (strcmp (type, LWES_BOOLEAN_STRING) == 0)
-    {
-      *tmpAttrType = LWES_BOOLEAN_TOKEN;
-    }
-  else if (strcmp (type, LWES_IP_ADDR_STRING) == 0)
-    {
-      *tmpAttrType = LWES_IP_ADDR_TOKEN;
-    }
-  else if (strcmp (type, LWES_STRING_STRING) == 0)
-    {
-      *tmpAttrType = LWES_STRING_TOKEN;
-    }
 
-  ret = lwes_hash_put (eventHash, tmpAttrName, tmpAttrType);
+  tmpAttrRec->attr_flags = flags;
+  tmpAttrRec->array_size = arr_size;
+  tmpAttrRec->max_str_size = max_str_size;
+  tmpAttrRec->type = lwes_string_to_type(type);
+  ret = lwes_hash_put (eventHash, tmpAttrName, tmpAttrRec);
 
   /* if inserting into the hash fails we should free up our memory */
   if (ret != NULL)
   {
     free (tmpAttrName);
-    free (tmpAttrType);
+    free (tmpAttrRec);
     return -4;
   }
 
@@ -211,40 +189,26 @@ lwes_event_type_db_add_attribute
 }
 
 int
+lwes_event_type_db_add_attribute
+  (struct lwes_event_type_db *db,
+   LWES_SHORT_STRING event_name,
+   LWES_SHORT_STRING attr_name,
+   LWES_SHORT_STRING type)
+{
+  return lwes_event_type_db_add_attribute_ex (db, event_name, attr_name, type, 0, 0, 0);
+}
+
+int
 lwes_event_type_db_check_for_event
-  (struct lwes_event_type_db *db, 
+  (struct lwes_event_type_db *db,
    LWES_SHORT_STRING event_name)
 {
   return lwes_hash_contains_key (db->events, event_name);
 }
 
-int
-lwes_event_type_db_check_for_attribute
-  (struct lwes_event_type_db *db, 
-   LWES_CONST_SHORT_STRING attr_name,
-   LWES_CONST_SHORT_STRING event_name)
-{
-  struct lwes_hash *event = 
-    (struct lwes_hash *)lwes_hash_get (db->events, event_name);
-  struct lwes_hash *meta_event = 
-    (struct lwes_hash *)lwes_hash_get (db->events, LWES_META_INFO_STRING);
-  int metaContainsAttribute = 0;
-  int eventContainsAttribute = 0;
-  if (event != NULL)
-  {
-    eventContainsAttribute = lwes_hash_contains_key (event, attr_name);
-  }
-  if (meta_event != NULL)
-  {
-    metaContainsAttribute = lwes_hash_contains_key (meta_event, attr_name);
-  }
-  return (metaContainsAttribute || eventContainsAttribute);
-}
-
-int
-lwes_event_type_db_check_for_type
-  (struct lwes_event_type_db *db, 
-   LWES_BYTE type_value,
+const struct lwes_event_field_db_attribute*
+lwes_event_type_db_lookup_attr
+  (struct lwes_event_type_db *db,
    LWES_CONST_SHORT_STRING attr_name,
    LWES_CONST_SHORT_STRING event_name)
 {
@@ -252,20 +216,42 @@ lwes_event_type_db_check_for_type
     (struct lwes_hash *)lwes_hash_get (db->events, event_name);
   struct lwes_hash *meta_event =
     (struct lwes_hash *)lwes_hash_get (db->events, LWES_META_INFO_STRING);
-  LWES_BYTE *tmp_type = NULL;
+  struct lwes_event_field_db_attribute *tmp_rec = NULL;
 
   if (event != NULL)
   {
-    tmp_type = (LWES_BYTE *)lwes_hash_get (event, attr_name);
+    tmp_rec = (struct lwes_event_field_db_attribute *)
+      lwes_hash_get (event, attr_name);
   }
-  if (tmp_type == NULL && meta_event != NULL)
+  if (tmp_rec == NULL && meta_event != NULL)
   {
-    tmp_type = (LWES_BYTE *)lwes_hash_get (meta_event, attr_name);
+    tmp_rec = (struct lwes_event_field_db_attribute *)
+      lwes_hash_get (meta_event, attr_name);
   }
-  if (tmp_type == NULL)
-  {
-    return 0;
-  }
+  return tmp_rec;
+}
 
-  return ((*tmp_type)==type_value);
+int
+lwes_event_type_db_check_for_attribute
+  (struct lwes_event_type_db *db,
+   LWES_CONST_SHORT_STRING attr_name,
+   LWES_CONST_SHORT_STRING event_name)
+{
+  const struct lwes_event_field_db_attribute* attrRec =
+    lwes_event_type_db_lookup_attr (db, attr_name, event_name);
+
+  return (NULL != attrRec);
+}
+
+int
+lwes_event_type_db_check_for_type
+  (struct lwes_event_type_db *db,
+   LWES_BYTE type_value,
+   LWES_CONST_SHORT_STRING attr_name,
+   LWES_CONST_SHORT_STRING event_name)
+{
+  const struct lwes_event_field_db_attribute* attrRec =
+    lwes_event_type_db_lookup_attr (db, attr_name, event_name);
+
+  return ((NULL != attrRec) && (attrRec->type == type_value));
 }

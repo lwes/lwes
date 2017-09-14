@@ -1,3 +1,13 @@
+Version 1.1.0 (timrc)
+  * Added array types, and BYTE, FLOAT, DOUBLE for parity with Erlang/Java
+  * Flag invalid characters from ESF parser.
+  * Removed LWES_*_TOKEN constants in favor of LWES_TYPE_* enum.
+  * Use stdint types in typedefs (e.g. uint16_t for LWES_U_INT_16)
+  * Removed lots of copy-paste code.
+  * Moved repeated field-printing functions from the tools to the library.
+  * Added array types, required/optional/nullable and string-size to ESF parser.
+  * (upcoming) Added array types.
+
 Version 1.0.0 (molinaro)
   * Possibly NON-BACKWARD-COMPATIBLE - changed some members of
     lwes_net_connection in order to reuse it in the lwes-journaller.

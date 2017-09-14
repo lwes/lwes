@@ -52,15 +52,7 @@ int marshall_INT_16       (LWES_INT_16       anInt,
                            size_t            length,
                            size_t            *offset)
 {
-  int ret = 0;
-  if ( bytes != NULL && ((int)length-(int)(*offset)) >= 2 )
-    {
-      bytes[(*offset)]   = (LWES_BYTE)( (anInt & (255 << 8)) >> 8);
-      bytes[(*offset)+1] = (LWES_BYTE)( (anInt & (255)) );
-      (*offset) += 2;
-      ret = 2;
-    }
-  return ret;
+  return marshall_U_INT_16((LWES_U_INT_16)anInt, bytes, length, offset);
 }
 
 int marshall_U_INT_32     (LWES_U_INT_32     anInt,
@@ -86,17 +78,7 @@ int marshall_INT_32       (LWES_INT_32       anInt,
                            size_t            length,
                            size_t            *offset)
 {
-  int ret = 0;
-  if ( bytes != NULL && ((int)length-(int)(*offset)) >= 4 )
-    {
-      bytes[(*offset)]   = (LWES_BYTE) ( (anInt & (255 << 24)) >> 24);
-      bytes[(*offset)+1] = (LWES_BYTE) ( (anInt & (255 << 16)) >> 16);
-      bytes[(*offset)+2] = (LWES_BYTE) ( (anInt & (255 <<  8)) >>  8);
-      bytes[(*offset)+3] = (LWES_BYTE) ( (anInt & (255)));
-      (*offset) += 4;
-      ret = 4;
-    }
-  return ret;
+  return marshall_U_INT_32((LWES_U_INT_32)anInt, bytes, length, offset);
 }
 
 int marshall_U_INT_64     (LWES_U_INT_64     anInt,
@@ -126,21 +108,7 @@ int marshall_INT_64       (LWES_INT_64       anInt,
                            size_t            length,
                            size_t            *offset)
 {
-  int ret = 0;
-  if ( bytes != NULL && ((int)length-(int)(*offset)) >= 8 )
-    {
-      bytes[(*offset)  ] = (LWES_BYTE) ( (anInt & (0xffULL << 56)) >> 56);
-      bytes[(*offset)+1] = (LWES_BYTE) ( (anInt & (0xffULL << 48)) >> 48);
-      bytes[(*offset)+2] = (LWES_BYTE) ( (anInt & (0xffULL << 40)) >> 40);
-      bytes[(*offset)+3] = (LWES_BYTE) ( (anInt & (0xffULL << 32)) >> 32);
-      bytes[(*offset)+4] = (LWES_BYTE) ( (anInt & (0xffULL << 24)) >> 24);
-      bytes[(*offset)+5] = (LWES_BYTE) ( (anInt & (0xffULL << 16)) >> 16);
-      bytes[(*offset)+6] = (LWES_BYTE) ( (anInt & (0xffULL <<  8)) >>  8);
-      bytes[(*offset)+7] = (LWES_BYTE) ( (anInt & (0xffULL <<  0)) >>  0);
-      (*offset) += 8;
-      ret = 8;
-    }
-  return ret;
+  return marshall_U_INT_64((LWES_U_INT_64)anInt, bytes, length, offset);
 }
 
 int marshall_BOOLEAN      (LWES_BOOLEAN      aBoolean,
@@ -148,14 +116,23 @@ int marshall_BOOLEAN      (LWES_BOOLEAN      aBoolean,
                            size_t            length,
                            size_t            *offset)
 {
-  int ret = 0;
-  if ( bytes != NULL && ((int)length-(int)(*offset)) >= 1 )
-    {
-      bytes[(*offset)] = aBoolean;
-      (*offset)++;
-      ret = 1;
-    }
-  return ret;
+  return marshall_BYTE((LWES_BYTE)aBoolean, bytes, length, offset);
+}
+
+int marshall_FLOAT        (LWES_FLOAT        val,
+                           LWES_BYTE_P       bytes,
+                           size_t            length,
+                           size_t            *offset)
+{
+  return marshall_U_INT_32((LWES_U_INT_32)val, bytes, length, offset);
+}
+
+int marshall_DOUBLE       (LWES_DOUBLE       val,
+                           LWES_BYTE_P       bytes,
+                           size_t            length,
+                           size_t            *offset)
+{
+  return marshall_U_INT_64((LWES_U_INT_64)val, bytes, length, offset);
 }
 
 int marshall_IP_ADDR      (LWES_IP_ADDR      ipAddress,
@@ -287,15 +264,7 @@ int unmarshall_INT_16       (LWES_INT_16 *anInt,
                              size_t length,
                              size_t *offset)
 {
-  int ret = 0;
-  if ( bytes != NULL && ((int)length-(int)(*offset)) >= 2 )
-    {
-      *anInt = (LWES_INT_16)( ( ( bytes[(*offset)  ] << 8 ) & (255 << 8 ))
-                            | ( ( bytes[(*offset)+1] << 0 ) & (255)) );
-      (*offset) += 2;
-      ret = 2;
-    }
-  return ret;
+  return unmarshall_U_INT_16((LWES_U_INT_16*)anInt, bytes, length, offset);
 }
 
 int unmarshall_U_INT_32     (LWES_U_INT_32 *anInt,
@@ -321,17 +290,7 @@ int unmarshall_INT_32       (LWES_INT_32 *anInt,
                              size_t length,
                              size_t *offset)
 {
-  int ret = 0;
-  if ( bytes != NULL && ((int)length-(int)(*offset)) >= 4 )
-    {
-      *anInt = (LWES_INT_32)( ( (bytes[(*offset)  ] << 24) & (255 << 24))
-                            | ( (bytes[(*offset)+1] << 16) & (255 << 16))
-                            | ( (bytes[(*offset)+2] << 8 ) & (255 <<  8))
-                            | ( (bytes[(*offset)+3] << 0 ) & (255)) );
-      (*offset) += 4;
-      ret = 4;
-    }
-  return ret;
+  return unmarshall_U_INT_32((LWES_U_INT_32*)anInt, bytes, length, offset);
 }
 
 int unmarshall_U_INT_64     (LWES_U_INT_64 *anInt,
@@ -362,22 +321,7 @@ int unmarshall_INT_64       (LWES_INT_64 *anInt,
                              size_t length,
                              size_t *offset)
 {
-  int ret = 0;
-  if ( bytes != NULL && ((int)length-(int)(*offset)) >= 8 )
-    {
-      *anInt = (LWES_INT_64)
-          ( ( ((LWES_INT_64)bytes[(*offset)  ] << 56) & (0xffULL << 56))
-          | ( ((LWES_INT_64)bytes[(*offset)+1] << 48) & (0xffULL << 48))
-          | ( ((LWES_INT_64)bytes[(*offset)+2] << 40) & (0xffULL << 40))
-          | ( ((LWES_INT_64)bytes[(*offset)+3] << 32) & (0xffULL << 32))
-          | ( ((LWES_INT_64)bytes[(*offset)+4] << 24) & (0xffULL << 24))
-          | ( ((LWES_INT_64)bytes[(*offset)+5] << 16) & (0xffULL << 16))
-          | ( ((LWES_INT_64)bytes[(*offset)+6] << 8 ) & (0xffULL <<  8))
-          | ( ((LWES_INT_64)bytes[(*offset)+7] << 0 ) & (0xffULL <<  0)));
-      (*offset) += 8;
-      ret = 8;
-    }
-  return ret;
+  return unmarshall_U_INT_64((LWES_U_INT_64*)anInt, bytes, length, offset);
 }
 
 int unmarshall_BOOLEAN      (LWES_BOOLEAN *aBoolean,
@@ -385,14 +329,28 @@ int unmarshall_BOOLEAN      (LWES_BOOLEAN *aBoolean,
                              size_t length,
                              size_t *offset)
 {
-  int ret = 0;
-  if ( bytes != NULL && ((int)length-(int)(*offset)) >= 1 )
+  int ret = unmarshall_BYTE((LWES_BYTE*)aBoolean, bytes, length, offset);
+  if (1 == ret) 
     {
-      *aBoolean = bytes[(*offset)];
-      (*offset)++;
-      ret = 1;
+      *aBoolean &= 0xff;
     }
   return ret;
+}
+
+int unmarshall_FLOAT       (LWES_FLOAT *val,
+                             LWES_BYTE_P bytes,
+                             size_t length,
+                             size_t *offset)
+{
+  return unmarshall_U_INT_32((LWES_U_INT_32*)val, bytes, length, offset);
+}
+
+int unmarshall_DOUBLE       (LWES_DOUBLE *val,
+                             LWES_BYTE_P bytes,
+                             size_t length,
+                             size_t *offset)
+{
+  return unmarshall_U_INT_64((LWES_U_INT_64*)val, bytes, length, offset);
 }
 
 int unmarshall_IP_ADDR      (LWES_IP_ADDR *ipAddress,
