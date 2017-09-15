@@ -23,10 +23,10 @@
 extern "C" {
 #endif
 
-#ifdef BISON_NEW
+#if (BISON_MAJOR > 2)
 #  define lweslval yylval
-#else
-#  define lweslval _lweslval
+//#else
+//#  define lweslval _lweslval
 #endif
 
 /* define a structure to control the parser and lexer */

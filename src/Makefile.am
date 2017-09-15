@@ -9,7 +9,7 @@ AM_YFLAGS = -d -p ${myparserprefix}
 # prefix the lex functions so we don't have conflicts with other libs
 AM_LFLAGS = -P${myparserprefix} ${FLEX_EXTRA_ARGS}
 LEX_OUTPUT_ROOT = lex.${myparserprefix}
-AM_CFLAGS=-DBISON_NEW=${BISON_NEW}
+AM_CFLAGS=-DBISON_MAJOR=${BISON_MAJOR}
 
 # any additional includes to add to the compile lines
 
