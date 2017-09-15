@@ -179,7 +179,7 @@ type: modifier type
 
 
 modifier: 
-    | YY_REQUIRED
+      YY_REQUIRED
         { ((struct lwes_parser_state *) param)->flags |= ATTRIBUTE_REQUIRED; }
     | YY_OPTIONAL
         { ((struct lwes_parser_state *) param)->flags |= ATTRIBUTE_OPTIONAL; }
