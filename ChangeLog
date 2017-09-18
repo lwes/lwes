@@ -1,3 +1,6 @@
+Version 1.0.2 (molinaro)
+  * attempt to work with bison on travis box
+
 Version 1.0.1 (molinaro)
   * see if removing some use statements prevent requiring perl when packaging
 

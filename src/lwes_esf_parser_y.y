@@ -39,7 +39,7 @@ void lwes_yyerror(const char *s, void *param);
 
 %}
 
-%pure_parser
+%pure-parser
 
 %token YY_UINT16 YY_INT16 YY_UINT32 YY_INT32 YY_INT64 YY_UINT64 YY_BOOLEAN YY_STRING YY_IP_ADDR EVENTWORD ATTRIBUTEWORD
 
