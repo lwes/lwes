@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 
-AC_INIT([lwes], [1.0.0], [anthonym@alumni.caltech.edu])
+AC_INIT([lwes], [1.0.1], [anthonym@alumni.caltech.edu])
 dnl -- we want a header to include in our source files with configure
 dnl    info
 AC_CONFIG_HEADERS(src/config.h)
