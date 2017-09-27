@@ -56,6 +56,7 @@ int main(void)
   const char *key11= "key11";
   const char *key12= "key12";
   const char *badkey1= "badkey1";
+  const char *badkey2= "badkey8";
   int    value1=5;
   int    value2=10;
   int    value3=11;
@@ -254,7 +255,10 @@ int main(void)
   assert ( lwes_hash_size (hash) == 12 );
 
   assert (   lwes_hash_contains_key ( hash, (char*)key6 ) );
+  /* Fail from empty bin. NOTE this depends on the hash algo and bin counts. */
   assert ( ! lwes_hash_contains_key ( hash, (char*)badkey1 ) );
+  /* Fail from occupied bin. NOTE this depends on the hash algo and bin counts. */
+  assert ( ! lwes_hash_contains_key ( hash, (char*)badkey2 ) );
 
   /* destroy without removal of all elements fails */
   assert ( lwes_hash_destroy (hash) == -1 );

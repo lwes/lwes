@@ -18,7 +18,7 @@
 
 #ifdef __cplusplus
 extern "C" {
-#endif 
+#endif
 
 /*! \file lwes_hash.h
  *  \brief Functions for dealing with the hash which is in the event
@@ -43,7 +43,7 @@ struct lwes_hash_element
 };
 
 /*! \struct lwes_hash_enumeration lwes_hash.h
- *  \brief Structure for enumerating over the hash.  This is opaque in 
+ *  \brief Structure for enumerating over the hash.  This is opaque in
  *         case of future extension.
  */
 struct lwes_hash_enumeration
@@ -123,6 +123,6 @@ lwes_hash_enumeration_next_element
 
 #ifdef __cplusplus
 }
-#endif 
+#endif
 
 #endif /* __LWES_HASH_H */

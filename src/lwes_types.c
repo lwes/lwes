@@ -69,28 +69,34 @@ const LWES_SHORT_STRING LWES_N_DOUBLE_ARRAY_STRING    = (LWES_SHORT_STRING)"null
 
 const LWES_SHORT_STRING LWES_META_INFO_STRING=(LWES_SHORT_STRING)"MetaEventInfo";
 
+#define TYPE_TO_STR(typ) \
+  case LWES_TYPE_##typ:       return LWES_##typ##_STRING; \
+  case LWES_TYPE_##typ##_ARRAY: return LWES_##typ##_ARRAY_STRING;
+
 LWES_CONST_SHORT_STRING
 lwes_type_to_string
   (LWES_TYPE type)
 {
   switch (type) {
-    case LWES_TYPE_U_INT_16: return LWES_U_INT_16_STRING;
-    case LWES_TYPE_INT_16:   return LWES_INT_16_STRING;
-    case LWES_TYPE_U_INT_32: return LWES_U_INT_32_STRING;
-    case LWES_TYPE_INT_32:   return LWES_INT_32_STRING;
-    case LWES_TYPE_U_INT_64: return LWES_U_INT_64_STRING;
-    case LWES_TYPE_INT_64:   return LWES_INT_64_STRING;
-    case LWES_TYPE_BOOLEAN:  return LWES_BOOLEAN_STRING;
-    case LWES_TYPE_IP_ADDR:  return LWES_IP_ADDR_STRING;
-    case LWES_TYPE_STRING:   return LWES_STRING_STRING;
-    case LWES_TYPE_BYTE:     return LWES_BYTE_STRING;
-    case LWES_TYPE_FLOAT:    return LWES_FLOAT_STRING;
-    case LWES_TYPE_DOUBLE:   return LWES_DOUBLE_STRING;
+    TYPE_TO_STR(U_INT_16)
+    TYPE_TO_STR(INT_16)
+    TYPE_TO_STR(U_INT_32)
+    TYPE_TO_STR(INT_32)
+    TYPE_TO_STR(U_INT_64)
+    TYPE_TO_STR(INT_64)
+    TYPE_TO_STR(BOOLEAN)
+    TYPE_TO_STR(IP_ADDR)
+    TYPE_TO_STR(STRING)
+    TYPE_TO_STR(BYTE)
+    TYPE_TO_STR(FLOAT)
+    TYPE_TO_STR(DOUBLE)
     default: return LWES_UNDEFINED_STRING;
   }
 }
 
-#define STR_TO_TYPE(typ) if (0 == strcmp(LWES_##typ##_STRING, type)) { return LWES_TYPE_##typ; }
+#define STR_TO_TYPE(typ) \
+  if (0 == strcmp(LWES_##typ##_STRING, type)) { return LWES_TYPE_##typ; } \
+  if (0 == strcmp(LWES_##typ##_ARRAY_STRING, type)) { return LWES_TYPE_##typ##_ARRAY; }
 
 LWES_TYPE
 lwes_string_to_type
@@ -111,6 +117,58 @@ lwes_string_to_type
   return LWES_TYPE_UNDEFINED;
 }
 
+/* NOTE: this intentionally returns the unit-size for array types */
+#define TYPE_TO_SIZE(typ) \
+  case LWES_TYPE_##typ:         return sizeof(LWES_##typ); \
+  case LWES_TYPE_##typ##_ARRAY: return sizeof(LWES_##typ);
+
+int
+lwes_type_to_size
+  (LWES_TYPE type)
+{
+  switch (type) {
+    TYPE_TO_SIZE(U_INT_16)
+    TYPE_TO_SIZE(INT_16)
+    TYPE_TO_SIZE(U_INT_32)
+    TYPE_TO_SIZE(INT_32)
+    TYPE_TO_SIZE(U_INT_64)
+    TYPE_TO_SIZE(INT_64)
+    TYPE_TO_SIZE(BOOLEAN)
+    TYPE_TO_SIZE(IP_ADDR)
+    TYPE_TO_SIZE(BYTE)
+    TYPE_TO_SIZE(FLOAT)
+    TYPE_TO_SIZE(DOUBLE)
+    case LWES_TYPE_STRING       : return sizeof(LWES_SHORT_STRING);
+    case LWES_TYPE_STRING_ARRAY : return sizeof(LWES_SHORT_STRING);
+    default: return 0;
+  }
+}
+
+LWES_BOOLEAN
+lwes_type_is_array(LWES_TYPE typ)
+{
+  return ((typ!= LWES_TYPE_UNDEFINED) &&
+          (typ >= LWES_TYPE_U_INT_16_ARRAY) )
+          ? TRUE : FALSE;
+}
+
+LWES_BOOLEAN
+lwes_type_is_nullable_array(LWES_TYPE typ)
+{
+  // TODO
+  (void)typ; return FALSE;
+  //return ((typ!= LWES_TYPE_UNDEFINED) &&
+  //        (typ >= LWES_TYPE_N_U_INT_16_ARRAY)
+  //        ? TRUE : FALSE;
+}
+
+LWES_TYPE
+lwes_array_type_to_base(LWES_TYPE typ)
+{
+  if (!lwes_type_is_array(typ)) { return LWES_TYPE_UNDEFINED; }
+  /* TODO deal with nullable arrays */
+  return (typ-LWES_TYPE_U_INT_16_ARRAY)+LWES_TYPE_U_INT_16;
+}
 
 int
 lwes_typed_value_to_stream
@@ -119,6 +177,12 @@ lwes_typed_value_to_stream
    FILE *stream)
 {
   void* v = value;
+
+  if (lwes_type_is_array(type)) {
+    /* can't process it without an array size */
+    return 0;
+  }
+
   switch(type) {
     case LWES_TYPE_U_INT_16: return fprintf(stream,"%hu",     *(LWES_U_INT_16*)v);
     case LWES_TYPE_INT_16:   return fprintf(stream,"%hd",     *(LWES_INT_16*)v);
@@ -128,11 +192,52 @@ lwes_typed_value_to_stream
     case LWES_TYPE_INT_64:   return fprintf(stream,"%"PRId64, *(LWES_INT_64*)v);
     case LWES_TYPE_BOOLEAN:  return fprintf(stream,"%s",      (1==*(LWES_BOOLEAN*)v)?"true":"false");
     case LWES_TYPE_IP_ADDR:  return fprintf(stream,"%s",      inet_ntoa(*(LWES_IP_ADDR *)v));
-    case LWES_TYPE_STRING:   return fprintf(stream,"%s",      (LWES_LONG_STRING)v);
+    case LWES_TYPE_STRING:   return fprintf(stream,"\"%s\"",  (LWES_LONG_STRING)v);
     default: return 0; //fprintf(stream, "<UNKNOWN_FIELD_TYPE>");
   }
   return 0;
 }
+
+int
+lwes_typed_array_to_stream
+  (LWES_TYPE type,
+   void* value,
+   int size,
+   FILE *stream)
+{
+  char* v = value;
+  int i, skip;
+  int ret=0;
+  LWES_TYPE baseType;
+
+  if (!lwes_type_is_array(type)) {
+    return 0;
+  }
+  baseType = lwes_array_type_to_base(type);
+  skip = lwes_type_to_size(type);
+  fprintf(stream,"[ ");
+    if (LWES_TYPE_STRING == baseType)
+      {
+        for (i=0; i<size; ++i)
+          {
+            ret += lwes_typed_value_to_stream(baseType, *(char**)(v+(i*skip)), stream);
+            if (i<size-1)
+              { fprintf(stream,", "); }
+          }
+      }
+    else
+      {
+        for (i=0; i<size; ++i)
+          {
+            ret += lwes_typed_value_to_stream(baseType, v+(i*skip), stream);
+            if (i<size-1)
+              { fprintf(stream,", "); }
+          }
+      }
+  fprintf(stream," ]");
+  return ret;
+}
+
 
 int
 lwes_event_attribute_to_stream
@@ -140,5 +245,12 @@ lwes_event_attribute_to_stream
    FILE *stream)
 {
   void* val = attribute->value;
-  return lwes_typed_value_to_stream(attribute->type, val, stream);
+  if (lwes_type_is_array(attribute->type))
+    {
+      return lwes_typed_array_to_stream(attribute->type, val, attribute->array_len, stream);
+    }
+  else
+    {
+      return lwes_typed_value_to_stream(attribute->type, val, stream);
+    }
 }

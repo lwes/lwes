@@ -22,7 +22,7 @@
 
 #ifdef __cplusplus
 extern "C" {
-#endif 
+#endif
 
 /*! \file lwes_emitter.h
  *  \brief Functions for emitting LWES events
@@ -161,6 +161,6 @@ lwes_emitter_destroy
 
 #ifdef __cplusplus
 }
-#endif 
+#endif
 
 #endif /* __LWES_EMITTER_H */

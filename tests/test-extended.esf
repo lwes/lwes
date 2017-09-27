@@ -1,8 +1,7 @@
 
-Event2 (*&
+Event2
 {
-  ^%$
-  boolean= t_bool;     # test_bool                    OPTIONAL, CALCULATED
+  boolean t_bool;     # test_bool                    OPTIONAL, CALCULATED
   int16   t_int16;     # test_int16                   OPTIONAL, CALCULATED
   uint16  t_uint16;    # test_uint16                  OPTIONAL, CALCULATED
   int32   t_int32;     # test_int32                   OPTIONAL, CALCULATED
@@ -16,12 +15,11 @@ Event2 (*&
   float   t_float;     # test_bool_array              OPTIONAL, CALCULATED
   double  t_double;    # test_bool_array              OPTIONAL, CALCULATED
 
-  boolean t_bool_ar[8] *;   # test_bool_array              OPTIONAL, CALCULATED
+  boolean t_bool_ar[8];   # test_bool_array              OPTIONAL, CALCULATED
   optional byte maybeb;
   required byte mustb;
   nullable byte possiblyb[8];
   required nullable string full_feature_string(32)[8];
   required nullable string unlimited_string[];
-  @#$
 }
 

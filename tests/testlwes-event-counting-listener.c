@@ -338,7 +338,7 @@ check_event_1 (void)
     "\taUInt64 = 18446744073709551615;\n"
     "\tSenderPort = \1\1\1\1\1;\n"
     "\taBoolean = true;\n"
-    "\taString = http://www.test.com;\n"
+    "\taString = \"http://www.test.com\";\n"
     "\tanInt32 = -1;\n"
     "}\n";
 

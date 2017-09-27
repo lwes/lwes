@@ -22,6 +22,8 @@ TypeChecker
   int32 anInt32;
   uint64 aUInt64;
   int64 anInt64;
+  uint16 uint16_array[];
+  string string_array[10];
 }
 
 # check out empty events

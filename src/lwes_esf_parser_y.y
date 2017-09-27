@@ -30,11 +30,14 @@
 int lwesparse(void *param);
 int lweslex(YYSTYPE *lvalp, void *param);
 void lweslexdestroy (void);
+int lweslex_destroy  (void); /* the auto-generated one */
 void lwesrestart(FILE *input_file);
 
 void duplicate_lex_string (void* param, char* *dest, const char* str, const char* label);
 void lwes_add_type_to_state(void* param, const char* type);
 void lwes_yyerror(void *param, const char *s);
+void lwes_cleanup_event_state(void* param);
+void lwes_cleanup_attribute_state(void* param);
 
 /* since (bison 2.x) yyerror() only supports the msg param, we 'fool'
    C into sending the void * pointer along with the message */
@@ -60,12 +63,7 @@ eventlist: event
     ;
 
 event: check eventname check '{' check attributelist check '}'  {
-            if ( ((struct lwes_parser_state *) param)->lastType != NULL )
-              free( ((struct lwes_parser_state *) param)->lastType );
-            if ( ((struct lwes_parser_state *) param)->lastEvent != NULL )
-              free( ((struct lwes_parser_state *) param)->lastEvent );
-            ((struct lwes_parser_state *) param)->lastType = NULL;
-            ((struct lwes_parser_state *) param)->lastEvent = NULL;
+            lwes_cleanup_event_state(param);
                                         }
     | error ';'   { lwes_yyerror(param, "parser error with ';'"); }
     | error '}'   { lwes_yyerror(param, "parser error with '}'"); }
@@ -88,30 +86,24 @@ attribute: check type check attributename check stringspec check arrayspec check
         {
           struct lwes_parser_state* state = (struct lwes_parser_state *) param;
           if (state->lastType != NULL)
-          {
-            /* TODO complain if strMaxSize is set and lastType is not a string */
-            /* fprintf(stderr, "Adding event:[%s] type:[%s] field:[%s] flags [0x%x] arraySize:[%d] stringLimit[%d]\n", state->lastEvent, state->lastType, state->lastField, state->flags, state->arrayTypeSize, state->strMaxSize); */
-            lwes_event_type_db_add_attribute_ex
-              (((struct lwes_parser_state *) param)->db,
-               (LWES_SHORT_STRING) state->lastEvent,
-               (LWES_SHORT_STRING) state->lastField,
-               (LWES_SHORT_STRING) state->lastType,
-               (LWES_U_INT_32) state->flags,
-               (LWES_INT_16) state->arrayTypeSize,
-               (LWES_INT_16) state->strMaxSize
-              );
-              free(state->lastType);
-              state->lastType = NULL;
-              free(state->lastField);
-              state->lastField = NULL;
-              state->flags = 0;
-              state->arrayTypeSize = 0;
-              state->strMaxSize = 0;
-           }
+            {
+              /* TODO complain if strMaxSize is set and lastType is not a string */
+              /* fprintf(stderr, "Adding event:[%s] type:[%s] field:[%s] flags [0x%x] arraySize:[%d] stringLimit[%d]\n", state->lastEvent, state->lastType, state->lastField, state->flags, state->arrayTypeSize, state->strMaxSize); */
+              lwes_event_type_db_add_attribute_ex
+                (((struct lwes_parser_state *) param)->db,
+                 (LWES_SHORT_STRING) state->lastEvent,
+                 (LWES_SHORT_STRING) state->lastField,
+                 (LWES_SHORT_STRING) state->lastType,
+                 (LWES_U_INT_32) state->flags,
+                 (LWES_INT_16) state->arrayTypeSize,
+                 (LWES_INT_16) state->strMaxSize
+                );
+              lwes_cleanup_attribute_state(param);
+             }
            else
-           {
-           lwes_yyerror(param, "Bad 'type' 'attributename' pair");
-           }
+             {
+               lwes_yyerror(param, "Bad 'type' 'attributename' pair");
+             }
         }
     }
 /*
@@ -137,7 +129,7 @@ count: ATTRIBUTESIZE { /* No-op */ }
     ;
 
 str_size: ATTRIBUTESIZE { /* No-op */ }
-    | BADSIZE  { lwes_yyerror(param, "Invalid Array Size"); }
+    | BADSIZE  { lwes_yyerror(param, "Invalid String Size"); }
     ;
 
 attributename: ATTRIBUTEWORD {
@@ -220,6 +212,13 @@ lwes_parse_esf
     lwesin = fd;
     lwesrestart(lwesin);
     lwesparse((void *) &state);
+    lweslex_destroy();
+    free(state.lastType);
+    state.lastType = NULL;
+    free(state.lastEvent);
+    state.lastEvent = NULL;
+    free(state.lastField);
+    state.lastField = NULL;
     fclose (fd);
   }
   else
@@ -268,4 +267,23 @@ void lwes_yyerror(void *param, const char *s)
 {
   fprintf(stderr,"ERROR : %s : line %d\n",s, ((struct lwes_parser_state *) param)->lineno);
   ((struct lwes_parser_state *) param)->errors = 1;
+}
+
+void lwes_cleanup_attribute_state(void* param)
+{
+  struct lwes_parser_state* state = (struct lwes_parser_state *) param;
+  free(state->lastType);
+  state->lastType = NULL;
+  free(state->lastField);
+  state->lastField = NULL;
+  state->flags = 0;
+  state->arrayTypeSize = 0;
+  state->strMaxSize = 0;
+}
+void lwes_cleanup_event_state(void* param)
+{
+  struct lwes_parser_state* state = (struct lwes_parser_state *) param;
+  free(state->lastEvent);
+  state->lastEvent = NULL;
+  lwes_cleanup_attribute_state(param);
 }

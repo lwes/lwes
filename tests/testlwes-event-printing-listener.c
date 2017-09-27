@@ -72,6 +72,14 @@ static void event1 (struct lwes_emitter *emitter)
   LWES_SHORT_STRING key09     = (LWES_SHORT_STRING)"anInt64";
   LWES_INT_64       value09   = (LWES_INT_64)-1;
 
+  const LWES_U_INT_16 size10   = 3;
+  LWES_SHORT_STRING key10      = (LWES_SHORT_STRING)"uint16_array";
+  LWES_U_INT_16     value10[3] = {123, 234, 345};
+
+  const LWES_U_INT_16 size11   = 4;
+  LWES_SHORT_STRING key11      = (LWES_SHORT_STRING)"string_array";
+  LWES_CONST_LONG_STRING value11[4]  = {"a", "bb", "ccc", "d"};
+
   /* set this one here since we need to call a function */
   value03.s_addr = inet_addr("224.0.0.100");
   /* create event */
@@ -97,6 +105,11 @@ static void event1 (struct lwes_emitter *emitter)
   MY_ASSERT ( ret == 8 );
   ret = lwes_event_set_INT_64   (event, key09, value09);
   MY_ASSERT ( ret == 9 );
+
+  ret = lwes_event_set_array(event, key10, LWES_TYPE_U_INT_16_ARRAY, size10, value10);
+  MY_ASSERT ( ret == 10 );
+  ret = lwes_event_set_array(event, key11, LWES_TYPE_STRING_ARRAY,   size11, value11);
+  MY_ASSERT ( ret == 11 );
 
   /* now emit event */
   ret = lwes_emitter_emit (emitter, event);
@@ -329,7 +342,7 @@ check_event_1 (void)
   /* this will totally not work if the order changes, or the SenderPort
      SenderIP or ReceiptTime are not the lengths represented here */
   const char *output =
-    "TypeChecker[12]\n"
+    "TypeChecker[14]\n"
     "{\n"
     "\tanIPAddress = 224.0.0.100;\n"
     "\tanInt16 = -1;\n"
@@ -340,8 +353,10 @@ check_event_1 (void)
     "\taUInt16 = 65535;\n"
     "\taUInt64 = 18446744073709551615;\n"
     "\tSenderPort = \1\1\1\1\1;\n"
+    "\tuint16_array = [ 123, 234, 345 ];\n"
     "\taBoolean = true;\n"
-    "\taString = http://www.test.com;\n"
+    "\taString = \"http://www.test.com\";\n"
+    "\tstring_array = [ \"a\", \"bb\", \"ccc\", \"d\" ];\n"
     "\tanInt32 = -1;\n"
     "}\n";
 

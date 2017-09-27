@@ -37,8 +37,7 @@ lwes_event_type_db_create
         {
           if (lwes_parse_esf (db, db->esf_filename) != 0)
             {
-              lwes_hash_destroy (db->events);
-              free (db);
+              lwes_event_type_db_destroy(db);
               db = NULL;
             }
         }
@@ -175,6 +174,13 @@ lwes_event_type_db_add_attribute_ex
   tmpAttrRec->array_size = arr_size;
   tmpAttrRec->max_str_size = max_str_size;
   tmpAttrRec->type = lwes_string_to_type(type);
+  if (arr_size != 0 && tmpAttrRec->type<LWES_TYPE_U_INT_16_ARRAY)
+    {
+      /* turn it into an array type */
+      tmpAttrRec->type += (LWES_TYPE_U_INT_16_ARRAY-LWES_TYPE_U_INT_16);
+    }
+  // TODO handle nullable
+
   ret = lwes_hash_put (eventHash, tmpAttrName, tmpAttrRec);
 
   /* if inserting into the hash fails we should free up our memory */

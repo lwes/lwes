@@ -133,7 +133,7 @@ int main (int   argc,
 
           default:
             fprintf (stderr,
-                     "error: unrecognized command line option -%c\n", 
+                     "error: unrecognized command line option -%c\n",
                      optopt);
 
             return 1;
@@ -217,7 +217,7 @@ int main (int   argc,
                 printf ("Was only able to emit %07d in 1 sec\n",i);
                 break;
               }
-            
+
             /* if we are attempting to send events evenly throughout
             the second, consider pausing briefly to get back on
             schedule */

@@ -27,16 +27,25 @@
 
 /* Create the memory for an event attribute */
 static struct lwes_event_attribute *
-lwes_event_attribute_create
-  (LWES_BYTE attrType,
-   void *    attrValue);
+lwes_event_attribute_create (LWES_BYTE       attrType,
+                             void*           attrValue,
+                             LWES_U_INT_16   arrayLen,
+                             void*           nullBits);
+
+static int
+lwes_event_add_attr
+  (struct lwes_event*           event,
+   LWES_CONST_SHORT_STRING      attrNameIn,
+   struct lwes_event_attribute* attribute);
 
 static int
 lwes_event_add
   (struct lwes_event*       event,
    LWES_CONST_SHORT_STRING  attrNameIn,
    LWES_BYTE                attrType,
-   void*                    attrValue);
+   void*                    attrValue,
+   LWES_U_INT_16            arrayLen,
+   void*                    nullBits);
 
 static int
 lwes_event_set_generic
@@ -325,13 +334,21 @@ lwes_event_destroy
   return 0;
 }
 
+
+
 #define TYPED_EVENT_FIELD_TO_BYTES(typ, fail_ret)\
   else if (tmp->type == LWES_TYPE_##typ)         \
   {                                              \
-    if (0 == marshall_##typ                      \
+    if (!marshall_##typ                          \
                 (*((LWES_##typ *)tmp->value),    \
                 bytes, num_bytes, &tmpOffset))   \
       { ret = fail_ret; }                        \
+  }                                              \
+  else if (tmp->type == LWES_TYPE_##typ##_ARRAY) \
+  {                                              \
+    if (!marshall_array_attribute                \
+          (tmp, bytes, num_bytes, &tmpOffset))   \
+      { ret = fail_ret-100; }                    \
   }
 
 
@@ -438,7 +455,7 @@ lwes_event_to_bytes
                         }
                       else
                         {
-                          if (tmp->type == LWES_TYPE_UNDEFINED) 
+                          if (tmp->type == LWES_TYPE_UNDEFINED)
                             {
                             }
                           TYPED_EVENT_FIELD_TO_BYTES(U_INT_16, -7)
@@ -458,6 +475,12 @@ lwes_event_to_bytes
                                                         bytes, num_bytes, &tmpOffset)) {
                                   ret = -15;
                                 }
+                            }
+                          else if (tmp->type == LWES_TYPE_STRING_ARRAY)
+                            {
+                              if (!marshall_array_attribute
+                                    (tmp, bytes, num_bytes, &tmpOffset))
+                                { ret = -115; }
                             }
                           else
                             {
@@ -646,14 +669,27 @@ lwes_event_add_headers
   else if (tmp_byte == LWES_TYPE_##typ)                              \
     {                                                                \
       LWES_##typ var;                                                \
-      if (unmarshall_##typ                                           \
-            (&var, bytes, num_bytes, &tmpOffset)) {                  \
-          if (0 > lwes_event_set_##typ                               \
-                (event, tmp_short_str, var))                         \
-            { return set_fail_ret; }                                 \
-        }                                                            \
-      else                                                           \
+      if (!unmarshall_##typ                                          \
+            (&var, bytes, num_bytes, &tmpOffset))                    \
         { return mar_fail_ret; }                                     \
+      if (0 > lwes_event_set_##typ                                   \
+            (event, tmp_short_str, var))                             \
+        { return set_fail_ret; }                                     \
+    }                                                                \
+  else if (tmp_byte == LWES_TYPE_##typ##_ARRAY)                      \
+    {                                                                \
+      struct lwes_event_attribute* attr;                             \
+      attr = lwes_event_attribute_create(tmp_byte, NULL, 0, NULL);   \
+      if (!unmarshall_array_attribute                                \
+            (attr, bytes, num_bytes, &tmpOffset))                    \
+        { return mar_fail_ret-100; }                                     \
+      if (0 > lwes_event_add_attr                                    \
+            (event, tmp_short_str, attr))                            \
+        {                                                            \
+          free(attr->value);                                         \
+          free(attr);                                                \
+          return set_fail_ret;                                       \
+        }                                                            \
     }
 
 /* PUBLIC : deserialize the event from a byte array and into an event */
@@ -715,7 +751,7 @@ lwes_event_from_bytes
                                                     num_bytes,
                                                     &tmpOffset))
                         {
-                          if (tmp_byte == LWES_TYPE_UNDEFINED) 
+                          if (tmp_byte == LWES_TYPE_UNDEFINED)
                             {
                             }
                           TYPED_BYTES_TO_EVENT_FIELD(U_INT_16, -2,  -3)
@@ -731,16 +767,12 @@ lwes_event_from_bytes
                           TYPED_BYTES_TO_EVENT_FIELD(DOUBLE,   -30, -31)
                           else if (tmp_byte == LWES_TYPE_STRING)
                             {
-                              if (unmarshall_LONG_STRING (tmp_long_str,
-                                                           (LONG_STRING_MAX+1),
-                                                           bytes,
-                                                           num_bytes,
-                                                           &tmpOffset))
+                              if (unmarshall_LONG_STRING 
+                                    (tmp_long_str, (LONG_STRING_MAX+1), 
+                                     bytes, num_bytes, &tmpOffset))
                                 {
-                                  if (lwes_event_set_STRING (event,
-                                                              tmp_short_str,
-                                                              tmp_long_str)
-                                       < 0)
+                                  if (0 > lwes_event_set_STRING 
+                                      (event, tmp_short_str, tmp_long_str))
                                     {
                                       return -18;
                                     }
@@ -748,6 +780,21 @@ lwes_event_from_bytes
                               else
                                 {
                                   return -19;
+                                }
+                            }
+                          else if (tmp_byte == LWES_TYPE_STRING_ARRAY)
+                            {
+                              struct lwes_event_attribute* attr;
+                              attr = lwes_event_attribute_create(tmp_byte, NULL, 0, NULL);
+                              if (!unmarshall_array_attribute
+                                    (attr, bytes, num_bytes, &tmpOffset))
+                                { return -119; }
+                              if (0 > lwes_event_add_attr
+                                    (event, tmp_short_str, attr))
+                                {
+                                  free(attr->value);
+                                  free(attr);
+                                  return -118;
                                 }
                             }
                           else
@@ -811,7 +858,7 @@ lwes_event_set_generic
     }
   memcpy(attrCopy, attrValue, attrSize);
 
-  ret = lwes_event_add (event, attrName, attrType, attrCopy);
+  ret = lwes_event_add (event, attrName, attrType, attrCopy, 0, NULL);
   if (ret < 0)
     {
       free (attrCopy);
@@ -825,7 +872,7 @@ lwes_event_get_generic
    LWES_CONST_SHORT_STRING  attrName,
    LWES_BYTE                attrType,
    int                      attrSize,
-   void*                    attrValue) 
+   void*                    attrValue)
 {
   struct lwes_event_attribute *tmp;
   if (event == NULL || attrName == NULL || attrValue == NULL)
@@ -838,6 +885,123 @@ lwes_event_get_generic
       memcpy(attrValue, tmp->value, attrSize);
       return 0;
     }
+  return -1;
+}
+
+int
+lwes_event_set_array
+  (struct lwes_event *event,
+   LWES_CONST_SHORT_STRING attrName,
+   LWES_TYPE type,
+   LWES_U_INT_16 arr_length,
+   void *arr)
+{
+  int ret = 0;
+  char *attrCopy;
+
+  if (event == NULL || attrName == NULL || arr == NULL)
+    {
+      return -1;
+    }
+
+  LWES_TYPE baseType = lwes_array_type_to_base(type);
+  int baseSize = arr_length * lwes_type_to_size(type);
+  int attrSize = baseSize;
+  if (LWES_TYPE_STRING == baseType)
+    {
+      /* Sum up the size of all the strings, to allocate in one block */
+      LWES_CONST_SHORT_STRING *str = (LWES_CONST_SHORT_STRING*)arr;
+      for (int i=0; i< arr_length; ++i)
+        {
+          attrSize += 1 + (str[i] ? strlen(str[i]) : 0);
+        }
+    }
+  attrCopy = (char *)malloc (attrSize);
+
+  if (attrCopy == NULL)
+    {
+      return -3;
+    }
+  if (LWES_TYPE_STRING == baseType)
+    {
+      LWES_CONST_SHORT_STRING *str = (LWES_CONST_SHORT_STRING*)arr;
+      LWES_SHORT_STRING *strOut    = ((LWES_SHORT_STRING*)attrCopy);
+      char * cur = ((char*)attrCopy) + baseSize;
+      for (int i=0; i< arr_length; ++i)
+        {
+          if (str[i])
+            {
+              int sz = 1 + strlen(str[i]);
+              memcpy(cur, str[i], sz);
+              strOut[i]=cur;
+              cur += sz;
+            }
+        }
+    }
+  else
+    {
+      memcpy(attrCopy, arr, attrSize);
+    }
+
+  ret = lwes_event_add (event, attrName, type, attrCopy, arr_length, NULL);
+  if (ret < 0)
+    {
+      free (attrCopy);
+    }
+  return ret;
+}
+
+/* NOTE: the returned array should be treated as const, */
+/* as it references the internal event data. */
+int
+lwes_event_get_array
+  (struct lwes_event *event,
+   LWES_CONST_SHORT_STRING name,
+   LWES_TYPE type,
+   LWES_U_INT_16 *arr_length,
+   void **arr)
+{
+  struct lwes_event_attribute *tmp;
+
+  if (event == NULL || name == NULL || arr == NULL)
+    {
+      return -1;
+    }
+
+  tmp = (struct lwes_event_attribute *)lwes_hash_get (event->attributes, name);
+
+  if (tmp != NULL && tmp->type == type)
+    {
+      *arr = (char*)tmp->value;
+      *arr_length = tmp->array_len;
+      return 0;
+    }
+  return -1;
+}
+
+int
+lwes_event_set_nullable_array
+  (struct lwes_event *event,
+   LWES_CONST_SHORT_STRING name,
+   LWES_TYPE type,
+   LWES_U_INT_16 arr_length,
+   void *arr)
+{
+  // TODO TODO TODO
+  (void)event; (void)name; (void)type; (void)arr_length; (void)arr;
+  return -1;
+}
+
+int
+lwes_event_get_nullable_array
+  (struct lwes_event *event,
+   LWES_CONST_SHORT_STRING name,
+   LWES_TYPE type,
+   LWES_U_INT_16 *arr_length,
+   void **arr)
+{
+  // TODO TODO TODO
+  (void)event; (void)name; (void)type; (void)arr_length; (void)arr;
   return -1;
 }
 
@@ -960,7 +1124,7 @@ int lwes_event_set_IP_ADDR_w_string (struct lwes_event *       event,
     }
   attrValue->s_addr = inet_addr (value);
 
-  ret = lwes_event_add (event, attrName, LWES_TYPE_IP_ADDR, attrValue);
+  ret = lwes_event_add (event, attrName, LWES_TYPE_IP_ADDR, attrValue, 0, NULL);
   if (ret < 0)
     {
       free (attrValue);
@@ -974,7 +1138,10 @@ int lwes_event_set_IP_ADDR_w_string (struct lwes_event *       event,
  *************************************************************************/
 /* Create the memory for an attribute */
 static struct lwes_event_attribute *
-lwes_event_attribute_create (LWES_BYTE attrType, void *attrValue)
+lwes_event_attribute_create (LWES_BYTE       attrType,
+                             void*           attrValue,
+                             LWES_U_INT_16   arrayLen,
+                             void*           nullBits)
 {
   struct lwes_event_attribute *attribute =
     (struct lwes_event_attribute *)
@@ -987,21 +1154,21 @@ lwes_event_attribute_create (LWES_BYTE attrType, void *attrValue)
 
   attribute->type  = attrType;
   attribute->value = attrValue;
+  attribute->array_len = arrayLen;
+  attribute->null_bits = nullBits;
 
   return attribute;
 }
 
-/* add an attribute to an event */
 static int
-lwes_event_add (struct lwes_event*       event,
-                LWES_CONST_SHORT_STRING  attrNameIn,
-                LWES_BYTE                attrType,
-                void*                    attrValue)
+lwes_event_add_attr
+  (struct lwes_event*           event,
+   LWES_CONST_SHORT_STRING      attrNameIn,
+   struct lwes_event_attribute* attribute)
 {
-  struct lwes_event_attribute* attribute = NULL;
   struct lwes_event_attribute* attribute_out = NULL;
-  LWES_SHORT_STRING            attrName  = NULL;
-  void *ret                              = NULL;
+  LWES_SHORT_STRING attrName  = NULL;
+  void* ret = NULL;
 
   /* check against the event db */
   if (event->type_db != NULL
@@ -1013,7 +1180,7 @@ lwes_event_add (struct lwes_event*       event,
     }
   if (event->type_db != NULL
        && lwes_event_type_db_check_for_type (event->type_db,
-                                             attrType,
+                                             attribute->type,
                                              attrNameIn,
                                              event->eventName) == 0)
     {
@@ -1030,14 +1197,6 @@ lwes_event_add (struct lwes_event*       event,
   attrName[0] = '\0';
   strcat (attrName,attrNameIn);
 
-  /* create the attribute */
-  attribute = lwes_event_attribute_create (attrType, attrValue);
-  if (attribute == NULL)
-    {
-      free (attrName);
-      return -3;
-    }
-
   /* Try and put something into the hash */
   ret = lwes_hash_put (event->attributes, attrName, attribute);
 
@@ -1046,7 +1205,6 @@ lwes_event_add (struct lwes_event*       event,
    */
   if (ret == attribute)
     {
-      free (attribute);
       free (attrName);
       return -4;
     }
@@ -1054,7 +1212,7 @@ lwes_event_add (struct lwes_event*       event,
     {
       attribute_out = ret;
       /* in this case we replaced the old value and it returned it, so free up the
-       * old value and the key (since we reused the old key
+       * old value and the key (since we reused the old key)
        */
       if (attribute_out->value != NULL)
         {
@@ -1067,6 +1225,36 @@ lwes_event_add (struct lwes_event*       event,
     {
       /* we successfully added a new attribute, so increment the number of attributes */
       event->number_of_attributes++;
+    }
+
+  return 0;
+}
+
+/* add an attribute to an event */
+static int
+lwes_event_add (struct lwes_event*       event,
+                LWES_CONST_SHORT_STRING  attrNameIn,
+                LWES_BYTE                attrType,
+                void*                    attrValue,
+                LWES_U_INT_16            arrayLen,
+                void*                    nullBits)
+{
+  struct lwes_event_attribute* attribute = NULL;
+  int ret                                = 0;
+
+  /* create the attribute */
+  attribute = lwes_event_attribute_create (attrType, attrValue, arrayLen, nullBits);
+  if (attribute == NULL)
+    {
+      return -3;
+    }
+
+  ret = lwes_event_add_attr (event, attrNameIn, attribute);
+
+  if (ret)
+    {
+      free (attribute);
+      return ret;
     }
 
   return event->number_of_attributes;
@@ -1141,7 +1329,7 @@ lwes_event_enumeration_next_element
      lwes_hash_enumeration_next_element (&(enumeration->hash_enum));
   (*key) = NULL;
   (*type) = LWES_TYPE_UNDEFINED;
-  
+
   if ( tmpAttrName != NULL)
     {
       struct lwes_event_attribute *tmp =

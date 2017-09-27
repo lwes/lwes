@@ -155,7 +155,7 @@ int main (int   argc, char *argv[]) {
 
       default:
         fprintf (stderr,
-                 "error: unrecognized command line option -%c\n", 
+                 "error: unrecognized command line option -%c\n",
                  optopt);
         return 1;
     }

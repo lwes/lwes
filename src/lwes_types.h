@@ -240,18 +240,20 @@ typedef enum {
     LWES_TYPE_BYTE              = 10,  /*!< 1 byte byte type */
     LWES_TYPE_FLOAT             = 11,  /*!< 4 byte floating point type */
     LWES_TYPE_DOUBLE            = 12,  /*!< 8 byte double-precision floating point type */
-//    LWES_TYPE_U_INT_16_ARRAY    = 129,
-//    LWES_TYPE_INT_16_ARRAY      = 130,
-//    LWES_TYPE_U_INT_32_ARRAY    = 131,
-//    LWES_TYPE_INT_32_ARRAY      = 132,
-//    LWES_TYPE_STRING_ARRAY      = 133,
-//    LWES_TYPE_IP_ADDR_ARRAY     = 134,
-//    LWES_TYPE_INT_64_ARRAY      = 135,
-//    LWES_TYPE_U_INT_64_ARRAY    = 136,
-//    LWES_TYPE_BOOLEAN_ARRAY     = 137,
-//    LWES_TYPE_BYTE_ARRAY        = 138,
-//    LWES_TYPE_FLOAT_ARRAY       = 139,
-//    LWES_TYPE_DOUBLE_ARRAY      = 140,
+    /* linear array types */
+    LWES_TYPE_U_INT_16_ARRAY    = 129,
+    LWES_TYPE_INT_16_ARRAY      = 130,
+    LWES_TYPE_U_INT_32_ARRAY    = 131,
+    LWES_TYPE_INT_32_ARRAY      = 132,
+    LWES_TYPE_STRING_ARRAY      = 133,
+    LWES_TYPE_IP_ADDR_ARRAY     = 134,
+    LWES_TYPE_INT_64_ARRAY      = 135,
+    LWES_TYPE_U_INT_64_ARRAY    = 136,
+    LWES_TYPE_BOOLEAN_ARRAY     = 137,
+    LWES_TYPE_BYTE_ARRAY        = 138,
+    LWES_TYPE_FLOAT_ARRAY       = 139,
+    LWES_TYPE_DOUBLE_ARRAY      = 140,
+    /* "nullable" (sparse) array types */
 //    LWES_TYPE_N_U_INT_16_ARRAY  = 141,
 //    LWES_TYPE_N_INT_16_ARRAY    = 142,
 //    LWES_TYPE_N_U_INT_32_ARRAY  = 143,
@@ -274,10 +276,35 @@ LWES_TYPE
 lwes_string_to_type
   (LWES_SHORT_STRING type_str);
 
+LWES_BOOLEAN
+lwes_type_is_array
+  (LWES_TYPE typ);
+
+LWES_BOOLEAN
+lwes_type_is_nullable_array
+  (LWES_TYPE typ);
+
+LWES_TYPE
+lwes_array_type_to_base
+  (LWES_TYPE typ);
+
+/* returns the unit-size for type typ
+ * NOTE: for strings it returns the pointer-size */
+int
+lwes_type_to_size
+  (LWES_TYPE type);
+
 int
 lwes_typed_value_to_stream
   (LWES_TYPE type,
    void* value,
+   FILE *stream);
+
+int
+lwes_typed_array_to_stream
+  (LWES_TYPE type,
+   void* value,
+   int size,
    FILE *stream);
 
 struct lwes_event_attribute;

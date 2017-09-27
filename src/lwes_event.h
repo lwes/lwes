@@ -23,7 +23,7 @@
 
 #ifdef __cplusplus
 extern "C" {
-#endif 
+#endif
 
 /*! \file lwes_event.h
  *  \brief Functions for dealing with LWES events
@@ -68,6 +68,10 @@ struct lwes_event_attribute
   LWES_BYTE         type;
   /*! The value of the attribute */
   void             *value;
+  /*! The array length, for array types only. */
+  LWES_U_INT_16     array_len;
+  /*! Pointer to bit array (0 = null, 1 = non-null), for nullable arrays. */
+  void             *null_bits;
 };
 
 /*! \struct lwes_event_enumeration lwes_event.h
@@ -78,7 +82,7 @@ struct lwes_event_enumeration
   /*! enumeration for the underlying hash */
   struct lwes_hash_enumeration hash_enum;
 };
- 
+
 /*! \brief Create the memory for an event with no name
  *
  *  This is used when deserializing an event from a byte array
@@ -126,7 +130,7 @@ lwes_event_create_with_encoding
    LWES_CONST_SHORT_STRING name,
    LWES_INT_16 encoding);
 
-/*! \brief Cleanup the memory for an event 
+/*! \brief Cleanup the memory for an event
  *
  * \param[in] event the event to free
  *
@@ -423,7 +427,7 @@ lwes_event_get_name
  */
 int
 lwes_event_get_number_of_attributes
-  (struct lwes_event *event, 
+  (struct lwes_event *event,
    LWES_U_INT_16 *number);
 
 /*! \brief Get the encoding of the event
@@ -611,6 +615,42 @@ lwes_event_get_DOUBLE
    LWES_CONST_SHORT_STRING  name,
    LWES_DOUBLE            *value);
 
+/* set an entire array in one call */
+int
+lwes_event_set_array
+  (struct lwes_event *event,
+   LWES_CONST_SHORT_STRING name,
+   LWES_TYPE type,
+   LWES_U_INT_16 arr_length,
+   void *arr);
+
+/* get an entire array in one call */
+int
+lwes_event_get_array
+  (struct lwes_event *event,
+   LWES_CONST_SHORT_STRING name,
+   LWES_TYPE type,
+   LWES_U_INT_16 *arr_length,
+   void **arr);
+
+/* set an entire nullable array in one call */
+int
+lwes_event_set_nullable_array
+  (struct lwes_event *event,
+   LWES_CONST_SHORT_STRING name,
+   LWES_TYPE type,
+   LWES_U_INT_16 arr_length,
+   void *arr);
+
+/* get an entire nullable array in one call */
+int
+lwes_event_get_nullable_array
+  (struct lwes_event *event,
+   LWES_CONST_SHORT_STRING name,
+   LWES_TYPE type,
+   LWES_U_INT_16 *arr_length,
+   void **arr);
+
 ///* set an entire array in one call */
 //int
 //lwes_event_set_<TYPE>_arr
@@ -619,7 +659,7 @@ lwes_event_get_DOUBLE
 //   LWES_INT_16 arr_length,
 //   LWES_<TYPE> *arr);
 //
-///* set an entire array in one call */
+///* get an entire array in one call */
 //int
 //lwes_event_get_<TYPE>_arr
 //  (struct lwes_event *event,
@@ -627,10 +667,9 @@ lwes_event_get_DOUBLE
 //   LWES_INT_16 arr_length,
 //   LWES_<TYPE> **arr);
 
-
 /*! \brief Serialize an event
- 
-   Serialization format is 
+
+   Serialization format is
 
    <pre>
     1 byte event name length ( 1 < b <= 255 )
@@ -851,9 +890,9 @@ int
 lwes_event_enumeration_next_element
   (struct lwes_event_enumeration *enumeration,
    LWES_CONST_SHORT_STRING *key,
-   LWES_TYPE *type); 
+   LWES_TYPE *type);
 
 #ifdef __cplusplus
 }
-#endif 
+#endif
 #endif /* __LWES_EVENT_FUNCTIONS_H */

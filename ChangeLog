@@ -6,7 +6,8 @@ Version 1.1.0 (timrc)
   * Removed lots of copy-paste code.
   * Moved repeated field-printing functions from the tools to the library.
   * Added array types, required/optional/nullable and string-size to ESF parser.
-  * (upcoming) Added array types.
+  * Added basic array type support to the library.
+  * Support bison 2.x and 3.x.
 
 Version 1.0.0 (molinaro)
   * Possibly NON-BACKWARD-COMPATIBLE - changed some members of

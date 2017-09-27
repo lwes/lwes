@@ -28,3 +28,7 @@ ylwrap
 *.gcno
 .*.swo
 .*.swp
+*.info
+out
+src/lwes_esf_parser_lwes_esf_parser_y.h
+src/lwes_esf_parser_lwes_esf_parser_y.c

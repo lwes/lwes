@@ -62,7 +62,7 @@ static int lwes_net_open_error = 0;
 static int
 my_lwes_net_open
   (struct lwes_net_connection *conn,
-   const char *address, 
+   const char *address,
    const char *iface,
    int port)
 {

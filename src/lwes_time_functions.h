@@ -40,7 +40,7 @@ currentTimeMillisLongLong
   (void);
 
 /*! \brief Convert to timeval
- * 
+ *
  * Converting an LWES_INT_64 to a struct timeval.
  * This is useful for printing the time.
  *
@@ -54,6 +54,6 @@ convertUnixLongLongTimeToTimeval
 
 #ifdef __cplusplus
 }
-#endif 
+#endif
 
 #endif /* __TIME_FUNCTIONS_H */

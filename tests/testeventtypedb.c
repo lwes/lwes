@@ -384,10 +384,37 @@ test_2_db (void)
   lwes_event_type_db_destroy (db2);
 }
 
+static void
+test_extended_esf (void)
+{
+  struct lwes_event_type_db *db;
+  const char *esffile = "test-extended.esf";
+
+  db = lwes_event_type_db_create ((char*)esffile);
+  assert ( db != NULL );
+
+  /* TODO check required/nullable/array/length-limited fields */
+
+  lwes_event_type_db_destroy (db);
+}
+
+static void
+test_bad_esf (void)
+{
+  struct lwes_event_type_db *db;
+  const char *esffile = "test-error.esf";
+
+  db = lwes_event_type_db_create ((char*)esffile);
+  assert ( db == NULL );
+}
+
+
 int main(void)
 {
   test_db ();
   test_2_db ();
+  test_extended_esf ();
+  test_bad_esf ();
 
   return 0;
 }

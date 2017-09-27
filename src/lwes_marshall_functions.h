@@ -17,10 +17,11 @@
 #include <stdio.h>
 
 #include "lwes_types.h"
+#include "lwes_event.h"
 
 #ifdef __cplusplus
 extern "C" {
-#endif 
+#endif
 
 /*! \file lwes_marshall_functions.h
  *  \brief Functions for marshalling LWES data types to/from byte arrays
@@ -690,8 +691,57 @@ unmarshall_LONG_STRING
    size_t           length,
    size_t *         offset);
 
+/* Private functions for internal library use */
+
+int unmarshall_string  (LWES_LONG_STRING aString,
+                        size_t max_string_length,
+                        int string_size_bits,
+                        LWES_BYTE_P bytes,
+                        size_t length,
+                        size_t *offset);
+
+int
+calculate_array_byte_size
+  (LWES_BYTE       type,
+   LWES_U_INT_16   array_len,
+   LWES_BYTE_P     bytes,
+   size_t          length,
+   size_t          offset);
+
+
+int
+marshall_generic
+  (LWES_BYTE      type,
+   void*          val,
+   LWES_BYTE_P    bytes,
+   size_t         length,
+   size_t *       offset);
+
+int
+unmarshall_generic
+  (LWES_BYTE      type,
+   void*          val,
+   LWES_BYTE_P    bytes,
+   size_t         length,
+   size_t *       offset);
+
+int
+marshall_array_attribute
+  (struct lwes_event_attribute* attr,
+   LWES_BYTE_P     bytes,
+   size_t          length,
+   size_t*         offset);
+
+int
+unmarshall_array_attribute
+  (struct lwes_event_attribute* attr,
+   LWES_BYTE_P     bytes,
+   size_t          length,
+   size_t*         offset);
+
+
 #ifdef __cplusplus
 }
-#endif 
+#endif
 
 #endif /* __LWES_MARSHALL_FUNCTIONS_H */

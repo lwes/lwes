@@ -222,7 +222,7 @@ lwes_net_recv_bind
  */
 int
 lwes_net_recv_bytes
-  (struct lwes_net_connection *conn, 
+  (struct lwes_net_connection *conn,
    LWES_BYTE_P bytes,
    size_t len);
 
@@ -240,7 +240,7 @@ lwes_net_recv_bytes
  */
 int
 lwes_net_recv_bytes_by
-  (struct lwes_net_connection *conn, 
+  (struct lwes_net_connection *conn,
    LWES_BYTE_P bytes,
    size_t len,
    unsigned int timeout_ms);

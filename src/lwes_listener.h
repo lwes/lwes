@@ -19,7 +19,7 @@
 
 #ifdef __cplusplus
 extern "C" {
-#endif 
+#endif
 
 /*! \file lwes_listener.h
  *  \brief Functions for listening to LWES events
@@ -202,6 +202,6 @@ lwes_listener_destroy
 
 #ifdef __cplusplus
 }
-#endif 
+#endif
 
 #endif /* __LWES_LISTENER_H */
