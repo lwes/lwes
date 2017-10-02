@@ -139,7 +139,9 @@ attributename: ATTRIBUTEWORD {
             lwes_yyerror(param, "Bad 'type' 'attributename' pair");
             }
           if ( ((struct lwes_parser_state *) param)->lastField != NULL )
+            {
             free( ((struct lwes_parser_state *) param)->lastField );
+            }
           duplicate_lex_string(param, &(state->lastField), lweslval, "fieldname");
                              }
     ;
@@ -245,11 +247,14 @@ duplicate_lex_string
   (void* param, char* *dest, const char* str, const char* label)
 {
   /* allocate a string, and copy the type value into it */
-  *dest = strdup(str);
+  if (str)
+  {
+    *dest = strdup(str);
+  }
   if ( *dest == NULL )
   {
     char buffer[256];
-    sprintf(buffer,"malloc problem for %s '%s'", label, str);
+    sprintf(buffer,"strdup problem for %s '%s'", label, str);
     lwes_yyerror(param, buffer);
   }
 }

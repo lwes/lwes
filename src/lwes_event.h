@@ -70,8 +70,6 @@ struct lwes_event_attribute
   void             *value;
   /*! The array length, for array types only. */
   LWES_U_INT_16     array_len;
-  /*! Pointer to bit array (0 = null, 1 = non-null), for nullable arrays. */
-  void             *null_bits;
 };
 
 /*! \struct lwes_event_enumeration lwes_event.h
@@ -823,6 +821,29 @@ lwes_event_add_headers
    LWES_INT_64 receipt_time,
    LWES_IP_ADDR sender_ip,
    LWES_U_INT_16 sender_port);
+
+/*! \brief Deserialize an event
+
+    \param[in] event the event to deserialize into
+    \param[out] if non-null, it is set to the expected number of attributes
+    \param[in] bytes the byte array to serialize into
+    \param[in] num_bytes the size of the byte array
+    \param[in] offset the offset into the array to start serializing at
+    \param[in] dtmp some temporary space to deserialize strings into
+
+    \return The number of bytes read from the array on success,
+             a negative number on failure
+    NOTE: This method allows reading events where attributes have been added or
+    removed, without updating the header (expected number of attributes).
+*/
+int
+lwes_event_from_bytes_lax
+  (struct lwes_event *event,
+   LWES_U_INT_16 *expected,
+   LWES_BYTE_P bytes,
+   size_t num_bytes,
+   size_t offset,
+   struct lwes_event_deserialize_tmp *dtmp);
 
 /*! \brief Deserialize an event
 

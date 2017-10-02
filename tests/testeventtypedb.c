@@ -408,6 +408,18 @@ test_bad_esf (void)
   assert ( db == NULL );
 }
 
+void
+duplicate_lex_string
+  (void* param, char* *dest, const char* str, const char* label);
+
+static void
+test_parser_duplicate_fail (void)
+{
+  char* dest = NULL;
+  struct lwes_parser_state state; 
+  duplicate_lex_string((void*)&state, &dest, NULL, "test");
+  assert(dest == NULL);
+}
 
 int main(void)
 {
@@ -415,6 +427,7 @@ int main(void)
   test_2_db ();
   test_extended_esf ();
   test_bad_esf ();
+  test_parser_duplicate_fail ();
 
   return 0;
 }

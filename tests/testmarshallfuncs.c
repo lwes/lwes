@@ -23,8 +23,28 @@
 
 
 #include "lwes_marshall_functions.h"
+
+static size_t null_at = 0;
+static size_t malloc_count = 0;
+
+static
+void *my_malloc (size_t size)
+{
+  void *ret = NULL;
+  malloc_count++;
+  if ( malloc_count != null_at )
+    {
+      ret = malloc (size);
+    }
+  return ret;
+}
+#define malloc my_malloc
+
 #include "lwes_marshall_functions.c"
 #include "lwes_types.c"
+
+#undef malloc
+
 
 //static LWES_BYTE marshal_data[72] = {
 static LWES_BYTE marshal_data[84] = {
@@ -49,12 +69,26 @@ static LWES_BYTE array_data[] = {
       0x00, 0x7b,
       0x15, 0x38,
       0xd4, 0x31,
-    /* string array length 2: "foo", "Bar" */
+    /* string array length 2: "foo", "BarBar" */
     0x85,   0x00, 0x02,
       0x00, 0x03,  0x66, 0x6f, 0x6f,
       0x00, 0x06,  0x42, 0x61, 0x72, 0x42, 0x61, 0x72
     /* TODO the other array types */
 };
+
+static LWES_BYTE nullable_data[] = {
+    /* uint16_t array length 9: 123, null, 5432, null, 54321, null, null, null, null */
+    0x8d,   0x00, 0x09,   0x15, 0x00,
+      0x00, 0x7b,
+      0x15, 0x38,
+      0xd4, 0x31,
+    /* string array length 5: null, "foo", null, "BarBar", null */
+    0x91,   0x00, 0x05,  0x0a,
+      0x00, 0x03,  0x66, 0x6f, 0x6f,
+      0x00, 0x06,  0x42, 0x61, 0x72, 0x42, 0x61, 0x72
+    /* TODO the other array types */
+};
+
 
 static LWES_BYTE scratch[512];
 
@@ -92,6 +126,19 @@ static void test_typefuncs()
   assert(0 == strcmp(LWES_IP_ADDR_ARRAY_STRING,  lwes_type_to_string(LWES_TYPE_IP_ADDR_ARRAY)));
   assert(0 == strcmp(LWES_STRING_ARRAY_STRING,   lwes_type_to_string(LWES_TYPE_STRING_ARRAY)));
 
+  assert(0 == strcmp(LWES_N_BYTE_ARRAY_STRING,     lwes_type_to_string(LWES_TYPE_N_BYTE_ARRAY)));
+  assert(0 == strcmp(LWES_N_BOOLEAN_ARRAY_STRING,  lwes_type_to_string(LWES_TYPE_N_BOOLEAN_ARRAY)));
+  assert(0 == strcmp(LWES_N_INT_16_ARRAY_STRING,   lwes_type_to_string(LWES_TYPE_N_INT_16_ARRAY)));
+  assert(0 == strcmp(LWES_N_U_INT_16_ARRAY_STRING, lwes_type_to_string(LWES_TYPE_N_U_INT_16_ARRAY)));
+  assert(0 == strcmp(LWES_N_INT_32_ARRAY_STRING,   lwes_type_to_string(LWES_TYPE_N_INT_32_ARRAY)));
+  assert(0 == strcmp(LWES_N_U_INT_32_ARRAY_STRING, lwes_type_to_string(LWES_TYPE_N_U_INT_32_ARRAY)));
+  assert(0 == strcmp(LWES_N_INT_64_ARRAY_STRING,   lwes_type_to_string(LWES_TYPE_N_INT_64_ARRAY)));
+  assert(0 == strcmp(LWES_N_U_INT_64_ARRAY_STRING, lwes_type_to_string(LWES_TYPE_N_U_INT_64_ARRAY)));
+  assert(0 == strcmp(LWES_N_FLOAT_ARRAY_STRING,    lwes_type_to_string(LWES_TYPE_N_FLOAT_ARRAY)));
+  assert(0 == strcmp(LWES_N_DOUBLE_ARRAY_STRING,   lwes_type_to_string(LWES_TYPE_N_DOUBLE_ARRAY)));
+  /*assert(0 == strcmp(LWES_N_IP_ADDR_ARRAY_STRING,  lwes_type_to_string(LWES_TYPE_N_IP_ADDR_ARRAY)));*/
+  assert(0 == strcmp(LWES_N_STRING_ARRAY_STRING,   lwes_type_to_string(LWES_TYPE_N_STRING_ARRAY)));
+
 
   assert(0 == lwes_type_to_size(LWES_TYPE_UNDEFINED));
   assert(sizeof(LWES_BYTE)     == lwes_type_to_size(LWES_TYPE_BYTE));
@@ -119,6 +166,27 @@ static void test_typefuncs()
   assert(sizeof(LWES_DOUBLE)   == lwes_type_to_size(LWES_TYPE_DOUBLE_ARRAY));
   assert(sizeof(LWES_IP_ADDR)  == lwes_type_to_size(LWES_TYPE_IP_ADDR_ARRAY));
   assert(sizeof(LWES_SHORT_STRING) == lwes_type_to_size(LWES_TYPE_STRING_ARRAY));
+
+  assert(sizeof(LWES_BYTE)     == lwes_type_to_size(LWES_TYPE_N_BYTE_ARRAY));
+  assert(sizeof(LWES_BOOLEAN)  == lwes_type_to_size(LWES_TYPE_N_BOOLEAN_ARRAY));
+  assert(sizeof(LWES_INT_16)   == lwes_type_to_size(LWES_TYPE_N_INT_16_ARRAY));
+  assert(sizeof(LWES_U_INT_16) == lwes_type_to_size(LWES_TYPE_N_U_INT_16_ARRAY));
+  assert(sizeof(LWES_INT_32)   == lwes_type_to_size(LWES_TYPE_N_INT_32_ARRAY));
+  assert(sizeof(LWES_U_INT_32) == lwes_type_to_size(LWES_TYPE_N_U_INT_32_ARRAY));
+  assert(sizeof(LWES_INT_64)   == lwes_type_to_size(LWES_TYPE_N_INT_64_ARRAY));
+  assert(sizeof(LWES_U_INT_64) == lwes_type_to_size(LWES_TYPE_N_U_INT_64_ARRAY));
+  assert(sizeof(LWES_FLOAT)    == lwes_type_to_size(LWES_TYPE_N_FLOAT_ARRAY));
+  assert(sizeof(LWES_DOUBLE)   == lwes_type_to_size(LWES_TYPE_N_DOUBLE_ARRAY));
+  assert(sizeof(LWES_IP_ADDR)  == lwes_type_to_size(LWES_TYPE_N_IP_ADDR_ARRAY));
+  assert(sizeof(LWES_SHORT_STRING) == lwes_type_to_size(LWES_TYPE_N_STRING_ARRAY));
+
+  assert(LWES_TYPE_UNDEFINED == lwes_array_type_to_base(LWES_TYPE_INT_16));
+  assert(LWES_TYPE_U_INT_16 == lwes_array_type_to_base(LWES_TYPE_U_INT_16_ARRAY));
+  assert(LWES_TYPE_U_INT_16 == lwes_array_type_to_base(LWES_TYPE_N_U_INT_16_ARRAY));
+  assert(LWES_TYPE_STRING   == lwes_array_type_to_base(LWES_TYPE_STRING_ARRAY));
+  assert(LWES_TYPE_STRING   == lwes_array_type_to_base(LWES_TYPE_N_STRING_ARRAY));
+  assert(LWES_TYPE_DOUBLE   == lwes_array_type_to_base(LWES_TYPE_DOUBLE_ARRAY));
+  assert(LWES_TYPE_DOUBLE   == lwes_array_type_to_base(LWES_TYPE_N_DOUBLE_ARRAY));
 
   assert( 0 == lwes_typed_value_to_stream(LWES_TYPE_U_INT_32_ARRAY, NULL, NULL));
   assert( 0 == lwes_typed_value_to_stream(LWES_TYPE_UNDEFINED, NULL, NULL));
@@ -186,6 +254,8 @@ int main(void)
   LWES_CHAR  small_string[small_string_length];
   size_t     long_too_long_bytes = 65536;
   size_t     offset = 0;
+  size_t     offsetw = 0;
+  size_t     offset_save = 0;
   size_t     short_string_offset1 = 0;
   size_t     short_string_offset2 = 0;
   unsigned int i=0;
@@ -291,7 +361,7 @@ int main(void)
       assert (bytes[i] == 0x00 );
     }
 
-  /* actually mashall something now */
+  /* actually marshall something now */
   offset = 0;
   assert (   marshall_BYTE         (aByte,         bytes, num_bytes, &offset) );
   assert (   marshall_BOOLEAN      (aBool,         bytes, num_bytes, &offset) );
@@ -597,7 +667,6 @@ int main(void)
   /* Test array code */
   offset = 0;
   attr.value = NULL;
-  attr.null_bits = NULL;
   attr.type = LWES_TYPE_U_INT_16_ARRAY;
   assert( ! marshall_array_attribute (NULL, scratch, sizeof(scratch), &offset) );
   assert( ! marshall_array_attribute (&attr, scratch, offset, &offset) );
@@ -610,7 +679,6 @@ int main(void)
   assert( ((LWES_U_INT_16*)attr.value)[0] ==   123 );
   assert( ((LWES_U_INT_16*)attr.value)[1] ==  5432 );
   assert( ((LWES_U_INT_16*)attr.value)[2] == 54321 );
-  assert( NULL == attr.null_bits );
   free(attr.value);
   attr.value = NULL;
 
@@ -622,7 +690,6 @@ int main(void)
   assert( attr.array_len == 2 );
   assert( 0 == strcmp ("foo", ((LWES_SHORT_STRING*)attr.value)[0]) );
   assert( 0 == strcmp ("BarBar", ((LWES_SHORT_STRING*)attr.value)[1]) );
-  assert( NULL == attr.null_bits );
   free(attr.value);
   attr.value = NULL;
 
@@ -653,6 +720,100 @@ int main(void)
   assert( ! marshall_array_attribute (&attr, scratch, 3, &offset) );
   assert( ! marshall_array_attribute (&attr, scratch, 4, &offset) );
   attr.value = NULL;
+
+  /* nullable array generic */
+  offset = 0;
+  assert( unmarshall_BYTE (&attr.type, nullable_data, sizeof(nullable_data), &offset) );
+  assert( attr.type == LWES_TYPE_N_U_INT_16_ARRAY );
+  offset_save = offset;
+  /* fail read */
+  for (i=0; i<8; ++i)
+    {
+      offset = offset_save;
+      assert(!unmarshall_array_attribute (&attr, nullable_data, i, &offset) );
+    }
+  offset = offset_save;
+  /* good read */
+  assert( unmarshall_array_attribute (&attr, nullable_data, sizeof(nullable_data), &offset) );
+  offset_save = offset;
+  assert( attr.array_len == 9 );
+  assert( ((LWES_U_INT_16**)attr.value)[0] );
+  assert(!((LWES_U_INT_16**)attr.value)[1] );
+  assert( ((LWES_U_INT_16**)attr.value)[2] );
+  assert(!((LWES_U_INT_16**)attr.value)[3] );
+  assert( ((LWES_U_INT_16**)attr.value)[4] );
+  assert(!((LWES_U_INT_16**)attr.value)[5] );
+  assert(!((LWES_U_INT_16**)attr.value)[6] );
+  assert(!((LWES_U_INT_16**)attr.value)[7] );
+  assert(!((LWES_U_INT_16**)attr.value)[8] );
+  assert( *(((LWES_U_INT_16**)attr.value)[0]) ==   123 );
+  assert( *(((LWES_U_INT_16**)attr.value)[2]) ==   5432 );
+  assert( *(((LWES_U_INT_16**)attr.value)[4]) ==   54321 );
+  /* write it back out */
+  offsetw=0;
+  assert( marshall_BYTE (attr.type, bytes, num_bytes, &offsetw) );
+  assert( marshall_array_attribute (&attr, bytes, num_bytes, &offsetw) );
+  free(attr.value);
+  attr.value = NULL;
+  /* write with errors */
+  for (i=0; i<8; ++i)
+    {
+      offset = 0;
+      assert(!marshall_array_attribute (&attr, bytes2, 0, &offset) );
+    }
+  free(attr.value);
+  attr.value = NULL;
+
+  /* nullable array string */
+  offset = offset_save;
+  assert( unmarshall_BYTE (&attr.type, nullable_data, sizeof(nullable_data), &offset) );
+  assert( attr.type == LWES_TYPE_N_STRING_ARRAY );
+  /* fail read */
+  offset_save = offset;
+  for (i=0; i<23; ++i)
+    {
+      offset = offset_save;
+      assert(!unmarshall_array_attribute (&attr, nullable_data, i, &offset) );
+    }
+
+  /* fail malloc */
+  null_at=1;
+  malloc_count=0;
+  assert( !unmarshall_array_attribute (&attr, nullable_data, sizeof(nullable_data), &offset) );
+  null_at=0;
+  malloc_count=0;
+
+
+  /* good read */
+  offset = offset_save;
+  assert( unmarshall_array_attribute (&attr, nullable_data, sizeof(nullable_data), &offset) );
+  assert( attr.array_len == 5 );
+  assert(!((LWES_LONG_STRING*)attr.value)[0] );
+  assert( ((LWES_LONG_STRING*)attr.value)[1] );
+  assert(!((LWES_LONG_STRING*)attr.value)[2] );
+  assert( ((LWES_LONG_STRING*)attr.value)[3] );
+  assert(!((LWES_LONG_STRING*)attr.value)[4] );
+  assert(0 == strcmp("foo", ((LWES_LONG_STRING*)attr.value)[1]) );
+  assert(0 == strcmp("BarBar", ((LWES_LONG_STRING*)attr.value)[3]) );
+  /* failed write */
+  offset_save = offsetw;
+  for (i=0; i<23; ++i)
+    {
+      offsetw = offset_save;
+      assert(!marshall_array_attribute (&attr, bytes2, i, &offsetw) );
+    }
+  offsetw = offset_save;
+  /* write it back out */
+  offsetw = offset_save;
+  assert( marshall_BYTE (attr.type, bytes, num_bytes, &offsetw) );
+  assert( marshall_array_attribute (&attr, bytes, num_bytes, &offsetw) );
+  free(attr.value);
+  attr.value = NULL;
+
+  for (i = 0; i < offsetw; i++)
+    {
+      assert(nullable_data[i] == bytes[i]);
+    }
 
   free(attr.value);
   attr.value = NULL;

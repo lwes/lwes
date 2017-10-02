@@ -174,12 +174,16 @@ lwes_event_type_db_add_attribute_ex
   tmpAttrRec->array_size = arr_size;
   tmpAttrRec->max_str_size = max_str_size;
   tmpAttrRec->type = lwes_string_to_type(type);
-  if (arr_size != 0 && tmpAttrRec->type<LWES_TYPE_U_INT_16_ARRAY)
+  if ((flags & ATTRIBUTE_NULLABLE) &&  tmpAttrRec->type<LWES_TYPE_U_INT_16_ARRAY)
+    {
+      /* turn it into a nullable array type */
+      tmpAttrRec->type += (LWES_TYPE_N_U_INT_16_ARRAY-LWES_TYPE_U_INT_16);
+    }
+  else if (arr_size != 0 && tmpAttrRec->type<LWES_TYPE_U_INT_16_ARRAY)
     {
       /* turn it into an array type */
       tmpAttrRec->type += (LWES_TYPE_U_INT_16_ARRAY-LWES_TYPE_U_INT_16);
     }
-  // TODO handle nullable
 
   ret = lwes_hash_put (eventHash, tmpAttrName, tmpAttrRec);
 

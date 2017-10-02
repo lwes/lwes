@@ -205,11 +205,27 @@ const LWES_U_INT_16 size14   = 4;
 LWES_SHORT_STRING key14      = (LWES_SHORT_STRING)"string_array";
 LWES_CONST_LONG_STRING value14[4]  = {"one", "twos", "threeses", "for"};
 
+const LWES_U_INT_16 size15   = 9;
+LWES_SHORT_STRING key15      = (LWES_SHORT_STRING)"uint16_null_array";
+LWES_U_INT_16     *value15[9] = {&value13[0], NULL, &value13[1], NULL, NULL, &value13[2], NULL, NULL, NULL};
+
+const LWES_U_INT_16 size16   = 7;
+LWES_SHORT_STRING key16      = (LWES_SHORT_STRING)"string_null_array";
+LWES_CONST_LONG_STRING value16[7]  = {NULL, "one", "twos", NULL, "threeses", "for", NULL};
+
+LWES_SHORT_STRING key17     = (LWES_SHORT_STRING)"aByte";
+LWES_BYTE         value17   = (LWES_BYTE)42;
+LWES_SHORT_STRING key18     = (LWES_SHORT_STRING)"aFloat";
+LWES_FLOAT        value18   = (LWES_FLOAT)43.44;
+LWES_SHORT_STRING key19     = (LWES_SHORT_STRING)"aDouble";
+LWES_DOUBLE       value19   = (LWES_DOUBLE)654.321;
+
 static void
 test_event_with_db (void)
 {
   struct lwes_event *event1;
   struct lwes_event *event2;
+  struct lwes_event *event3;
   struct lwes_event_type_db *db = NULL;
   struct lwes_event_deserialize_tmp dtmp;
   LWES_BYTE bytes[MAX_MSG_SIZE];
@@ -236,6 +252,13 @@ test_event_with_db (void)
   LWES_U_INT_16    *value13_o1 = NULL;
   LWES_U_INT_16     size14_o1 = 0;
   LWES_LONG_STRING *value14_o1 = NULL;
+  LWES_U_INT_16     size15_o1 = 0;
+  LWES_U_INT_16   **value15_o1 = NULL;
+  LWES_U_INT_16     size16_o1 = 0;
+  LWES_LONG_STRING *value16_o1 = NULL;
+  LWES_BYTE         value17_o1 = 0;
+  LWES_FLOAT        value18_o1 = 0;
+  LWES_DOUBLE       value19_o1 = 0;
 
   LWES_SHORT_STRING evnt_nm_o2;
   LWES_U_INT_16     nm_attr_o2;
@@ -256,7 +279,15 @@ test_event_with_db (void)
   LWES_U_INT_16    *value13_o2;
   LWES_U_INT_16     size14_o2;
   LWES_LONG_STRING *value14_o2;
+  LWES_U_INT_16     size15_o2 = 0;
+  LWES_U_INT_16   **value15_o2 = NULL;
+  LWES_U_INT_16     size16_o2 = 0;
+  LWES_LONG_STRING *value16_o2 = NULL;
+  LWES_BYTE         value17_o2 = 0;
+  LWES_FLOAT        value18_o2 = 0;
+  LWES_DOUBLE       value19_o2 = 0;
 
+  int attrCount = 0;
   db = lwes_event_type_db_create ((char*)esffile);
   assert ( db != NULL );
 
@@ -265,19 +296,19 @@ test_event_with_db (void)
 
   assert ( lwes_event_get_name ( event1, &evnt_nm_o1) == 0 );
   assert ( strcmp (evnt_nm_o1, eventname) == 0 );
-  assert ( lwes_event_set_STRING           (event1, key01, value01) ==  1 );
-  assert ( lwes_event_set_BOOLEAN          (event1, key02, value02) ==  2 );
+  assert ( lwes_event_set_STRING           (event1, key01, value01) == ++attrCount );
+  assert ( lwes_event_set_BOOLEAN          (event1, key02, value02) == ++attrCount );
   assert ( lwes_event_set_STRING           (event1, key02, value02s)== -2 );
-  assert ( lwes_event_set_IP_ADDR_w_string (event1, key03, value03s)==  3 );
-  assert ( lwes_event_set_U_INT_16         (event1, key04, value04) ==  4 );
+  assert ( lwes_event_set_IP_ADDR_w_string (event1, key03, value03s)== ++attrCount );
+  assert ( lwes_event_set_U_INT_16         (event1, key04, value04) == ++attrCount );
   assert ( lwes_event_set_U_INT_16         (event1, key05, value05) == -1 );
-  assert ( lwes_event_set_INT_16           (event1, key06, value06) ==  5 );
-  assert ( lwes_event_set_U_INT_32         (event1, key07, value07) ==  6 );
-  assert ( lwes_event_set_INT_32           (event1, key08, value08) ==  7 );
-  assert ( lwes_event_set_U_INT_64         (event1, key09, value09) ==  8 );
-  assert ( lwes_event_set_INT_64           (event1, key10, value10) ==  9 );
-  assert ( lwes_event_set_STRING           (event1, key11, value11) == 10 );
-  assert ( lwes_event_set_IP_ADDR          (event1, key12, value12) == 11 );
+  assert ( lwes_event_set_INT_16           (event1, key06, value06) == ++attrCount );
+  assert ( lwes_event_set_U_INT_32         (event1, key07, value07) == ++attrCount );
+  assert ( lwes_event_set_INT_32           (event1, key08, value08) == ++attrCount );
+  assert ( lwes_event_set_U_INT_64         (event1, key09, value09) == ++attrCount );
+  assert ( lwes_event_set_INT_64           (event1, key10, value10) == ++attrCount );
+  assert ( lwes_event_set_STRING           (event1, key11, value11) == ++attrCount );
+  assert ( lwes_event_set_IP_ADDR          (event1, key12, value12) == ++attrCount );
   assert ( lwes_event_get_number_of_attributes ( event1, &nm_attr_o1) == 0 );
   assert ( nm_attr_o1 == 11 );
 
@@ -292,20 +323,50 @@ test_event_with_db (void)
     }
 
   // TODO move this above and update the binary data, 
-  // NOTE: because of hash-ordering it completely changes the data
+  // NOTE: because of hash-ordering it completely changes/reorders the data
+  assert ( lwes_event_set_BYTE             (event1, key17, value17) ==  ++attrCount );
+  assert ( lwes_event_set_FLOAT            (event1, key18, value18) ==  ++attrCount );
+  assert ( lwes_event_set_DOUBLE           (event1, key19, value19) ==  ++attrCount );
+
   assert ( lwes_event_set_array(event1, "badkey", LWES_TYPE_U_INT_16_ARRAY, size13, value13) == -1 );
   assert ( lwes_event_set_array(NULL, key13, LWES_TYPE_U_INT_16_ARRAY, size13, value13) == -1 );
-  assert ( lwes_event_set_array(event1, key13, LWES_TYPE_U_INT_16_ARRAY, size13, value13) == 12 );
+  assert ( lwes_event_set_array(event1, key13, LWES_TYPE_U_INT_16, size13, value13) == -1 );
+  assert ( lwes_event_set_array(event1, key13, LWES_TYPE_U_INT_16_ARRAY, size13, value13) == ++attrCount );
   size1 = lwes_event_to_bytes (event1,bytes,MAX_MSG_SIZE, 0);
-  assert ( lwes_event_set_array(event1, key14, LWES_TYPE_STRING_ARRAY, size14, value14) == 13 );
+  assert ( lwes_event_set_array(event1, key14, LWES_TYPE_STRING_ARRAY, size14, value14) == ++attrCount );
+  size1 = lwes_event_to_bytes (event1,bytes,MAX_MSG_SIZE, 0);
+
+  assert ( lwes_event_set_nullable_array(NULL, key15, LWES_TYPE_N_U_INT_16_ARRAY, size15, value15) == -1 );
+  assert ( lwes_event_set_nullable_array(event1, key15, LWES_TYPE_U_INT_16, size15, value15) == -1 );
+  assert ( lwes_event_set_nullable_array(event1, "badkey", LWES_TYPE_N_U_INT_16_ARRAY, size15, value15) == -1 );
+
+  assert ( lwes_event_set_nullable_array(event1, key15, LWES_TYPE_N_U_INT_16_ARRAY, size15, value15) == ++attrCount );
+  size1 = lwes_event_to_bytes (event1,bytes,MAX_MSG_SIZE, 0);
+  assert ( lwes_event_set_nullable_array(event1, key16, LWES_TYPE_N_STRING_ARRAY, size16, value16) == ++attrCount );
   size1 = lwes_event_to_bytes (event1,bytes,MAX_MSG_SIZE, 0);
   assert ( lwes_event_get_number_of_attributes ( event1, &nm_attr_o1) == 0 );
-  assert ( nm_attr_o1 == 13 );
+  assert ( nm_attr_o1 == attrCount );
 
   event2 = lwes_event_create_no_name (db);
   assert ( event2 != NULL );
 
   size2  = lwes_event_from_bytes (event2, bytes, size1, 0, &dtmp);
+
+  for (i=0; i<size1; ++i)
+    {
+      assert( 0 > lwes_event_to_bytes (event1, bytes, i, 0) );
+    }
+
+  for (i=0; i<size1; ++i)
+    {
+      int ret;
+      event3 = lwes_event_create_no_name (db);
+      assert ( event3 != NULL );
+      ret = lwes_event_from_bytes (event3, bytes, i, 0, &dtmp);
+      assert( 0 > ret);
+      lwes_event_destroy(event3);
+    }
+
 
   assert ( size1 == size2 );
 
@@ -313,7 +374,7 @@ test_event_with_db (void)
   assert ( strcmp (evnt_nm_o2, eventname) == 0 );
   assert ( strcmp (evnt_nm_o1, evnt_nm_o2) == 0 );
   assert ( lwes_event_get_number_of_attributes ( event2, &nm_attr_o2) == 0 );
-  assert ( nm_attr_o2 == 13 );
+  assert ( nm_attr_o2 == attrCount );
   assert ( nm_attr_o2 == nm_attr_o1 );
 
   assert ( lwes_event_get_STRING   (event1, key01, &value01_o1) ==  0 );
@@ -329,17 +390,48 @@ test_event_with_db (void)
   assert ( lwes_event_get_INT_64   (event1, key10, &value10_o1) ==  0 );
   assert ( lwes_event_get_STRING   (event1, key11, &value11_o1) ==  0 );
   assert ( lwes_event_get_IP_ADDR  (event1, key12, &value12_o1) ==  0 );
+
+  assert ( lwes_event_get_BYTE     (event1, key17, &value17_o1) ==  0 );
+  assert ( lwes_event_get_FLOAT    (event1, key18, &value18_o1) ==  0 );
+  assert ( lwes_event_get_DOUBLE   (event1, key19, &value19_o1) ==  0 );
+  assert ( value17 == value17_o1 );
+  assert ( value18 == value18_o1 );
+  assert ( value19 == value19_o1 );
+
   assert ( lwes_event_get_array(event1, key13, LWES_TYPE_U_INT_16_ARRAY, &size13_o1, (void**)&value13_o1) == 0 );
   assert ( lwes_event_get_array(event1, key14, LWES_TYPE_STRING_ARRAY, &size14_o1, (void**)&value14_o1) == 0 );
   assert ( size13_o1 == size13 );
-  assert ( value13_o1[0] == value13[0] );
-  assert ( value13_o1[1] == value13[1] );
-  assert ( value13_o1[2] == value13[2] );
+  for (i=0; i<size13; ++i)
+    {
+      assert ( value13[i] == value13_o1[i] );
+    }
   assert ( size14_o1 == size14 );
-  assert ( 0 == strcmp(value14_o1[0], value14[0]) );
-  assert ( 0 == strcmp(value14_o1[1], value14[1]) );
-  assert ( 0 == strcmp(value14_o1[2], value14[2]) );
-  assert ( 0 == strcmp(value14_o1[3], value14[3]) );
+  for (i=0; i<size14; ++i)
+    {
+      if (!value14[i])
+        { assert ( value14[i] == value14_o1[i] ); }
+      else
+        { assert ( 0 == strcmp(value14[i], value14_o1[i]) ); }
+    }
+
+  assert ( lwes_event_get_nullable_array(event1, key15, LWES_TYPE_N_U_INT_16_ARRAY, &size15_o1, (void**)&value15_o1) == 0 );
+  assert ( lwes_event_get_nullable_array(event1, key16, LWES_TYPE_N_STRING_ARRAY, &size16_o1, (void**)&value16_o1) == 0 );
+  assert ( size15_o1 == size15 );
+  for (i=0; i<size15; ++i)
+    {
+      if (!value15[i])
+        { assert ( value15[i] == value15_o1[i] ); }
+      else
+        { assert ( *value15[i] == *value15_o1[i] ); }
+    }
+  assert ( size16_o1 == size16 );
+  for (i=0; i<size16; ++i)
+    {
+      if (!value16[i])
+        { assert ( value16[i] == value16_o1[i] ); }
+      else
+        { assert ( 0 == strcmp(value16[i], value16_o1[i]) ); }
+    }
 
 
   assert ( lwes_event_get_STRING   (event2, key01, &value01_o2) ==  0 );
@@ -355,6 +447,9 @@ test_event_with_db (void)
   assert ( lwes_event_get_INT_64   (event2, key10, &value10_o2) ==  0 );
   assert ( lwes_event_get_STRING   (event2, key11, &value11_o2) ==  0 );
   assert ( lwes_event_get_IP_ADDR  (event2, key12, &value12_o2) ==  0 );
+  assert ( lwes_event_get_BYTE     (event1, key17, &value17_o2) ==  0 );
+  assert ( lwes_event_get_FLOAT    (event1, key18, &value18_o2) ==  0 );
+  assert ( lwes_event_get_DOUBLE   (event1, key19, &value19_o2) ==  0 );
   assert ( lwes_event_get_array(event2, key13, LWES_TYPE_U_INT_16_ARRAY, &size13_o2, (void**)&value13_o2) == 0 );
   assert ( lwes_event_get_array(event2, key14, LWES_TYPE_STRING_ARRAY, &size14_o2, (void**)&value14_o2) == 0 );
 
@@ -371,18 +466,64 @@ test_event_with_db (void)
   assert ( value10_o1 == value10_o2 );
   assert ( strcmp ( value11_o1, value11_o2 ) == 0 );
   assert ( value12_o1.s_addr == value12_o2.s_addr );
+  assert ( value17 == value17_o2 );
+  assert ( value18 == value18_o2 );
+  assert ( value19 == value19_o2 );
   assert ( size13_o2 == size13 );
-  assert ( value13_o2[0] == value13[0] );
-  assert ( value13_o2[1] == value13[1] );
-  assert ( value13_o2[2] == value13[2] );
+  for (i=0; i<size13; ++i)
+    {
+      assert ( value13[i] == value13_o2[i] );
+    }
   assert ( size14_o2 == size14 );
-  assert ( 0 == strcmp(value14_o2[0], value14[0]) );
-  assert ( 0 == strcmp(value14_o2[1], value14[1]) );
-  assert ( 0 == strcmp(value14_o2[2], value14[2]) );
-  assert ( 0 == strcmp(value14_o2[3], value14[3]) );
+  for (i=0; i<size14; ++i)
+    {
+      if (!value14[i])
+        { assert ( value14[i] == value14_o2[i] ); }
+      else
+        { assert ( 0 == strcmp(value14[i], value14_o2[i]) ); }
+    }
 
   assert ( lwes_event_get_array(NULL, key13, LWES_TYPE_U_INT_16_ARRAY, &size13_o2, (void**)&value13_o2) != 0 );
+  assert ( lwes_event_get_array(event1, key13, LWES_TYPE_U_INT_16, &size13_o2, (void**)&value13_o2) != 0 );
   assert ( lwes_event_get_array(event1, "badkey", LWES_TYPE_U_INT_16_ARRAY, &size13_o2, (void**)&value13_o2) != 0 );
+
+  assert ( lwes_event_get_nullable_array(NULL, key15, LWES_TYPE_N_U_INT_16_ARRAY, &size15_o2, (void**)&value15_o2) != 0 );
+  assert ( lwes_event_get_nullable_array(event1, key15, LWES_TYPE_U_INT_16, &size15_o2, (void**)&value15_o2) != 0 );
+  assert ( lwes_event_get_nullable_array(event1, "badkey", LWES_TYPE_N_U_INT_16_ARRAY, &size15_o2, (void**)&value15_o2) != 0 );
+
+  assert ( lwes_event_get_nullable_array(event1, key15, LWES_TYPE_N_U_INT_16_ARRAY, &size15_o2, (void**)&value15_o2) == 0 );
+  assert ( lwes_event_get_nullable_array(event1, key16, LWES_TYPE_N_STRING_ARRAY, &size16_o2, (void**)&value16_o2) == 0 );
+  assert ( size15_o2 == size15 );
+  for (i=0; i<size15; ++i)
+    {
+      if (!value15[i])
+        { assert ( value15[i] == value15_o2[i] ); }
+      else
+        { assert ( *value15[i] == *value15_o2[i] ); }
+    }
+  assert ( size16_o2 == size16 );
+  for (i=0; i<size16; ++i)
+    {
+      if (!value16[i])
+        { assert ( value16[i] == value16_o2[i] ); }
+      else
+        { assert ( 0 == strcmp(value16[i], value16_o2[i]) ); }
+    }
+
+
+  /* add fields that will deserialize, but fail to add (keys not in the ESF for event1). */
+  attrCount = 0;
+  event3 = lwes_event_create (NULL, eventname);
+  assert ( lwes_event_set_array(event3, "bogus2", LWES_TYPE_STRING_ARRAY, size14, value14) == ++attrCount );
+  assert ( lwes_event_set_nullable_array(event3, "bogus4", LWES_TYPE_N_STRING_ARRAY, size16, value16) == ++attrCount );
+  size1 = lwes_event_to_bytes (event3, bytes, MAX_MSG_SIZE, 0);
+  lwes_event_destroy(event3);
+  event3 = lwes_event_create_no_name (NULL);
+  assert ( 0 < lwes_event_from_bytes (event3, bytes, size1, 0, &dtmp) );
+  lwes_event_destroy(event3);
+  event3 = lwes_event_create_no_name (db);
+  assert ( 0 > lwes_event_from_bytes (event3, bytes, size1, 0, &dtmp) );
+  lwes_event_destroy(event3);
 
   lwes_event_destroy (event1);
   lwes_event_destroy (event2);
@@ -685,6 +826,8 @@ test_error_and_boundary_conditions (void)
   LWES_LONG_STRING  value_string;
   LWES_IP_ADDR      value_ipaddr;
   LWES_BOOLEAN      value_bool;
+  LWES_U_INT_16     value_int16_a[4] = {10, 1, 9, 5};
+  LWES_U_INT_16    *value_int16_n[4] = {NULL, &value_int16_a[0], NULL, &value_int16_a[1]};
 
 
   /* cause malloc to fail for event creates */
@@ -742,7 +885,7 @@ test_error_and_boundary_conditions (void)
         }
       else
         {
-          null_at      = i;
+          null_at  = i;
         }
 
       malloc_count = 0;
@@ -772,6 +915,12 @@ test_error_and_boundary_conditions (void)
               == ret);
       malloc_count = 0;
       assert (lwes_event_set_BOOLEAN (event, "Bar", 1) == ret);
+
+      malloc_count = 0;
+      assert (lwes_event_set_array (event, "Bar", LWES_TYPE_U_INT_16_ARRAY, 4, value_int16_a) == ret);
+
+      malloc_count = 0;
+      assert (lwes_event_set_nullable_array (event, "Bar", LWES_TYPE_N_U_INT_16_ARRAY, 4, value_int16_n) == ret);
     }
 
   /* reset error counters */

@@ -16,6 +16,17 @@
 
 const LWES_BYTE NULL_CHAR = (LWES_BYTE)'\0';
 
+
+int
+bitvec_byte_size
+  (size_t length);
+
+int bitvec_get
+  (LWES_BYTE* bitvec, int index);
+
+void bitvec_set
+  (LWES_BYTE* bitvec, int index, int val);
+
 int marshall_BYTE         (LWES_BYTE         aByte,
                            LWES_BYTE_P       bytes,
                            size_t            length,
@@ -524,6 +535,35 @@ unmarshall_generic
   }
 }
 
+int
+bitvec_byte_size
+  (size_t length)
+{
+  return (length+7) >> 3;
+}
+
+int bitvec_get
+  (LWES_BYTE* bitvec, int index)
+{
+  int byte = index >> 3;
+  int bit = index & 0x07;
+  int ret = ((bitvec[byte] >> bit) & 1);
+  return ret;
+}
+
+void bitvec_set
+  (LWES_BYTE* bitvec, int index, int val)
+{
+  int byte = index >> 3;
+  int bit = index & 0x07;
+  uint8_t ormask  = 1 << bit;
+  uint8_t andmask = 0xff ^ ormask; 
+  /* Unconditionally clear the bit. */
+  uint8_t temp = bitvec[byte];
+  /* Conditionally set it. Conditional-load is faster than branching. */
+  bitvec[byte] = val ? temp | ormask : temp & andmask;
+}
+
 
 int
 marshall_array_attribute
@@ -534,26 +574,59 @@ marshall_array_attribute
 {
   int i, delta, w, used=0;
   LWES_BYTE type, baseType;
+  LWES_BOOLEAN nullable;
   char* array;
   if (!attr || !offset || !lwes_type_is_array(attr->type))
     { return 0; }
+
   w = marshall_U_INT_16(attr->array_len, bytes, length, offset);
   if (!w)
     { return 0; }
   used += w;
-  array = (char*) attr->value;
+
   type = attr->type;
   baseType = lwes_array_type_to_base(type);
   delta = lwes_type_to_size(baseType);
-  /* TODO bit array and skips for nullable-arrays, or separate function */
-  for (i=0; i<attr->array_len; ++i)
+  nullable = lwes_type_is_nullable_array(attr->type);
+  array = (char*) attr->value;
+  if (nullable)
     {
-      w = marshall_generic(baseType, array+i*delta, bytes, length, offset);
-      if (!w)
-        { 
-          return 0; 
+      int bvsize = bitvec_byte_size(attr->array_len);
+      if (bvsize > (int)(length - *offset))
+        { return 0; }
+      LWES_BYTE* bitvec = bytes + *offset;
+      LWES_BYTE** data = attr->value;
+      *offset += bvsize;
+      used += bvsize;
+      memset(bitvec, 0, bvsize);
+      for (i=0; i<attr->array_len; ++i)
+        {
+          bitvec_set(bitvec, i, data[i] ? 1 : 0);
+          if (data[i])
+            {
+              if (LWES_TYPE_STRING == baseType)
+                {
+                  w = marshall_generic(baseType, data+i, bytes, length, offset);
+                }
+              else
+                {
+                  w = marshall_generic(baseType, data[i], bytes, length, offset);
+                }
+              if (!w)
+                { return 0; }
+              used += w;
+            }
         }
-      used += w;
+    }
+  else
+    {
+      for (i=0; i<attr->array_len; ++i)
+        {
+          w = marshall_generic(baseType, array+i*delta, bytes, length, offset);
+          if (!w)
+            { return 0; }
+          used += w;
+        }
     }
   return used;
 }
@@ -566,31 +639,53 @@ calculate_array_byte_size
    size_t          length,
    size_t          offset)
 {
+  int total = 0;
   LWES_BYTE baseType = lwes_array_type_to_base(type);
+  LWES_U_INT_16 actual_len = array_len;
+  int i;
+
+  if (lwes_type_is_nullable_array(type))
+    {
+      int bvbytes = bitvec_byte_size(array_len);
+      if ( bvbytes > (int)(length-offset))
+        { 
+          return -1;
+        }
+      for (i=0; i<array_len; ++i)
+        {
+          if (!bitvec_get(bytes+offset, i))
+            {
+              --actual_len; /* subtract NULLS */
+            }
+        }
+      if (baseType != LWES_TYPE_STRING)
+        {
+          /* Add base (pointer) array size, which includes NULLs.
+           * String-array pointers are handled below. */
+          total += array_len * sizeof(char*);
+        }
+      offset += bvbytes;
+    }
   if (baseType == LWES_TYPE_STRING)
     {
-      int i, total = 0;
+      /* For strings, always include space for *all* pointers (including NULLs). */
+      total += array_len * sizeof(char*);
+      /* Include the variable length of each string. */
       LWES_U_INT_16 cur;
-      /* skip over the actual strings, but add up the sizes */
-      for (i=0; i<array_len; ++i) {
+      /* Skip over the actual strings, adding up the sizes. */
+      for (i=0; i<actual_len; ++i) {
         if (!unmarshall_U_INT_16(&cur, bytes, length, &offset))
           { return -1; }
-        total += cur+1; /* add space for trailing NULL */
+        total += cur+1; /* Include space for trailing NULL. */
         offset += cur;
       }
-      total += lwes_type_to_size(baseType) * array_len;
-      return total;
-    }
-  else if (lwes_type_is_nullable_array(type))
-    {
-      // TODO discount by number of null elements, add base-array, and bit-vector size
-      return -1;
     }
   else
     {
-      /* Normal arrays, are just unit_size * num_elements */
-      return lwes_type_to_size(baseType) * array_len;
+      /* Normal arrays, are just unit_size x (actual) num_elements. */
+      total += lwes_type_to_size(baseType) * actual_len;
     }
+  return total;
 }
 
 int
@@ -600,16 +695,25 @@ unmarshall_array_attribute
    size_t          length,
    size_t*         offset)
 {
-  int i, used=0, r, delta, alloc_size;
+  int i, r, delta, alloc_size;
+  int used = 0;
+  int left = 0;
   LWES_BYTE baseType;
+  LWES_BYTE *bitvec = NULL;
+  LWES_BYTE **pointers = NULL;
+  LWES_BYTE *data = NULL;
 
   if (!attr || !offset)
     {
       return 0;
     }
   r = unmarshall_U_INT_16(&(attr->array_len), bytes, length, offset);
+  if (!r)
+    {
+      return 0;
+    }
   alloc_size = calculate_array_byte_size(attr->type, attr->array_len, bytes, length, *offset);
-  if (alloc_size <= 1)
+  if (alloc_size < 1)
     {
       return 0;
     }
@@ -622,43 +726,61 @@ unmarshall_array_attribute
 
   baseType = lwes_array_type_to_base(attr->type);
   delta = lwes_type_to_size(baseType);
-  if (LWES_TYPE_STRING == baseType)
+
+  if (lwes_type_is_nullable_array(attr->type))
     {
-      // TODO handle nullable
-      int arrayPtrBytes = delta*attr->array_len;
-      int left = alloc_size - arrayPtrBytes;
-      char* *curPtr = attr->value;
-      char* curStr = ((char*)attr->value) + arrayPtrBytes;
-      for (i=0; i<attr->array_len; ++i)
-        {
-          r = unmarshall_LONG_STRING(curStr, left, bytes, length, offset);
-          if (!r)
-            {
-              free(attr->value);
-              attr->value = NULL;
-              return 0;
-            }
-          curPtr[i] = curStr;
-         /* leave off the 2 bytes for (LONG_) string size, but include trailing null */
-          curStr += (r-2+1);
-          left -= (r-2+1);
-          used += r;
-        }
+      int bvsize = bitvec_byte_size(attr->array_len);
+      bitvec = bytes+*offset;
+      /* skip bitset */
+      *offset += bvsize;
+      pointers = attr->value;
+      data = ((LWES_BYTE*)attr->value) + (sizeof(char*) * attr->array_len);
+      left = alloc_size - (sizeof(char*) * attr->array_len);
+      used += bvsize;
+    }
+  else if (LWES_TYPE_STRING == baseType)
+    {
+      pointers = attr->value;
+      data = ((LWES_BYTE*)attr->value) + (sizeof(char*) * attr->array_len);
+      left = alloc_size - (delta * attr->array_len);
     }
   else
     {
-      char* cur = attr->value;
-      // TODO handle nullable
-      for (i=0; i<attr->array_len; ++i)
+      data = ((LWES_BYTE*)attr->value);
+      left = alloc_size;
+    }
+  for (i=0; i<attr->array_len; ++i)
+    {
+      if (bitvec && !bitvec_get(bitvec, i))
+        { 
+          pointers[i] = NULL; 
+        }
+      else
         {
-          r = unmarshall_generic(baseType, cur, bytes, length, offset);
+          if (pointers) 
+            { 
+              pointers[i] = data; 
+            }
+          if (LWES_TYPE_STRING == baseType)
+            {
+              /* special case string... */
+              r = unmarshall_LONG_STRING((LWES_LONG_STRING)data, left, bytes, length, offset);
+              /* leave off the 2 bytes for (LONG_) string size, but include trailing null */
+              data += (r-2+1);
+              left -= (r-2+1);
+            }
+          else
+            {
+              r = unmarshall_generic(baseType, data, bytes, length, offset);
+              data += delta;
+              left -= delta;
+            }
           if (!r)
             {
               free(attr->value);
               attr->value = NULL;
               return 0;
             }
-          cur += delta;
           used += r;
         }
     }
