@@ -1736,8 +1736,8 @@ test_deserialize_errors (void)
     LWES_##typ array[3] = {value, value, value};           \
     const char* key = "the_array_"#typ;                    \
     assert (++fields ==                                    \
-      lwes_event_set_array (event1,                        \
-        key, LWES_TYPE_##typ##_ARRAY, len, array) );       \
+      lwes_event_set_##typ##_ARRAY (event1,                \
+        key, len, array) );                                \
   }                                                        \
   {                                                        \
     LWES_U_INT_16 len = 5;                                 \
@@ -1746,8 +1746,8 @@ test_deserialize_errors (void)
     LWES_##typ* array[5] = {ref, NULL, ref, NULL, ref};    \
     const char* key = "the_n_array_"#typ;                  \
     assert (++fields ==                                    \
-      lwes_event_set_nullable_array (event1,               \
-        key, LWES_TYPE_N_##typ##_ARRAY, len, array) );     \
+      lwes_event_set_N_##typ##_ARRAY (event1,              \
+        key, len, array) );                                \
   }                                                        \
 
 #define SET_ARRAY_TYPE_STR(typ, val)                       \
@@ -1757,8 +1757,8 @@ test_deserialize_errors (void)
     LWES_##typ array[3] = {value, value, value};           \
     const char* key = "the_array_"#typ;                    \
     assert (++fields ==                                    \
-      lwes_event_set_array (event1,                        \
-        key, LWES_TYPE_##typ##_ARRAY, len, array) );       \
+      lwes_event_set_##typ##_ARRAY (event1,                \
+        key, len, array) );                                \
   }                                                        \
   {                                                        \
     LWES_U_INT_16 len = 5;                                 \
@@ -1766,8 +1766,8 @@ test_deserialize_errors (void)
     LWES_##typ array[5] = {value, NULL, value, NULL, value};\
     const char* key = "the_n_array_"#typ;                  \
     assert (++fields ==                                    \
-      lwes_event_set_nullable_array (event1,               \
-        key, LWES_TYPE_N_##typ##_ARRAY, len, array) );     \
+      lwes_event_set_N_##typ##_ARRAY (event1,              \
+        key, len, array) );                                \
   }                                                        \
 
 
@@ -1796,10 +1796,9 @@ test_deserialize_errors (void)
       LWES_##typ *arrayOut;                                \
       const char* key = "the_array_"#typ;                  \
       LWES_U_INT_16 len, i;                                \
-      LWES_TYPE type = LWES_TYPE_##typ##_ARRAY;            \
       assert (ret == 1);                                   \
-      assert (0 == lwes_event_get_array                    \
-          (event1, key, type, &len, (void*)&arrayOut));    \
+      assert (0 == lwes_event_get_##typ##_ARRAY            \
+          (event1, key, &len, (void*)&arrayOut));          \
       assert (len == 3);                                   \
       for (i=0; i<len; ++i)                                \
         {                                                  \
@@ -1814,10 +1813,9 @@ test_deserialize_errors (void)
       LWES_##typ* *arrayOut;                               \
       const char* key = "the_n_array_"#typ;                \
       LWES_U_INT_16 len, i;                                \
-      LWES_TYPE type = LWES_TYPE_N_##typ##_ARRAY;          \
       assert (ret == 1);                                   \
-      assert (0 == lwes_event_get_nullable_array           \
-          (event1, key, type, &len, (void*)&arrayOut));    \
+      assert (0 == lwes_event_get_N_##typ##_ARRAY          \
+          (event1, key, &len, (void*)&arrayOut));          \
       assert (len == 5);                                   \
       for (i=0; i<len; ++i)                                \
         {                                                  \

@@ -649,21 +649,818 @@ lwes_event_get_nullable_array
    LWES_U_INT_16 *arr_length,
    void **arr);
 
-///* set an entire array in one call */
-//int
-//lwes_event_set_<TYPE>_arr
-//  (struct lwes_event *event,
-//   LWES_CONST_SHORT_STRING name,
-//   LWES_INT_16 arr_length,
-//   LWES_<TYPE> *arr);
-//
-///* get an entire array in one call */
-//int
-//lwes_event_get_<TYPE>_arr
-//  (struct lwes_event *event,
-//   LWES_CONST_SHORT_STRING name,
-//   LWES_INT_16 arr_length,
-//   LWES_<TYPE> **arr);
+
+/*! \brief Set an LWES_BYTE array attribute from the event
+ *
+ *  \param[in] event the event to get the attribute from
+ *  \param[in] name the name of the attribute
+ *  \param[in] length the length of the array
+ *  \param[in] value the array value of the attribute
+ *
+ *  \return 0 on failure, the number of attributes on success
+ */
+int
+lwes_event_set_BYTE_ARRAY
+  (struct lwes_event       *event,
+   LWES_CONST_SHORT_STRING  name,
+   LWES_U_INT_16  length,
+   LWES_BYTE  *value);
+
+/*! \brief Get an LWES_BYTE array attribute from the event
+ *
+ *  \param[in] event the event to get the attribute from
+ *  \param[in] name the name of the attribute
+ *  \param[out] length the length of the array
+ *  \param[out] value reference to the array value of the attribute
+ *
+ *  \return 0 on success, a negative number on failure
+ */
+int
+lwes_event_get_BYTE_ARRAY
+  (struct lwes_event       *event,
+   LWES_CONST_SHORT_STRING  name,
+   LWES_U_INT_16 *length,
+   LWES_BYTE **value);
+
+/*! \brief Set an LWES_N_BYTE (nullable) array attribute from the event
+ *
+ *  \param[in] event the event to get the attribute from
+ *  \param[in] name the name of the attribute
+ *  \param[in] length the length of the array
+ *  \param[in] value the poiner-array value of the attribute
+ *
+ *  \return 0 on failure, the number of attributes on success
+ */
+int
+lwes_event_set_N_BYTE_ARRAY
+  (struct lwes_event       *event,
+   LWES_CONST_SHORT_STRING  name,
+   LWES_U_INT_16  length,
+   LWES_BYTE  **value);
+
+/*! \brief Get an LWES_N_BYTE nullable array attribute from the event
+ *
+ *  \param[in] event the event to get the attribute from
+ *  \param[in] name the name of the attribute
+ *  \param[out] length the length of the array
+ *  \param[out] value reference to the the poiner-array value of the attribute
+ *
+ *  \return 0 on success, a negative number on failure
+ */
+int
+lwes_event_get_N_BYTE_ARRAY
+  (struct lwes_event       *event,
+   LWES_CONST_SHORT_STRING  name,
+   LWES_U_INT_16 *length,
+   LWES_BYTE* **value);
+
+
+
+
+
+/*! \brief Set an LWES_BOOLEAN array attribute from the event
+ *
+ *  \param[in] event the event to get the attribute from
+ *  \param[in] name the name of the attribute
+ *  \param[in] length the length of the array
+ *  \param[in] value the array value of the attribute
+ *
+ *  \return 0 on failure, the number of attributes on success
+ */
+int
+lwes_event_set_BOOLEAN_ARRAY
+  (struct lwes_event       *event,
+   LWES_CONST_SHORT_STRING  name,
+   LWES_U_INT_16  length,
+   LWES_BOOLEAN  *value);
+
+/*! \brief Get an LWES_BOOLEAN array attribute from the event
+ *
+ *  \param[in] event the event to get the attribute from
+ *  \param[in] name the name of the attribute
+ *  \param[out] length the length of the array
+ *  \param[out] value reference to the array value of the attribute
+ *
+ *  \return 0 on success, a negative number on failure
+ */
+int
+lwes_event_get_BOOLEAN_ARRAY
+  (struct lwes_event       *event,
+   LWES_CONST_SHORT_STRING  name,
+   LWES_U_INT_16 *length,
+   LWES_BOOLEAN **value);
+
+/*! \brief Set an LWES_N_BOOLEAN (nullable) array attribute from the event
+ *
+ *  \param[in] event the event to get the attribute from
+ *  \param[in] name the name of the attribute
+ *  \param[in] length the length of the array
+ *  \param[in] value the poiner-array value of the attribute
+ *
+ *  \return 0 on failure, the number of attributes on success
+ */
+int
+lwes_event_set_N_BOOLEAN_ARRAY
+  (struct lwes_event       *event,
+   LWES_CONST_SHORT_STRING  name,
+   LWES_U_INT_16  length,
+   LWES_BOOLEAN  **value);
+
+/*! \brief Get an LWES_N_BOOLEAN nullable array attribute from the event
+ *
+ *  \param[in] event the event to get the attribute from
+ *  \param[in] name the name of the attribute
+ *  \param[out] length the length of the array
+ *  \param[out] value reference to the the poiner-array value of the attribute
+ *
+ *  \return 0 on success, a negative number on failure
+ */
+int
+lwes_event_get_N_BOOLEAN_ARRAY
+  (struct lwes_event       *event,
+   LWES_CONST_SHORT_STRING  name,
+   LWES_U_INT_16 *length,
+   LWES_BOOLEAN* **value);
+
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+
+/*! \brief Set an LWES_STRING array attribute from the event
+ *
+ *  \param[in] event the event to get the attribute from
+ *  \param[in] name the name of the attribute
+ *  \param[in] length the length of the array
+ *  \param[in] value the array value of the attribute
+ *
+ *  \return 0 on failure, the number of attributes on success
+ */
+int
+lwes_event_set_STRING_ARRAY
+  (struct lwes_event       *event,
+   LWES_CONST_SHORT_STRING  name,
+   LWES_U_INT_16  length,
+   LWES_STRING  *value);
+
+/*! \brief Get an LWES_STRING array attribute from the event
+ *
+ *  \param[in] event the event to get the attribute from
+ *  \param[in] name the name of the attribute
+ *  \param[out] length the length of the array
+ *  \param[out] value reference to the array value of the attribute
+ *
+ *  \return 0 on success, a negative number on failure
+ */
+int
+lwes_event_get_STRING_ARRAY
+  (struct lwes_event       *event,
+   LWES_CONST_SHORT_STRING  name,
+   LWES_U_INT_16 *length,
+   LWES_STRING **value);
+
+/*! \brief Set an LWES_N_STRING (nullable) array attribute from the event
+ *
+ *  \param[in] event the event to get the attribute from
+ *  \param[in] name the name of the attribute
+ *  \param[in] length the length of the array
+ *  \param[in] value the poiner-array value of the attribute
+ *
+ *  \return 0 on failure, the number of attributes on success
+ */
+int
+lwes_event_set_N_STRING_ARRAY
+  (struct lwes_event       *event,
+   LWES_CONST_SHORT_STRING  name,
+   LWES_U_INT_16  length,
+   LWES_STRING  *value);
+
+/*! \brief Get an LWES_N_STRING nullable array attribute from the event
+ *
+ *  \param[in] event the event to get the attribute from
+ *  \param[in] name the name of the attribute
+ *  \param[out] length the length of the array
+ *  \param[out] value reference to the the poiner-array value of the attribute
+ *
+ *  \return 0 on success, a negative number on failure
+ */
+int
+lwes_event_get_N_STRING_ARRAY
+  (struct lwes_event       *event,
+   LWES_CONST_SHORT_STRING  name,
+   LWES_U_INT_16 *length,
+   LWES_STRING* *value);
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+
+/*! \brief Set an LWES_IP_ADDR array attribute from the event
+ *
+ *  \param[in] event the event to get the attribute from
+ *  \param[in] name the name of the attribute
+ *  \param[in] length the length of the array
+ *  \param[in] value the array value of the attribute
+ *
+ *  \return 0 on failure, the number of attributes on success
+ */
+int
+lwes_event_set_IP_ADDR_ARRAY
+  (struct lwes_event       *event,
+   LWES_CONST_SHORT_STRING  name,
+   LWES_U_INT_16  length,
+   LWES_IP_ADDR  *value);
+
+/*! \brief Get an LWES_IP_ADDR array attribute from the event
+ *
+ *  \param[in] event the event to get the attribute from
+ *  \param[in] name the name of the attribute
+ *  \param[out] length the length of the array
+ *  \param[out] value reference to the array value of the attribute
+ *
+ *  \return 0 on success, a negative number on failure
+ */
+int
+lwes_event_get_IP_ADDR_ARRAY
+  (struct lwes_event       *event,
+   LWES_CONST_SHORT_STRING  name,
+   LWES_U_INT_16 *length,
+   LWES_IP_ADDR **value);
+
+/*! \brief Set an LWES_N_IP_ADDR (nullable) array attribute from the event
+ *
+ *  \param[in] event the event to get the attribute from
+ *  \param[in] name the name of the attribute
+ *  \param[in] length the length of the array
+ *  \param[in] value the poiner-array value of the attribute
+ *
+ *  \return 0 on failure, the number of attributes on success
+ */
+int
+lwes_event_set_N_IP_ADDR_ARRAY
+  (struct lwes_event       *event,
+   LWES_CONST_SHORT_STRING  name,
+   LWES_U_INT_16  length,
+   LWES_IP_ADDR  **value);
+
+/*! \brief Get an LWES_N_IP_ADDR nullable array attribute from the event
+ *
+ *  \param[in] event the event to get the attribute from
+ *  \param[in] name the name of the attribute
+ *  \param[out] length the length of the array
+ *  \param[out] value reference to the the poiner-array value of the attribute
+ *
+ *  \return 0 on success, a negative number on failure
+ */
+int
+lwes_event_get_N_IP_ADDR_ARRAY
+  (struct lwes_event       *event,
+   LWES_CONST_SHORT_STRING  name,
+   LWES_U_INT_16 *length,
+   LWES_IP_ADDR* **value);
+
+
+
+
+/*! \brief Set an LWES_FLOAT array attribute from the event
+ *
+ *  \param[in] event the event to get the attribute from
+ *  \param[in] name the name of the attribute
+ *  \param[in] length the length of the array
+ *  \param[in] value the array value of the attribute
+ *
+ *  \return 0 on failure, the number of attributes on success
+ */
+int
+lwes_event_set_FLOAT_ARRAY
+  (struct lwes_event       *event,
+   LWES_CONST_SHORT_STRING  name,
+   LWES_U_INT_16  length,
+   LWES_FLOAT  *value);
+
+/*! \brief Get an LWES_FLOAT array attribute from the event
+ *
+ *  \param[in] event the event to get the attribute from
+ *  \param[in] name the name of the attribute
+ *  \param[out] length the length of the array
+ *  \param[out] value reference to the array value of the attribute
+ *
+ *  \return 0 on success, a negative number on failure
+ */
+int
+lwes_event_get_FLOAT_ARRAY
+  (struct lwes_event       *event,
+   LWES_CONST_SHORT_STRING  name,
+   LWES_U_INT_16 *length,
+   LWES_FLOAT **value);
+
+/*! \brief Set an LWES_N_FLOAT (nullable) array attribute from the event
+ *
+ *  \param[in] event the event to get the attribute from
+ *  \param[in] name the name of the attribute
+ *  \param[in] length the length of the array
+ *  \param[in] value the poiner-array value of the attribute
+ *
+ *  \return 0 on failure, the number of attributes on success
+ */
+int
+lwes_event_set_N_FLOAT_ARRAY
+  (struct lwes_event       *event,
+   LWES_CONST_SHORT_STRING  name,
+   LWES_U_INT_16  length,
+   LWES_FLOAT  **value);
+
+/*! \brief Get an LWES_N_FLOAT nullable array attribute from the event
+ *
+ *  \param[in] event the event to get the attribute from
+ *  \param[in] name the name of the attribute
+ *  \param[out] length the length of the array
+ *  \param[out] value reference to the the poiner-array value of the attribute
+ *
+ *  \return 0 on success, a negative number on failure
+ */
+int
+lwes_event_get_N_FLOAT_ARRAY
+  (struct lwes_event       *event,
+   LWES_CONST_SHORT_STRING  name,
+   LWES_U_INT_16 *length,
+   LWES_FLOAT* **value);
+
+
+
+/*! \brief Set an LWES_DOUBLE array attribute from the event
+ *
+ *  \param[in] event the event to get the attribute from
+ *  \param[in] name the name of the attribute
+ *  \param[in] length the length of the array
+ *  \param[in] value the array value of the attribute
+ *
+ *  \return 0 on failure, the number of attributes on success
+ */
+int
+lwes_event_set_DOUBLE_ARRAY
+  (struct lwes_event       *event,
+   LWES_CONST_SHORT_STRING  name,
+   LWES_U_INT_16  length,
+   LWES_DOUBLE  *value);
+
+/*! \brief Get an LWES_DOUBLE array attribute from the event
+ *
+ *  \param[in] event the event to get the attribute from
+ *  \param[in] name the name of the attribute
+ *  \param[out] length the length of the array
+ *  \param[out] value reference to the array value of the attribute
+ *
+ *  \return 0 on success, a negative number on failure
+ */
+int
+lwes_event_get_DOUBLE_ARRAY
+  (struct lwes_event       *event,
+   LWES_CONST_SHORT_STRING  name,
+   LWES_U_INT_16 *length,
+   LWES_DOUBLE **value);
+
+/*! \brief Set an LWES_N_DOUBLE (nullable) array attribute from the event
+ *
+ *  \param[in] event the event to get the attribute from
+ *  \param[in] name the name of the attribute
+ *  \param[in] length the length of the array
+ *  \param[in] value the poiner-array value of the attribute
+ *
+ *  \return 0 on failure, the number of attributes on success
+ */
+int
+lwes_event_set_N_DOUBLE_ARRAY
+  (struct lwes_event       *event,
+   LWES_CONST_SHORT_STRING  name,
+   LWES_U_INT_16  length,
+   LWES_DOUBLE  **value);
+
+/*! \brief Get an LWES_N_DOUBLE nullable array attribute from the event
+ *
+ *  \param[in] event the event to get the attribute from
+ *  \param[in] name the name of the attribute
+ *  \param[out] length the length of the array
+ *  \param[out] value reference to the the poiner-array value of the attribute
+ *
+ *  \return 0 on success, a negative number on failure
+ */
+int
+lwes_event_get_N_DOUBLE_ARRAY
+  (struct lwes_event       *event,
+   LWES_CONST_SHORT_STRING  name,
+   LWES_U_INT_16 *length,
+   LWES_DOUBLE* **value);
+
+
+
+
+/*! \brief Set an LWES_U_INT_16 array attribute from the event
+ *
+ *  \param[in] event the event to get the attribute from
+ *  \param[in] name the name of the attribute
+ *  \param[in] length the length of the array
+ *  \param[in] value the array value of the attribute
+ *
+ *  \return 0 on failure, the number of attributes on success
+ */
+int
+lwes_event_set_U_INT_16_ARRAY
+  (struct lwes_event       *event,
+   LWES_CONST_SHORT_STRING  name,
+   LWES_U_INT_16  length,
+   LWES_U_INT_16  *value);
+
+/*! \brief Get an LWES_U_INT_16 array attribute from the event
+ *
+ *  \param[in] event the event to get the attribute from
+ *  \param[in] name the name of the attribute
+ *  \param[out] length the length of the array
+ *  \param[out] value reference to the array value of the attribute
+ *
+ *  \return 0 on success, a negative number on failure
+ */
+int
+lwes_event_get_U_INT_16_ARRAY
+  (struct lwes_event       *event,
+   LWES_CONST_SHORT_STRING  name,
+   LWES_U_INT_16 *length,
+   LWES_U_INT_16 **value);
+
+/*! \brief Set an LWES_N_U_INT_16 (nullable) array attribute from the event
+ *
+ *  \param[in] event the event to get the attribute from
+ *  \param[in] name the name of the attribute
+ *  \param[in] length the length of the array
+ *  \param[in] value the poiner-array value of the attribute
+ *
+ *  \return 0 on failure, the number of attributes on success
+ */
+int
+lwes_event_set_N_U_INT_16_ARRAY
+  (struct lwes_event       *event,
+   LWES_CONST_SHORT_STRING  name,
+   LWES_U_INT_16  length,
+   LWES_U_INT_16  **value);
+
+/*! \brief Get an LWES_N_U_INT_16 nullable array attribute from the event
+ *
+ *  \param[in] event the event to get the attribute from
+ *  \param[in] name the name of the attribute
+ *  \param[out] length the length of the array
+ *  \param[out] value reference to the the poiner-array value of the attribute
+ *
+ *  \return 0 on success, a negative number on failure
+ */
+int
+lwes_event_get_N_U_INT_16_ARRAY
+  (struct lwes_event       *event,
+   LWES_CONST_SHORT_STRING  name,
+   LWES_U_INT_16 *length,
+   LWES_U_INT_16* **value);
+
+
+/*! \brief Set an LWES_INT_16 array attribute from the event
+ *
+ *  \param[in] event the event to get the attribute from
+ *  \param[in] name the name of the attribute
+ *  \param[in] length the length of the array
+ *  \param[in] value the array value of the attribute
+ *
+ *  \return 0 on failure, the number of attributes on success
+ */
+int
+lwes_event_set_INT_16_ARRAY
+  (struct lwes_event       *event,
+   LWES_CONST_SHORT_STRING  name,
+   LWES_U_INT_16  length,
+   LWES_INT_16  *value);
+
+/*! \brief Get an LWES_INT_16 array attribute from the event
+ *
+ *  \param[in] event the event to get the attribute from
+ *  \param[in] name the name of the attribute
+ *  \param[out] length the length of the array
+ *  \param[out] value reference to the array value of the attribute
+ *
+ *  \return 0 on success, a negative number on failure
+ */
+int
+lwes_event_get_INT_16_ARRAY
+  (struct lwes_event       *event,
+   LWES_CONST_SHORT_STRING  name,
+   LWES_U_INT_16 *length,
+   LWES_INT_16 **value);
+
+/*! \brief Set an LWES_N_INT_16 (nullable) array attribute from the event
+ *
+ *  \param[in] event the event to get the attribute from
+ *  \param[in] name the name of the attribute
+ *  \param[in] length the length of the array
+ *  \param[in] value the poiner-array value of the attribute
+ *
+ *  \return 0 on failure, the number of attributes on success
+ */
+int
+lwes_event_set_N_INT_16_ARRAY
+  (struct lwes_event       *event,
+   LWES_CONST_SHORT_STRING  name,
+   LWES_U_INT_16  length,
+   LWES_INT_16  **value);
+
+/*! \brief Get an LWES_N_INT_16 nullable array attribute from the event
+ *
+ *  \param[in] event the event to get the attribute from
+ *  \param[in] name the name of the attribute
+ *  \param[out] length the length of the array
+ *  \param[out] value reference to the the poiner-array value of the attribute
+ *
+ *  \return 0 on success, a negative number on failure
+ */
+int
+lwes_event_get_N_INT_16_ARRAY
+  (struct lwes_event       *event,
+   LWES_CONST_SHORT_STRING  name,
+   LWES_U_INT_16 *length,
+   LWES_INT_16* **value);
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+
+
+/*! \brief Set an LWES_U_INT_32 array attribute from the event
+ *
+ *  \param[in] event the event to get the attribute from
+ *  \param[in] name the name of the attribute
+ *  \param[in] length the length of the array
+ *  \param[in] value the array value of the attribute
+ *
+ *  \return 0 on failure, the number of attributes on success
+ */
+int
+lwes_event_set_U_INT_32_ARRAY
+  (struct lwes_event       *event,
+   LWES_CONST_SHORT_STRING  name,
+   LWES_U_INT_16  length,
+   LWES_U_INT_32  *value);
+
+/*! \brief Get an LWES_U_INT_32 array attribute from the event
+ *
+ *  \param[in] event the event to get the attribute from
+ *  \param[in] name the name of the attribute
+ *  \param[out] length the length of the array
+ *  \param[out] value reference to the array value of the attribute
+ *
+ *  \return 0 on success, a negative number on failure
+ */
+int
+lwes_event_get_U_INT_32_ARRAY
+  (struct lwes_event       *event,
+   LWES_CONST_SHORT_STRING  name,
+   LWES_U_INT_16 *length,
+   LWES_U_INT_32 **value);
+
+/*! \brief Set an LWES_N_U_INT_32 (nullable) array attribute from the event
+ *
+ *  \param[in] event the event to get the attribute from
+ *  \param[in] name the name of the attribute
+ *  \param[in] length the length of the array
+ *  \param[in] value the poiner-array value of the attribute
+ *
+ *  \return 0 on failure, the number of attributes on success
+ */
+int
+lwes_event_set_N_U_INT_32_ARRAY
+  (struct lwes_event       *event,
+   LWES_CONST_SHORT_STRING  name,
+   LWES_U_INT_16  length,
+   LWES_U_INT_32  **value);
+
+/*! \brief Get an LWES_N_U_INT_32 nullable array attribute from the event
+ *
+ *  \param[in] event the event to get the attribute from
+ *  \param[in] name the name of the attribute
+ *  \param[out] length the length of the array
+ *  \param[out] value reference to the the poiner-array value of the attribute
+ *
+ *  \return 0 on success, a negative number on failure
+ */
+int
+lwes_event_get_N_U_INT_32_ARRAY
+  (struct lwes_event       *event,
+   LWES_CONST_SHORT_STRING  name,
+   LWES_U_INT_16 *length,
+   LWES_U_INT_32* **value);
+
+
+/*! \brief Set an LWES_INT_32 array attribute from the event
+ *
+ *  \param[in] event the event to get the attribute from
+ *  \param[in] name the name of the attribute
+ *  \param[in] length the length of the array
+ *  \param[in] value the array value of the attribute
+ *
+ *  \return 0 on failure, the number of attributes on success
+ */
+int
+lwes_event_set_INT_32_ARRAY
+  (struct lwes_event       *event,
+   LWES_CONST_SHORT_STRING  name,
+   LWES_U_INT_16  length,
+   LWES_INT_32  *value);
+
+/*! \brief Get an LWES_INT_32 array attribute from the event
+ *
+ *  \param[in] event the event to get the attribute from
+ *  \param[in] name the name of the attribute
+ *  \param[out] length the length of the array
+ *  \param[out] value reference to the array value of the attribute
+ *
+ *  \return 0 on success, a negative number on failure
+ */
+int
+lwes_event_get_INT_32_ARRAY
+  (struct lwes_event       *event,
+   LWES_CONST_SHORT_STRING  name,
+   LWES_U_INT_16 *length,
+   LWES_INT_32 **value);
+
+/*! \brief Set an LWES_N_INT_32 (nullable) array attribute from the event
+ *
+ *  \param[in] event the event to get the attribute from
+ *  \param[in] name the name of the attribute
+ *  \param[in] length the length of the array
+ *  \param[in] value the poiner-array value of the attribute
+ *
+ *  \return 0 on failure, the number of attributes on success
+ */
+int
+lwes_event_set_N_INT_32_ARRAY
+  (struct lwes_event       *event,
+   LWES_CONST_SHORT_STRING  name,
+   LWES_U_INT_16  length,
+   LWES_INT_32  **value);
+
+/*! \brief Get an LWES_N_INT_32 nullable array attribute from the event
+ *
+ *  \param[in] event the event to get the attribute from
+ *  \param[in] name the name of the attribute
+ *  \param[out] length the length of the array
+ *  \param[out] value reference to the the poiner-array value of the attribute
+ *
+ *  \return 0 on success, a negative number on failure
+ */
+int
+lwes_event_get_N_INT_32_ARRAY
+  (struct lwes_event       *event,
+   LWES_CONST_SHORT_STRING  name,
+   LWES_U_INT_16 *length,
+   LWES_INT_32* **value);
+
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+
+
+/*! \brief Set an LWES_U_INT_64 array attribute from the event
+ *
+ *  \param[in] event the event to get the attribute from
+ *  \param[in] name the name of the attribute
+ *  \param[in] length the length of the array
+ *  \param[in] value the array value of the attribute
+ *
+ *  \return 0 on failure, the number of attributes on success
+ */
+int
+lwes_event_set_U_INT_64_ARRAY
+  (struct lwes_event       *event,
+   LWES_CONST_SHORT_STRING  name,
+   LWES_U_INT_16  length,
+   LWES_U_INT_64  *value);
+
+/*! \brief Get an LWES_U_INT_64 array attribute from the event
+ *
+ *  \param[in] event the event to get the attribute from
+ *  \param[in] name the name of the attribute
+ *  \param[out] length the length of the array
+ *  \param[out] value reference to the array value of the attribute
+ *
+ *  \return 0 on success, a negative number on failure
+ */
+int
+lwes_event_get_U_INT_64_ARRAY
+  (struct lwes_event       *event,
+   LWES_CONST_SHORT_STRING  name,
+   LWES_U_INT_16 *length,
+   LWES_U_INT_64 **value);
+
+/*! \brief Set an LWES_N_U_INT_64 (nullable) array attribute from the event
+ *
+ *  \param[in] event the event to get the attribute from
+ *  \param[in] name the name of the attribute
+ *  \param[in] length the length of the array
+ *  \param[in] value the poiner-array value of the attribute
+ *
+ *  \return 0 on failure, the number of attributes on success
+ */
+int
+lwes_event_set_N_U_INT_64_ARRAY
+  (struct lwes_event       *event,
+   LWES_CONST_SHORT_STRING  name,
+   LWES_U_INT_16  length,
+   LWES_U_INT_64  **value);
+
+/*! \brief Get an LWES_N_U_INT_64 nullable array attribute from the event
+ *
+ *  \param[in] event the event to get the attribute from
+ *  \param[in] name the name of the attribute
+ *  \param[out] length the length of the array
+ *  \param[out] value reference to the the poiner-array value of the attribute
+ *
+ *  \return 0 on success, a negative number on failure
+ */
+int
+lwes_event_get_N_U_INT_64_ARRAY
+  (struct lwes_event       *event,
+   LWES_CONST_SHORT_STRING  name,
+   LWES_U_INT_16 *length,
+   LWES_U_INT_64* **value);
+
+
+/*! \brief Set an LWES_INT_64 array attribute from the event
+ *
+ *  \param[in] event the event to get the attribute from
+ *  \param[in] name the name of the attribute
+ *  \param[in] length the length of the array
+ *  \param[in] value the array value of the attribute
+ *
+ *  \return 0 on failure, the number of attributes on success
+ */
+int
+lwes_event_set_INT_64_ARRAY
+  (struct lwes_event       *event,
+   LWES_CONST_SHORT_STRING  name,
+   LWES_U_INT_16  length,
+   LWES_INT_64  *value);
+
+/*! \brief Get an LWES_INT_64 array attribute from the event
+ *
+ *  \param[in] event the event to get the attribute from
+ *  \param[in] name the name of the attribute
+ *  \param[out] length the length of the array
+ *  \param[out] value reference to the array value of the attribute
+ *
+ *  \return 0 on success, a negative number on failure
+ */
+int
+lwes_event_get_INT_64_ARRAY
+  (struct lwes_event       *event,
+   LWES_CONST_SHORT_STRING  name,
+   LWES_U_INT_16 *length,
+   LWES_INT_64 **value);
+
+/*! \brief Set an LWES_N_INT_64 (nullable) array attribute from the event
+ *
+ *  \param[in] event the event to get the attribute from
+ *  \param[in] name the name of the attribute
+ *  \param[in] length the length of the array
+ *  \param[in] value the poiner-array value of the attribute
+ *
+ *  \return 0 on failure, the number of attributes on success
+ */
+int
+lwes_event_set_N_INT_64_ARRAY
+  (struct lwes_event       *event,
+   LWES_CONST_SHORT_STRING  name,
+   LWES_U_INT_16  length,
+   LWES_INT_64  **value);
+
+/*! \brief Get an LWES_N_INT_64 nullable array attribute from the event
+ *
+ *  \param[in] event the event to get the attribute from
+ *  \param[in] name the name of the attribute
+ *  \param[out] length the length of the array
+ *  \param[out] value reference to the the poiner-array value of the attribute
+ *
+ *  \return 0 on success, a negative number on failure
+ */
+int
+lwes_event_get_N_INT_64_ARRAY
+  (struct lwes_event       *event,
+   LWES_CONST_SHORT_STRING  name,
+   LWES_U_INT_16 *length,
+   LWES_INT_64* **value);
+
+
+
+
+
 
 /*! \brief Serialize an event
 

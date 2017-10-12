@@ -1159,6 +1159,46 @@ int lwes_event_get_##typ                                \
   return lwes_event_get_generic(event, name,            \
                                 LWES_TYPE_##typ,        \
                                 sizeof(*value), value); \
+}                                                       \
+                                                        \
+int lwes_event_set_##typ##_ARRAY                        \
+  (struct lwes_event       *event,                      \
+   LWES_CONST_SHORT_STRING  name,                       \
+   LWES_U_INT_16  length,                               \
+   LWES_##typ  *value)                                  \
+{                                                       \
+  return lwes_event_set_array(event, name,              \
+      LWES_TYPE_##typ##_ARRAY, length, (void*)value);   \
+}                                                       \
+                                                        \
+int lwes_event_get_##typ##_ARRAY                        \
+  (struct lwes_event       *event,                      \
+   LWES_CONST_SHORT_STRING  name,                       \
+   LWES_U_INT_16 *length,                               \
+   LWES_##typ **value)                                  \
+{                                                       \
+  return lwes_event_get_array(event, name,              \
+      LWES_TYPE_##typ##_ARRAY, length, (void*)value);   \
+}                                                       \
+                                                        \
+int lwes_event_set_N_##typ##_ARRAY                      \
+  (struct lwes_event       *event,                      \
+   LWES_CONST_SHORT_STRING  name,                       \
+   LWES_U_INT_16  length,                               \
+   LWES_##typ  **value)                                 \
+{                                                       \
+  return lwes_event_set_nullable_array(event, name,     \
+      LWES_TYPE_N_##typ##_ARRAY, length, (void*)value); \
+}                                                       \
+                                                        \
+int lwes_event_get_N_##typ##_ARRAY                      \
+  (struct lwes_event       *event,                      \
+   LWES_CONST_SHORT_STRING  name,                       \
+   LWES_U_INT_16 *length,                               \
+   LWES_##typ* **value)                                 \
+{                                                       \
+  return lwes_event_get_nullable_array(event, name,     \
+      LWES_TYPE_N_##typ##_ARRAY, length, (void*)value); \
 }
 
 
@@ -1173,6 +1213,50 @@ MAKE_ACCESSORS(IP_ADDR)
 MAKE_ACCESSORS(BYTE)
 MAKE_ACCESSORS(FLOAT)
 MAKE_ACCESSORS(DOUBLE)
+
+
+
+
+int lwes_event_set_STRING_ARRAY
+  (struct lwes_event       *event,
+   LWES_CONST_SHORT_STRING  name,
+   LWES_U_INT_16  length,
+   LWES_STRING  *value)
+{
+  return lwes_event_set_array(event, name,
+      LWES_TYPE_STRING_ARRAY, length, (void*)value);
+}
+
+int lwes_event_get_STRING_ARRAY
+  (struct lwes_event       *event,
+   LWES_CONST_SHORT_STRING  name,
+   LWES_U_INT_16 *length,
+   LWES_STRING **value)
+{
+  return lwes_event_get_array(event, name,
+      LWES_TYPE_STRING_ARRAY, length, (void*)value);
+}
+
+int lwes_event_set_N_STRING_ARRAY
+  (struct lwes_event       *event,
+   LWES_CONST_SHORT_STRING  name,
+   LWES_U_INT_16  length,
+   LWES_STRING  *value)
+{
+  return lwes_event_set_nullable_array(event, name,
+      LWES_TYPE_N_STRING_ARRAY, length, (void*)value);
+}
+
+int lwes_event_get_N_STRING_ARRAY
+  (struct lwes_event       *event,
+   LWES_CONST_SHORT_STRING  name,
+   LWES_U_INT_16 *length,
+   LWES_STRING **value)
+{
+  return lwes_event_get_nullable_array(event, name,
+      LWES_TYPE_N_STRING_ARRAY, length, (void*)value);
+}
+
 
 
 int lwes_event_set_U_INT_64_w_string (struct lwes_event *     event,
