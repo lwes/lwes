@@ -24,8 +24,8 @@
 
 #include "lwes_marshall_functions.h"
 
-static size_t null_at = 0;
-static size_t malloc_count = 0;
+static int null_at = 0;
+static int malloc_count = 0;
 
 static
 void *my_malloc (size_t size)
@@ -73,20 +73,19 @@ static LWES_BYTE array_data[] = {
     0x85,   0x00, 0x02,
       0x00, 0x03,  0x66, 0x6f, 0x6f,
       0x00, 0x06,  0x42, 0x61, 0x72, 0x42, 0x61, 0x72
-    /* TODO the other array types */
 };
 
 static LWES_BYTE nullable_data[] = {
-    /* uint16_t array length 9: 123, null, 5432, null, 54321, null, null, null, null */
-    0x8d,   0x00, 0x09,   0x15, 0x00,
+    /* uint16_t array length 9(repeated), bitvec, array: 
+     * 123, null, 5432, null, 54321, null, null, null, null */
+    0x8d,   0x00, 0x09, 0x00, 0x09,   0x15, 0x00,
       0x00, 0x7b,
       0x15, 0x38,
       0xd4, 0x31,
-    /* string array length 5: null, "foo", null, "BarBar", null */
-    0x91,   0x00, 0x05,  0x0a,
+    /* string array length 5(repeated), bitvec array: null, "foo", null, "BarBar", null */
+    0x91,   0x00, 0x05, 0x00, 0x05,   0x0a,
       0x00, 0x03,  0x66, 0x6f, 0x6f,
       0x00, 0x06,  0x42, 0x61, 0x72, 0x42, 0x61, 0x72
-    /* TODO the other array types */
 };
 
 
@@ -195,6 +194,8 @@ static void test_typefuncs()
 
 int main(void)
 {
+  int ret;
+
   LWES_BYTE          aByte         = (LWES_BYTE)0xef;
   LWES_BOOLEAN       aBool         = 1;
   LWES_U_INT_16      uint16        = 0xffff;
@@ -776,13 +777,6 @@ int main(void)
       assert(!unmarshall_array_attribute (&attr, nullable_data, i, &offset) );
     }
 
-  /* fail malloc */
-  null_at=1;
-  malloc_count=0;
-  assert( !unmarshall_array_attribute (&attr, nullable_data, sizeof(nullable_data), &offset) );
-  null_at=0;
-  malloc_count=0;
-
 
   /* good read */
   offset = offset_save;
@@ -817,6 +811,17 @@ int main(void)
 
   free(attr.value);
   attr.value = NULL;
+
+  /* fail malloc */
+  null_at=1;
+  malloc_count=0;
+  offset = 0;
+  unmarshall_BYTE(&attr.type, nullable_data, sizeof(nullable_data), &offset);
+  ret = unmarshall_array_attribute (&attr, nullable_data, sizeof(nullable_data), &offset);
+  assert( !ret );
+  null_at=0;
+  malloc_count=0;
+
 
   return 0;
 }

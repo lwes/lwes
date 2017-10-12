@@ -417,6 +417,7 @@ test_parser_duplicate_fail (void)
 {
   char* dest = NULL;
   struct lwes_parser_state state; 
+  memset(&state, 0, sizeof(state));
   duplicate_lex_string((void*)&state, &dest, NULL, "test");
   assert(dest == NULL);
 }

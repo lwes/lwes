@@ -130,6 +130,7 @@ typedef char *             LWES_SHORT_STRING;
  *  \brief a string with length that can be stored in at most 2 bytes
  */
 typedef char *             LWES_LONG_STRING;
+typedef char *             LWES_STRING;
 
 /*! \typedef const char *  LWES_CONST_SHORT_STRING
  *  \brief a constant string with length that can be stored in at most 1 byte
@@ -140,6 +141,7 @@ typedef const char *       LWES_CONST_SHORT_STRING;
  *  \brief a constant string with length that can be stored in at most 1 byte
  */
 typedef const char *       LWES_CONST_LONG_STRING;
+typedef const char *       LWES_CONST_STRING;
 
 /*! \typedef char  LWES_CHAR
  *  \brief a character which is mainly used in mallocs for string types

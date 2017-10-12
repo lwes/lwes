@@ -31,7 +31,7 @@ const size_t MAX_QUEUED_ELEMENTS = 10000;
 #define TYPE_STRINGS(typ,str)                                                            \
   const LWES_SHORT_STRING LWES_##typ##_STRING         = (LWES_SHORT_STRING)str;          \
   const LWES_SHORT_STRING LWES_##typ##_ARRAY_STRING   = (LWES_SHORT_STRING)str "_array"; \
-  const LWES_SHORT_STRING LWES_N_##typ##_ARRAY_STRING = (LWES_SHORT_STRING)"nullable" str "_array";
+  const LWES_SHORT_STRING LWES_N_##typ##_ARRAY_STRING = (LWES_SHORT_STRING)"nullable_" str "_array";
 
 const LWES_SHORT_STRING LWES_UNDEFINED_STRING         = (LWES_SHORT_STRING)"undef";
 TYPE_STRINGS(U_INT_16, "uint16");
@@ -183,6 +183,9 @@ lwes_typed_value_to_stream
     case LWES_TYPE_U_INT_64: return fprintf(stream,"%"PRIu64, *(LWES_U_INT_64*)v);
     case LWES_TYPE_INT_64:   return fprintf(stream,"%"PRId64, *(LWES_INT_64*)v);
     case LWES_TYPE_BOOLEAN:  return fprintf(stream,"%s",      (1==*(LWES_BOOLEAN*)v)?"true":"false");
+    case LWES_TYPE_BYTE:     return fprintf(stream,"%u",     (unsigned int)*(LWES_BYTE*)v);
+    case LWES_TYPE_FLOAT:    return fprintf(stream,"%f",     *(LWES_FLOAT*)v);
+    case LWES_TYPE_DOUBLE:   return fprintf(stream,"%lf",    *(LWES_DOUBLE*)v);
     case LWES_TYPE_IP_ADDR:  return fprintf(stream,"%s",      inet_ntoa(*(LWES_IP_ADDR *)v));
     case LWES_TYPE_STRING:   return fprintf(stream,"\"%s\"",  (LWES_LONG_STRING)v);
     default: return 0; //fprintf(stream, "<UNKNOWN_FIELD_TYPE>");
@@ -214,12 +217,19 @@ lwes_typed_array_to_stream
     {
       if (nullable)
         {
-          char* ptr = *(char**)(v+(i*skip));
-          if (NULL != ptr)
+          char* ptr = ((char**)value)[i];
+          if (NULL == ptr)
+            {
+              // TODO print explicit 'null' ?
+            }
+          else if (LWES_TYPE_STRING == baseType)
+            {
+                ret += lwes_typed_value_to_stream(baseType, ptr, stream);
+            }
+          else
             {
               ret += lwes_typed_value_to_stream(baseType, ptr, stream);
             }
-          // TODO print explicit 'null' ?
         }
       else if (LWES_TYPE_STRING == baseType)
         {

@@ -591,11 +591,20 @@ marshall_array_attribute
   array = (char*) attr->value;
   if (nullable)
     {
+      LWES_BYTE* bitvec = NULL;
+      LWES_BYTE** data = NULL;
       int bvsize = bitvec_byte_size(attr->array_len);
+      /* NOTE: nullable-arrays have the array length written twice. */
+      /* Perhaps, in the future, it could be used to reduce the serialized size */
+      /* of the bit-vector if there are lots of trailing nulls. But for now, it */
+      /* should be equal to the length for compatibility with Java/Erlang/etc. */
+      w = marshall_U_INT_16(attr->array_len, bytes, length, offset);
+      if (!w)
+        { return 0; }
       if (bvsize > (int)(length - *offset))
         { return 0; }
-      LWES_BYTE* bitvec = bytes + *offset;
-      LWES_BYTE** data = attr->value;
+      bitvec = bytes + *offset;
+      data = attr->value;
       *offset += bvsize;
       used += bvsize;
       memset(bitvec, 0, bvsize);
@@ -642,15 +651,18 @@ calculate_array_byte_size
   int total = 0;
   LWES_BYTE baseType = lwes_array_type_to_base(type);
   LWES_U_INT_16 actual_len = array_len;
-  int i;
+  LWES_U_INT_16 bvBits = 0;
+  int i, r;
 
   if (lwes_type_is_nullable_array(type))
     {
       int bvbytes = bitvec_byte_size(array_len);
+      r = unmarshall_U_INT_16(&bvBits, bytes, length, &offset);
+      if (!r)
+        { return 0; }
+
       if ( bvbytes > (int)(length-offset))
-        { 
-          return -1;
-        }
+        { return -1; }
       for (i=0; i<array_len; ++i)
         {
           if (!bitvec_get(bytes+offset, i))
@@ -702,6 +714,7 @@ unmarshall_array_attribute
   LWES_BYTE *bitvec = NULL;
   LWES_BYTE **pointers = NULL;
   LWES_BYTE *data = NULL;
+  LWES_U_INT_16 bvBytes = 0;
 
   if (!attr || !offset)
     {
@@ -730,6 +743,9 @@ unmarshall_array_attribute
   if (lwes_type_is_nullable_array(attr->type))
     {
       int bvsize = bitvec_byte_size(attr->array_len);
+      /* Repeated length value. See the note above in marshall_array_attribute. */
+      /* NOTE: no need to check return, calculate_array_byte_size ensures space */
+      unmarshall_U_INT_16(&bvBytes, bytes, length, offset);
       bitvec = bytes+*offset;
       /* skip bitset */
       *offset += bvsize;

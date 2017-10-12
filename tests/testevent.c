@@ -165,6 +165,107 @@ static LWES_BYTE ref_bytes_db[188] = {
   0xff,0xff,0xff,0x0b,0x61,0x4d,0x65,0x74,0x61,0x53,0x74,0x72,0x69,0x6e,0x67,
   0x05,0x00,0x05,0x68,0x65,0x6c,0x6c,0x6f};
 
+static int
+lwes_event_to_stream
+  (struct lwes_event *event,
+   FILE *stream)
+{
+  struct lwes_event_attribute *tmp;
+  struct lwes_hash_enumeration e;
+
+  fprintf (stream, "%s", event->eventName);
+  fprintf (stream,"[");
+  fflush (stream);
+  lwes_typed_value_to_stream (LWES_TYPE_U_INT_16, (void*)&event->number_of_attributes, stream);
+  fprintf (stream,"]");
+  fflush (stream);
+  fprintf (stream,"\n");
+  fflush (stream);
+  fprintf (stream,"{\n");
+  fflush (stream);
+
+  if (lwes_hash_keys (event->attributes, &e))
+    {
+      while (lwes_hash_enumeration_has_more_elements (&e))
+        {
+          LWES_SHORT_STRING tmpAttrName =
+            lwes_hash_enumeration_next_element (&e);
+
+          tmp =
+            (struct lwes_event_attribute *)lwes_hash_get (event->attributes,
+                                                          tmpAttrName);
+
+          fprintf (stream,"\t");
+          fflush (stream);
+          fprintf (stream, "%s", tmpAttrName);
+          fflush (stream);
+          fprintf (stream," = ");
+          fflush (stream);
+          lwes_event_attribute_to_stream (tmp, stream);
+          fflush (stream);
+          fprintf (stream,";\n");
+          fflush (stream);
+        }
+    }
+  fprintf (stream,"}\n");
+  fflush (stream);
+  return 0;
+}
+
+
+static LWES_BYTE array_event_bytes[] = {
+  14,65,114,114,97,121,84,101,115,116,69,118,101,110,116,0,13,3,101,110,
+  100,5,0,22,84,104,105,115,32,105,115,32,116,104,101,32,101,110,100,32,
+  102,105,101,108,100,46,9,115,116,114,105,110,103,78,65,114,145,0,8,0,8,
+  85,0,1,97,0,2,98,98,0,3,99,99,99,0,4,100,100,100,100,9,117,105,110,116,
+  49,54,78,65,114,141,0,14,0,14,171,40,0,1,0,2,0,3,0,5,0,7,0,11,0,13,8,
+  115,116,114,105,110,103,65,114,133,0,4,0,3,119,111,110,0,3,116,111,111,
+  0,4,70,114,101,101,0,3,102,111,114,8,117,105,110,116,49,54,65,114,129,
+  0,7,0,1,0,2,0,3,0,5,0,7,0,11,0,13,3,100,117,98,12,64,9,33,251,77,18,
+  216,74,8,102,108,111,97,116,105,110,103,11,102,254,244,249,4,98,105,
+  116,101,10,42,5,115,116,97,114,116,5,0,24,84,104,105,115,32,105,115,32,
+  116,104,101,32,115,116,97,114,116,32,102,105,101,108,100,46,14,120,95,
+  115,118,99,95,118,101,114,115,105,111,110,115,5,0,16,103,97,116,101,
+  119,97,121,47,49,49,46,49,49,55,46,48,10,120,95,97,112,112,95,110,97,
+  109,101,5,0,7,103,97,116,101,119,97,121,4,101,95,105,100,7,162,1,254,
+  124,103,80,96,101,9,101,95,118,101,114,115,105,111,110,4,0,1,96,24
+};
+
+static void test_array_event()
+{
+  int i, ret;
+  int event_size = sizeof(array_event_bytes);
+  struct lwes_event_deserialize_tmp dtmp;
+  struct lwes_event *event;
+
+  /*
+    fprintf(stderr, "\n\n");
+    for (int i=0; i<event_size; ++i) {
+      fprintf(stderr, "0x%02x, ", array_event_bytes[i]);
+      if (!((i+1)&0xf)) { fprintf(stderr, "\n"); }
+    }
+    fprintf(stderr, "\n\n");
+  */
+
+
+  event = lwes_event_create_no_name (NULL);
+  assert(event != NULL);
+  ret = lwes_event_from_bytes (event, array_event_bytes, event_size, 0, &dtmp);
+  assert(event_size == ret);
+  lwes_event_to_stream(event, stdout);
+  lwes_event_destroy(event);
+
+  /* fail at any length less than the full event */
+  for (i=0; i<event_size-1; ++i)
+    {
+      event = lwes_event_create_no_name (NULL);
+      assert(event != NULL);
+      ret = lwes_event_from_bytes (event, array_event_bytes, i, 0, &dtmp);
+      assert(0 > ret);
+      lwes_event_destroy(event);
+    }
+}
+
 const char *esffile         = "testeventtypedb.esf";
 LWES_SHORT_STRING eventname = (LWES_SHORT_STRING)"TypeChecker";
 LWES_U_INT_16     encoding  = (LWES_U_INT_16)1;
@@ -322,7 +423,7 @@ test_event_with_db (void)
       assert ( bytes[i] == ref_bytes_db[i] );
     }
 
-  // TODO move this above and update the binary data, 
+  // TODO move this above and update the binary data,
   // NOTE: because of hash-ordering it completely changes/reorders the data
   assert ( lwes_event_set_BYTE             (event1, key17, value17) ==  ++attrCount );
   assert ( lwes_event_set_FLOAT            (event1, key18, value18) ==  ++attrCount );
@@ -408,10 +509,8 @@ test_event_with_db (void)
   assert ( size14_o1 == size14 );
   for (i=0; i<size14; ++i)
     {
-      if (!value14[i])
-        { assert ( value14[i] == value14_o1[i] ); }
-      else
-        { assert ( 0 == strcmp(value14[i], value14_o1[i]) ); }
+      assert ( value14_o1[i] );
+      assert ( 0 == strcmp(value14[i], value14_o1[i]) );
     }
 
   assert ( lwes_event_get_nullable_array(event1, key15, LWES_TYPE_N_U_INT_16_ARRAY, &size15_o1, (void**)&value15_o1) == 0 );
@@ -477,10 +576,8 @@ test_event_with_db (void)
   assert ( size14_o2 == size14 );
   for (i=0; i<size14; ++i)
     {
-      if (!value14[i])
-        { assert ( value14[i] == value14_o2[i] ); }
-      else
-        { assert ( 0 == strcmp(value14[i], value14_o2[i]) ); }
+      assert ( value14_o2[i] );
+      assert ( 0 == strcmp(value14[i], value14_o2[i]) );
     }
 
   assert ( lwes_event_get_array(NULL, key13, LWES_TYPE_U_INT_16_ARRAY, &size13_o2, (void**)&value13_o2) != 0 );
@@ -1632,26 +1729,149 @@ test_deserialize_errors (void)
   }
 }
 
+#define SET_ARRAY_TYPE(typ, val)                           \
+  {                                                        \
+    LWES_U_INT_16 len = 3;                                 \
+    LWES_##typ value = (LWES_##typ)val;                    \
+    LWES_##typ array[3] = {value, value, value};           \
+    const char* key = "the_array_"#typ;                    \
+    assert (++fields ==                                    \
+      lwes_event_set_array (event1,                        \
+        key, LWES_TYPE_##typ##_ARRAY, len, array) );       \
+  }                                                        \
+  {                                                        \
+    LWES_U_INT_16 len = 5;                                 \
+    LWES_##typ value = (LWES_##typ)val;                    \
+    LWES_##typ *ref = &value;                              \
+    LWES_##typ* array[5] = {ref, NULL, ref, NULL, ref};    \
+    const char* key = "the_n_array_"#typ;                  \
+    assert (++fields ==                                    \
+      lwes_event_set_nullable_array (event1,               \
+        key, LWES_TYPE_N_##typ##_ARRAY, len, array) );     \
+  }                                                        \
+
+#define SET_ARRAY_TYPE_STR(typ, val)                       \
+  {                                                        \
+    LWES_U_INT_16 len = 3;                                 \
+    LWES_##typ value = (LWES_##typ)val;                    \
+    LWES_##typ array[3] = {value, value, value};           \
+    const char* key = "the_array_"#typ;                    \
+    assert (++fields ==                                    \
+      lwes_event_set_array (event1,                        \
+        key, LWES_TYPE_##typ##_ARRAY, len, array) );       \
+  }                                                        \
+  {                                                        \
+    LWES_U_INT_16 len = 5;                                 \
+    LWES_##typ value = (LWES_##typ)val;                    \
+    LWES_##typ array[5] = {value, NULL, value, NULL, value};\
+    const char* key = "the_n_array_"#typ;                  \
+    assert (++fields ==                                    \
+      lwes_event_set_nullable_array (event1,               \
+        key, LWES_TYPE_N_##typ##_ARRAY, len, array) );     \
+  }                                                        \
+
+
+#define CMP_BASIC                                          \
+  assert (value == cur);
+
+#define CMP_STRING                                         \
+  if (type == LWES_TYPE_N_STRING_ARRAY)                    \
+    { cur = ((char**)arrayOut)[i]; }                       \
+  assert(0 == strcmp(value, cur));
+
+#define CMP_IP                                             \
+  assert(0 == memcmp(&value, &cur, sizeof(LWES_IP_ADDR)));
+
+#define ELEMENT_STR                                        \
+    ((char**)arrayOut)[i]
+
+#define ELEMENT_BASIC                                      \
+    *arrayOut[i]
+
+
+#define GET_ARRAY_TYPE_EX(typ, val, cmp_func, elem)        \
+  case LWES_TYPE_##typ##_ARRAY:                            \
+    {                                                      \
+      LWES_##typ value = (LWES_##typ)val;                  \
+      LWES_##typ *arrayOut;                                \
+      const char* key = "the_array_"#typ;                  \
+      LWES_U_INT_16 len, i;                                \
+      LWES_TYPE type = LWES_TYPE_##typ##_ARRAY;            \
+      assert (ret == 1);                                   \
+      assert (0 == lwes_event_get_array                    \
+          (event1, key, type, &len, (void*)&arrayOut));    \
+      assert (len == 3);                                   \
+      for (i=0; i<len; ++i)                                \
+        {                                                  \
+          LWES_##typ cur = arrayOut[i];                    \
+          cmp_func                                         \
+        }                                                  \
+    }                                                      \
+    break;                                                 \
+  case LWES_TYPE_N_##typ##_ARRAY:                          \
+    {                                                      \
+      LWES_##typ value = (LWES_##typ)val;                  \
+      LWES_##typ* *arrayOut;                               \
+      const char* key = "the_n_array_"#typ;                \
+      LWES_U_INT_16 len, i;                                \
+      LWES_TYPE type = LWES_TYPE_N_##typ##_ARRAY;          \
+      assert (ret == 1);                                   \
+      assert (0 == lwes_event_get_nullable_array           \
+          (event1, key, type, &len, (void*)&arrayOut));    \
+      assert (len == 5);                                   \
+      for (i=0; i<len; ++i)                                \
+        {                                                  \
+          if (!(i&1))                                      \
+            {                                              \
+              LWES_##typ cur = elem;                       \
+              cmp_func                                     \
+            }                                              \
+          else                                             \
+            { assert(NULL == arrayOut[i]); }               \
+        }                                                  \
+    }                                                      \
+    break;
+
+#define GET_ARRAY_TYPE(typ, val)                           \
+  GET_ARRAY_TYPE_EX(typ, val, CMP_BASIC, ELEMENT_BASIC)
+
 static void
 test_enumeration (void)
 {
   struct lwes_event *event1;
   struct lwes_event_enumeration e;
+  int fields = 0;
 
   /* create the event */
   event1 = lwes_event_create (NULL, eventname);
   assert ( event1 != NULL );
 
   /* set one field of each type */
-  assert (lwes_event_set_U_INT_16         (event1, key04, value04) ==  1);
-  assert (lwes_event_set_INT_16           (event1, key06, value06) ==  2);
-  assert (lwes_event_set_U_INT_32         (event1, key07, value07) ==  3);
-  assert (lwes_event_set_INT_32           (event1, key08, value08) ==  4);
-  assert (lwes_event_set_STRING           (event1, key01, value01) ==  5);
-  assert (lwes_event_set_IP_ADDR          (event1, key12, value12) ==  6);
-  assert (lwes_event_set_INT_64           (event1, key10, value10) ==  7);
-  assert (lwes_event_set_U_INT_64         (event1, key09, value09) ==  8);
-  assert (lwes_event_set_BOOLEAN          (event1, key02, value02) ==  9);
+  assert (lwes_event_set_U_INT_16         (event1, key04, value04) ==  ++fields);
+  assert (lwes_event_set_INT_16           (event1, key06, value06) ==  ++fields);
+  assert (lwes_event_set_U_INT_32         (event1, key07, value07) ==  ++fields);
+  assert (lwes_event_set_INT_32           (event1, key08, value08) ==  ++fields);
+  assert (lwes_event_set_STRING           (event1, key01, value01) ==  ++fields);
+  assert (lwes_event_set_IP_ADDR          (event1, key12, value12) ==  ++fields);
+  assert (lwes_event_set_INT_64           (event1, key10, value10) ==  ++fields);
+  assert (lwes_event_set_U_INT_64         (event1, key09, value09) ==  ++fields);
+  assert (lwes_event_set_BOOLEAN          (event1, key02, value02) ==  ++fields);
+  assert (lwes_event_set_BYTE             (event1, key17, value17) ==  ++fields);
+  assert (lwes_event_set_FLOAT            (event1, key18, value18) ==  ++fields);
+  assert (lwes_event_set_DOUBLE           (event1, key19, value19) ==  ++fields);
+
+  SET_ARRAY_TYPE(IP_ADDR,   value12);
+  SET_ARRAY_TYPE_STR(STRING,  "Foo");
+  SET_ARRAY_TYPE(BOOLEAN,   1);
+  SET_ARRAY_TYPE(BYTE,     22);
+  SET_ARRAY_TYPE(U_INT_16, 23);
+  SET_ARRAY_TYPE(INT_16,  -24);
+  SET_ARRAY_TYPE(U_INT_32, 25);
+  SET_ARRAY_TYPE(INT_32,  -26);
+  SET_ARRAY_TYPE(U_INT_64, 27);
+  SET_ARRAY_TYPE(INT_64,  -28);
+  SET_ARRAY_TYPE(FLOAT,    29.87);
+  SET_ARRAY_TYPE(DOUBLE,   30.12);
 
   /* enumerate over the fields */
   if (lwes_event_keys (event1, &e))
@@ -1755,6 +1975,49 @@ test_enumeration (void)
                 }
                 break;
 
+              case LWES_TYPE_BYTE:
+                {
+                  LWES_BYTE      value17_o1;
+                  assert (ret == 1);
+                  assert (lwes_event_get_BYTE
+                            (event1, key, &value17_o1) ==  0);
+                  assert (value17_o1 == value17);
+                }
+                break;
+
+              case LWES_TYPE_FLOAT:
+                {
+                  LWES_FLOAT      value18_o1;
+                  assert (ret == 1);
+                  assert (lwes_event_get_FLOAT
+                            (event1, key, &value18_o1) ==  0);
+                  assert (value18_o1 == value18);
+                }
+                break;
+
+              case LWES_TYPE_DOUBLE:
+                {
+                  LWES_DOUBLE      value19_o1;
+                  assert (ret == 1);
+                  assert (lwes_event_get_DOUBLE
+                            (event1, key, &value19_o1) ==  0);
+                  assert (value19_o1 == value19);
+                }
+                break;
+
+              GET_ARRAY_TYPE_EX(IP_ADDR,  value12, CMP_IP, ELEMENT_BASIC);
+              GET_ARRAY_TYPE_EX(STRING,  "Foo", CMP_STRING, ELEMENT_STR);
+              GET_ARRAY_TYPE(BOOLEAN,   1);
+              GET_ARRAY_TYPE(BYTE,     22);
+              GET_ARRAY_TYPE(U_INT_16, 23);
+              GET_ARRAY_TYPE(INT_16,  -24);
+              GET_ARRAY_TYPE(U_INT_32, 25);
+              GET_ARRAY_TYPE(INT_32,  -26);
+              GET_ARRAY_TYPE(U_INT_64, 27);
+              GET_ARRAY_TYPE(INT_64,  -28);
+              GET_ARRAY_TYPE(FLOAT,    29.87);
+              GET_ARRAY_TYPE(DOUBLE,   30.12);
+
               case LWES_TYPE_UNDEFINED:
                 {
                   assert (ret == 0);
@@ -1762,7 +2025,6 @@ test_enumeration (void)
                   assert (type == LWES_TYPE_UNDEFINED);
                 }
                 break;
-              default: exit(1); // TODO replace this with new types
             }
           if (ret == 0)
             {
@@ -1817,6 +2079,8 @@ int main (void)
 {
   value12.s_addr = inet_addr ("127.0.0.1");
   sender_ip.s_addr = inet_addr ("172.16.101.1");
+
+  test_array_event();
 
   test_event_with_db ();
   test_event_without_db ();
