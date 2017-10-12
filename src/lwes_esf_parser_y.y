@@ -52,6 +52,7 @@ void lwes_cleanup_attribute_state(void* param);
 %parse-param {void* param}
 %lex-param {void *param}
 
+
 %token YY_UINT16 YY_INT16 YY_UINT32 YY_INT32 YY_INT64 YY_UINT64 YY_BOOLEAN YY_STRING YY_IP_ADDR YY_BYTE YY_FLOAT YY_DOUBLE 
 %token YY_REQUIRED YY_OPTIONAL YY_NULLABLE
 %token EVENTWORD ATTRIBUTEWORD ATTRIBUTESIZE BADSIZE INVALID

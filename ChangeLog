@@ -9,6 +9,12 @@ Version 1.1.0 (timrc)
   * Moved repeated field-printing functions from the tools to the library.
   * Support bison 2.x and 3.x.
 
+Version 1.0.2 (molinaro)
+  * attempt to work with bison on travis box
+
+Version 1.0.1 (molinaro)
+  * see if removing some use statements prevent requiring perl when packaging
+
 Version 1.0.0 (molinaro)
   * Possibly NON-BACKWARD-COMPATIBLE - changed some members of
     lwes_net_connection in order to reuse it in the lwes-journaller.

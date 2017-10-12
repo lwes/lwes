@@ -11,11 +11,6 @@
 # limitations under the License. See accompanying LICENSE file.
 #======================================================================
 
-use strict;
-use warnings;
-
-use Data::Dumper;
-
 if (scalar (@ARGV) < 1)
   {
     print STDERR "lwes-calculate-max-size <esf_files>\n";
