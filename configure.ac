@@ -4,7 +4,7 @@ dnl -- get local macros (e.g. bison-version)
 AC_CONFIG_MACRO_DIRS([m4])
 m4_include([m4/bison-version.m4])
 
-AC_INIT([lwes], [1.0.0], [anthonym@alumni.caltech.edu])
+AC_INIT([lwes], [1.1.0], [anthonym@alumni.caltech.edu])
 
 dnl -- we want a header to include in our source files with configure
 dnl    info
