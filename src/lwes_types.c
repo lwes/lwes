@@ -233,7 +233,8 @@ lwes_typed_array_to_stream
         }
       else if (LWES_TYPE_STRING == baseType)
         {
-          ret += lwes_typed_value_to_stream(baseType, *(char**)(v+(i*skip)), stream);
+          char** ptr = (char**)(void*)v;
+          ret += lwes_typed_value_to_stream(baseType, ptr[i], stream);
         } 
       else
         {

@@ -972,7 +972,7 @@ lwes_event_set_array
   if (LWES_TYPE_STRING == baseType)
     {
       LWES_CONST_SHORT_STRING *str = (LWES_CONST_SHORT_STRING*)arr;
-      LWES_SHORT_STRING *strOut    = ((LWES_SHORT_STRING*)attrCopy);
+      LWES_SHORT_STRING *strOut    = ((LWES_SHORT_STRING*)(void*)attrCopy);
       char * cur = ((char*)attrCopy) + baseSize;
       for (int i=0; i< arr_length; ++i)
         {
@@ -1079,7 +1079,7 @@ lwes_event_set_nullable_array
       return -3;
     }
 
-  pointers = (LWES_BYTE**)tmp;
+  pointers = (LWES_BYTE**)(void*)tmp;
   dataOut = tmp + baseSize;
 
   for (int i=0; i< arr_length; ++i)

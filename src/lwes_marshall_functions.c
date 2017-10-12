@@ -135,7 +135,12 @@ int marshall_FLOAT        (LWES_FLOAT        val,
                            size_t            length,
                            size_t            *offset)
 {
-  return marshall_U_INT_32(*((LWES_U_INT_32*)&val), bytes, length, offset);
+  union {
+    LWES_U_INT_32 i32;
+    LWES_FLOAT     fl;
+  } tmp;
+  tmp.fl = val;
+  return marshall_U_INT_32(tmp.i32, bytes, length, offset);
 }
 
 int marshall_DOUBLE       (LWES_DOUBLE       val,
@@ -143,7 +148,12 @@ int marshall_DOUBLE       (LWES_DOUBLE       val,
                            size_t            length,
                            size_t            *offset)
 {
-  return marshall_U_INT_64(*((LWES_U_INT_64*)&val), bytes, length, offset);
+  union {
+    LWES_U_INT_64 i64;
+    LWES_DOUBLE    db;
+  } tmp;
+  tmp.db = val;
+  return marshall_U_INT_64(tmp.i64, bytes, length, offset);
 }
 
 int marshall_IP_ADDR      (LWES_IP_ADDR      ipAddress,
@@ -347,7 +357,14 @@ int unmarshall_FLOAT       (LWES_FLOAT *val,
                              size_t length,
                              size_t *offset)
 {
-  return unmarshall_U_INT_32((LWES_U_INT_32*)val, bytes, length, offset);
+  int ret;
+  union {
+    LWES_U_INT_32 i32;
+    LWES_FLOAT     fl;
+  } tmp;
+  ret = unmarshall_U_INT_32(&tmp.i32, bytes, length, offset);
+  *val = tmp.fl;
+  return ret;
 }
 
 int unmarshall_DOUBLE       (LWES_DOUBLE *val,
@@ -355,7 +372,14 @@ int unmarshall_DOUBLE       (LWES_DOUBLE *val,
                              size_t length,
                              size_t *offset)
 {
-  return unmarshall_U_INT_64((LWES_U_INT_64*)val, bytes, length, offset);
+  int ret;
+  union {
+    LWES_U_INT_64 i64;
+    LWES_DOUBLE    db;
+  } tmp;
+  ret = unmarshall_U_INT_64(&tmp.i64, bytes, length, offset);
+  *val = tmp.db;
+  return ret;
 }
 
 int unmarshall_IP_ADDR      (LWES_IP_ADDR *ipAddress,
