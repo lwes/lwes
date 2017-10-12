@@ -938,7 +938,7 @@ lwes_event_set_array
    LWES_U_INT_16 arr_length,
    void *arr)
 {
-  int ret = 0;
+  int i, ret = 0;
   char *attrCopy;
 
   if (event == NULL || attrName == NULL || arr == NULL)
@@ -957,7 +957,7 @@ lwes_event_set_array
     {
       /* Sum up the size of all the strings, to allocate in one block */
       LWES_CONST_SHORT_STRING *str = (LWES_CONST_SHORT_STRING*)arr;
-      for (int i=0; i< arr_length; ++i)
+      for (i=0; i< arr_length; ++i)
         {
           attrSize += 1 + (str[i] ? strlen(str[i]) : 0);
         }
@@ -974,7 +974,7 @@ lwes_event_set_array
       LWES_CONST_SHORT_STRING *str = (LWES_CONST_SHORT_STRING*)arr;
       LWES_SHORT_STRING *strOut    = ((LWES_SHORT_STRING*)(void*)attrCopy);
       char * cur = ((char*)attrCopy) + baseSize;
-      for (int i=0; i< arr_length; ++i)
+      for (i=0; i< arr_length; ++i)
         {
           if (str[i])
             {
@@ -1060,7 +1060,7 @@ lwes_event_set_nullable_array
   /* Sum up the size of all non-null elements, to allocate in one block */
   if (LWES_TYPE_STRING == baseType)
     {
-      for (int i=0; i< arr_length; ++i)
+      for (i=0; i< arr_length; ++i)
         {
           attrSize += (pointersIn[i] ? strlen((char*)pointersIn[i])+1 : 0);
         }
@@ -1082,7 +1082,7 @@ lwes_event_set_nullable_array
   pointers = (LWES_BYTE**)(void*)tmp;
   dataOut = tmp + baseSize;
 
-  for (int i=0; i< arr_length; ++i)
+  for (i=0; i< arr_length; ++i)
     {
       if (pointersIn[i])
         {
