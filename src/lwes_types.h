@@ -318,6 +318,13 @@ lwes_event_attribute_to_stream
   (struct lwes_event_attribute *attribute,
    FILE *stream);
 
+struct lwes_event;
+
+int
+lwes_event_to_stream
+  (struct lwes_event *event,
+   FILE *stream);
+
 #ifdef __cplusplus
 }
 #endif

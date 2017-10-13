@@ -165,53 +165,6 @@ static LWES_BYTE ref_bytes_db[188] = {
   0xff,0xff,0xff,0x0b,0x61,0x4d,0x65,0x74,0x61,0x53,0x74,0x72,0x69,0x6e,0x67,
   0x05,0x00,0x05,0x68,0x65,0x6c,0x6c,0x6f};
 
-static int
-lwes_event_to_stream
-  (struct lwes_event *event,
-   FILE *stream)
-{
-  struct lwes_event_attribute *tmp;
-  struct lwes_hash_enumeration e;
-
-  fprintf (stream, "%s", event->eventName);
-  fprintf (stream,"[");
-  fflush (stream);
-  lwes_typed_value_to_stream (LWES_TYPE_U_INT_16, (void*)&event->number_of_attributes, stream);
-  fprintf (stream,"]");
-  fflush (stream);
-  fprintf (stream,"\n");
-  fflush (stream);
-  fprintf (stream,"{\n");
-  fflush (stream);
-
-  if (lwes_hash_keys (event->attributes, &e))
-    {
-      while (lwes_hash_enumeration_has_more_elements (&e))
-        {
-          LWES_SHORT_STRING tmpAttrName =
-            lwes_hash_enumeration_next_element (&e);
-
-          tmp =
-            (struct lwes_event_attribute *)lwes_hash_get (event->attributes,
-                                                          tmpAttrName);
-
-          fprintf (stream,"\t");
-          fflush (stream);
-          fprintf (stream, "%s", tmpAttrName);
-          fflush (stream);
-          fprintf (stream," = ");
-          fflush (stream);
-          lwes_event_attribute_to_stream (tmp, stream);
-          fflush (stream);
-          fprintf (stream,";\n");
-          fflush (stream);
-        }
-    }
-  fprintf (stream,"}\n");
-  fflush (stream);
-  return 0;
-}
-
 
 static LWES_BYTE array_event_bytes[] = {
   14,65,114,114,97,121,84,101,115,116,69,118,101,110,116,0,13,3,101,110,
@@ -231,39 +184,157 @@ static LWES_BYTE array_event_bytes[] = {
   124,103,80,96,101,9,101,95,118,101,114,115,105,111,110,4,0,1,96,24
 };
 
-static void test_array_event()
+static char array_event_string[] =
+  "ArrayTestEvent[13]\n"
+  "{\n"
+  "\tend = \"This is the end field.\";\n"
+  "\te_id = -6772852554325794715;\n"
+  "\tuint16NAr = [ 1, 2, , 3, , 5, , 7, , , , 11, , 13 ];\n"
+  "\tstringAr = [ \"won\", \"too\", \"Free\", \"for\" ];\n"
+  "\tstart = \"This is the start field.\";\n"
+  "\tdub = 3.141593;\n"
+  "\tstringNAr = [ \"a\", , \"bb\", , \"ccc\", , \"dddd\",  ];\n"
+  "\tbite = 42;\n"
+  "\tx_svc_versions = \"gateway/11.117.0\";\n"
+  "\tuint16Ar = [ 1, 2, 3, 5, 7, 11, 13 ];\n"
+  "\tfloating = 602000017271895229464576.000000;\n"
+  "\tx_app_name = \"gateway\";\n"
+  "\te_version = 90136;\n"
+  "}\n"
+;
+
+
+static LWES_BYTE java_serialized_bytes[] = {
+    4,84,101,115,116,0,25,3,101,110,99,2,0,1,15,84,
+    101,115,116,83,116,114,105,110,103,65,114,114,
+    97,121,133,0,3,0,3,102,111,111,0,3,98,97,114,0,
+    3,98,97,122,11,102,108,111,97,116,95,97,114,114,
+    97,121,139,0,4,61,204,204,205,62,76,204,205,62,
+    153,153,154,62,204,204,205,8,84,101,115,116,66,
+    111,111,108,9,0,9,84,101,115,116,73,110,116,51,
+    50,4,0,0,54,176,10,84,101,115,116,68,111,117,98,
+    108,101,12,63,191,132,253,32,0,0,0,9,84,101,115,
+    116,73,110,116,54,52,7,0,0,0,0,0,0,12,162,10,84,
+    101,115,116,85,73,110,116,49,54,1,0,10,9,84,101,
+    115,116,70,108,111,97,116,11,61,250,120,108,15,
+    84,101,115,116,85,73,110,116,51,50,65,114,114,
+    97,121,131,0,3,0,0,48,34,1,239,43,17,0,20,6,67,
+    14,84,101,115,116,73,110,116,51,50,65,114,114,
+    97,121,132,0,3,0,0,0,123,0,0,177,110,0,0,134,29,
+    13,84,101,115,116,73,80,65,100,100,114,101,115,
+    115,6,1,0,0,127,10,84,101,115,116,85,73,110,116,
+    51,50,3,0,3,139,151,14,84,101,115,116,73,110,
+    116,54,52,65,114,114,97,121,135,0,3,0,0,0,0,0,0,
+    48,34,0,0,0,0,1,239,43,17,0,0,0,0,0,20,6,67,10,
+    98,121,116,101,95,97,114,114,97,121,138,0,5,10,
+    13,43,43,200,10,84,101,115,116,83,116,114,105,
+    110,103,5,0,3,102,111,111,15,84,101,115,116,85,
+    73,110,116,54,52,65,114,114,97,121,136,0,3,0,0,
+    0,0,0,0,48,34,0,0,0,0,1,239,43,17,0,0,0,0,0,20,
+    6,67,15,84,101,115,116,85,73,110,116,49,54,65,
+    114,114,97,121,129,0,3,0,123,177,110,134,29,6,
+    100,111,117,98,108,101,140,0,3,64,94,206,217,32,
+    0,0,0,64,94,199,227,64,0,0,0,64,69,170,206,160,
+    0,0,0,9,66,111,111,108,65,114,114,97,121,137,0,
+    4,1,0,0,1,14,84,101,115,116,73,110,116,49,54,65,
+    114,114,97,121,130,0,4,0,10,0,23,0,23,0,43,4,98,
+    121,116,101,10,20,10,84,101,115,116,85,73,110,
+    116,54,52,8,0,0,0,0,0,187,223,3,18,84,101,115,
+    116,73,80,65,100,100,114,101,115,115,65,114,114,
+    97,121,134,0,4,1,1,168,129,2,1,168,129,3,1,168,
+    129,4,1,168,129,9,84,101,115,116,73,110,116,49,
+    54,2,0,20
+};
+
+static char java_event_string[] =
+  "Test[25]\n"
+  "{\n"
+  "\tTestStringArray = [ \"foo\", \"bar\", \"baz\" ];\n"
+  "\tfloat_array = [ 0.100000, 0.200000, 0.300000, 0.400000 ];\n"
+  "\tTestBool = false;\n"
+  "\tTestInt64Array = [ 12322, 32451345, 1312323 ];\n"
+  "\tTestInt16 = 20;\n"
+  "\tTestDouble = 0.123123;\n"
+  "\tTestInt32Array = [ 123, 45422, 34333 ];\n"
+  "\tenc = 1;\n"
+  "\tTestUInt16Array = [ 123, 45422, 34333 ];\n"
+  "\tbyte = 20;\n"
+  "\tTestInt64 = 3234;\n"
+  "\tTestString = \"foo\";\n"
+  "\tTestInt32 = 14000;\n"
+  "\tTestUInt16 = 10;\n"
+  "\tTestUInt64Array = [ 12322, 32451345, 1312323 ];\n"
+  "\tTestUInt32Array = [ 12322, 32451345, 1312323 ];\n"
+  "\tTestIPAddressArray = [ 129.168.1.1, 129.168.1.2, 129.168.1.3, 129.168.1.4 ];\n"
+  "\tTestInt16Array = [ 10, 23, 23, 43 ];\n"
+  "\tTestFloat = 0.122300;\n"
+  "\tbyte_array = [ 10, 13, 43, 43, 200 ];\n"
+  "\tTestUInt64 = 12312323;\n"
+  "\tTestIPAddress = 127.0.0.1;\n"
+  "\tTestUInt32 = 232343;\n"
+  "\tdouble = [ 123.232002, 123.123245, 43.334431 ];\n"
+  "\tBoolArray = [ true, false, false, true ];\n"
+  "}\n"
+;
+
+static void 
+test_deserialize_event(LWES_BYTE *event_bytes, int event_size, char* str, size_t str_len)
 {
-  int i, ret;
-  int event_size = sizeof(array_event_bytes);
+  int i, ret, line;
   struct lwes_event_deserialize_tmp dtmp;
   struct lwes_event *event;
-
-  /*
-    fprintf(stderr, "\n\n");
-    for (int i=0; i<event_size; ++i) {
-      fprintf(stderr, "0x%02x, ", array_event_bytes[i]);
-      if (!((i+1)&0xf)) { fprintf(stderr, "\n"); }
-    }
-    fprintf(stderr, "\n\n");
-  */
-
+  FILE* tmp = fopen("./tmp-event.out", "w+");
+  size_t tmp_len;
+  char buf[4096];
+  assert(tmp);
 
   event = lwes_event_create_no_name (NULL);
   assert(event != NULL);
-  ret = lwes_event_from_bytes (event, array_event_bytes, event_size, 0, &dtmp);
+  ret = lwes_event_from_bytes (event, event_bytes, event_size, 0, &dtmp);
   assert(event_size == ret);
-  lwes_event_to_stream(event, stdout);
+  lwes_event_to_stream(event, tmp);
+  /*lwes_event_to_stream(event, stdout);*/
   lwes_event_destroy(event);
+
+  tmp_len = ftell(tmp);
+  rewind(tmp);
+  assert(tmp_len > 0);
+  assert(tmp_len < 4096);
+  fread(buf, tmp_len, 1, tmp);
+  fclose(tmp);
+
+  assert(tmp_len == str_len);
+  line = 0;
+  for (i=0; i<(int)str_len; ++i)
+    {
+      if (buf[i] == '\n') ++line;
+      if (buf[i] != str[i]) { fprintf(stderr, "difference at char %d [%c] vs [%c] line %d\n", i, buf[i], str[i], line); }
+      assert(buf[i] == str[i]);
+    }
 
   /* fail at any length less than the full event */
   for (i=0; i<event_size-1; ++i)
     {
       event = lwes_event_create_no_name (NULL);
       assert(event != NULL);
-      ret = lwes_event_from_bytes (event, array_event_bytes, i, 0, &dtmp);
+      ret = lwes_event_from_bytes (event, event_bytes, i, 0, &dtmp);
       assert(0 > ret);
       lwes_event_destroy(event);
     }
+}
+
+static void test_java_event()
+{
+  int event_size = sizeof(java_serialized_bytes);
+  size_t str_len = sizeof(java_event_string)-1; /* ignore null */
+  test_deserialize_event(java_serialized_bytes, event_size, java_event_string, str_len);
+}
+
+static void test_array_event()
+{
+  int event_size = sizeof(array_event_bytes);
+  size_t str_len = sizeof(array_event_string)-1; /* ignore null */
+  test_deserialize_event(array_event_bytes, event_size, array_event_string, str_len);
 }
 
 const char *esffile         = "testeventtypedb.esf";
@@ -2078,6 +2149,7 @@ int main (void)
   value12.s_addr = inet_addr ("127.0.0.1");
   sender_ip.s_addr = inet_addr ("172.16.101.1");
 
+  test_java_event();
   test_array_event();
 
   test_event_with_db ();

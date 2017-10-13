@@ -1,5 +1,5 @@
 
-Event2 (*&
+Event2 *&
 {
   ^%$
   boolean= t_bool;     # test_bool                    OPTIONAL, CALCULATED

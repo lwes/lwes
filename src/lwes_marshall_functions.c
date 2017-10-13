@@ -536,6 +536,7 @@ int
 unmarshall_generic
   (LWES_BYTE      type,
    void*          val,
+   size_t         max_val_len,
    LWES_BYTE_P    bytes,
    size_t         length,
    size_t *       offset)
@@ -553,8 +554,8 @@ unmarshall_generic
     TYPED_UNMARSHALL(FLOAT)
     TYPED_UNMARSHALL(DOUBLE)
     /* NOTE: SHORT vs LONG and a different signature makes this mildly problematic: */
-    /* case LWES_TYPE_STRING: return unmarshall_LONG_STRING
-        ((LWES_LONG_STRING *)val, bytes, length, offset); */
+    case LWES_TYPE_STRING: return unmarshall_LONG_STRING
+        ((LWES_LONG_STRING)val, max_val_len, bytes, length, offset);
     default: return 0;
   }
 }
@@ -804,14 +805,14 @@ unmarshall_array_attribute
           if (LWES_TYPE_STRING == baseType)
             {
               /* special case string... */
-              r = unmarshall_LONG_STRING((LWES_LONG_STRING)data, left, bytes, length, offset);
+              r = unmarshall_generic(baseType, data, left, bytes, length, offset);
               /* leave off the 2 bytes for (LONG_) string size, but include trailing null */
               data += (r-2+1);
               left -= (r-2+1);
             }
           else
             {
-              r = unmarshall_generic(baseType, data, bytes, length, offset);
+              r = unmarshall_generic(baseType, data, delta, bytes, length, offset);
               data += delta;
               left -= delta;
             }

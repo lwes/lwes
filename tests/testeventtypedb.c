@@ -200,6 +200,29 @@ test_db (void)
                                         LWES_TYPE_INT_64,
                                         (LWES_SHORT_STRING)"anInt64",
                                         (LWES_SHORT_STRING)"TypeChecker"));
+  assert (
+    lwes_event_type_db_check_for_type ( db,
+                                        LWES_TYPE_STRING_ARRAY,
+                                        (LWES_SHORT_STRING)"string_array",
+                                        (LWES_SHORT_STRING)"TypeChecker"));
+  assert (
+    lwes_event_type_db_check_for_type ( db,
+                                        LWES_TYPE_N_STRING_ARRAY,
+                                        (LWES_SHORT_STRING)"string_null_array",
+                                        (LWES_SHORT_STRING)"TypeChecker"));
+  assert (
+    lwes_event_type_db_check_for_type ( db,
+                                        LWES_TYPE_U_INT_16_ARRAY,
+                                        (LWES_SHORT_STRING)"uint16_array",
+                                        (LWES_SHORT_STRING)"TypeChecker"));
+  assert (
+    lwes_event_type_db_check_for_type ( db,
+                                        LWES_TYPE_N_U_INT_16_ARRAY,
+                                        (LWES_SHORT_STRING)"uint16_null_array",
+                                        (LWES_SHORT_STRING)"TypeChecker"));
+
+
+
   /* now check the meta fields */
   assert (
     lwes_event_type_db_check_for_attribute ( db,
@@ -292,6 +315,7 @@ test_db (void)
                                         LWES_TYPE_STRING,
                                         (LWES_SHORT_STRING)"aMetaString",
                                         (LWES_SHORT_STRING)"Empty"));
+
 
   /* now make sure that unknown fields work fine */
   assert (

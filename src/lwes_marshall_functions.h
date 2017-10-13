@@ -721,6 +721,7 @@ int
 unmarshall_generic
   (LWES_BYTE      type,
    void*          val,
+   size_t         max_val_len,
    LWES_BYTE_P    bytes,
    size_t         length,
    size_t *       offset);

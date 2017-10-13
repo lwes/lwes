@@ -39,11 +39,6 @@ void lwes_yyerror(void *param, const char *s);
 void lwes_cleanup_event_state(void* param);
 void lwes_cleanup_attribute_state(void* param);
 
-/* since (bison 2.x) yyerror() only supports the msg param, we 'fool'
-   C into sending the void * pointer along with the message */
-/*
-#define lweserror(msg) lwes_yyerror(param, msg)
-*/
 #define lweserror lwes_yyerror
 
 %}
@@ -89,7 +84,6 @@ attribute: check type check attributename check stringspec check arrayspec check
           if (state->lastType != NULL)
             {
               /* TODO complain if strMaxSize is set and lastType is not a string */
-              /* fprintf(stderr, "Adding event:[%s] type:[%s] field:[%s] flags [0x%x] arraySize:[%d] stringLimit[%d]\n", state->lastEvent, state->lastType, state->lastField, state->flags, state->arrayTypeSize, state->strMaxSize); */
               lwes_event_type_db_add_attribute_ex
                 (((struct lwes_parser_state *) param)->db,
                  (LWES_SHORT_STRING) state->lastEvent,
@@ -107,10 +101,6 @@ attribute: check type check attributename check stringspec check arrayspec check
              }
         }
     }
-/*
-    | type attributename error ';'  { lwes_yyerror(param, "Did you forget a ';'?"); }
-    | type attributename error '}'  { lwes_yyerror(param, "Did you forget a semi-colon?"); }
-*/
     ;
 
 stringspec:
@@ -268,7 +258,6 @@ lwes_add_type_to_state
   duplicate_lex_string(param, &(state->lastType), type, "type");
 }
 
-/*void lwes_yyerror(const char *s, void *param)*/
 void lwes_yyerror(void *param, const char *s)
 {
   fprintf(stderr,"ERROR : %s : line %d\n",s, ((struct lwes_parser_state *) param)->lineno);

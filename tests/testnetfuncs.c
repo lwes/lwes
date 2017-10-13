@@ -123,6 +123,7 @@ my_sendto
  * The actual file we are testing is included here                     *
  *=====================================================================*/
 #include "lwes_net_functions.c"
+#include "lwes_hash.c"
 
 #undef getsockopt
 #undef setsockopt

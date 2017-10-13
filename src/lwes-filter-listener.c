@@ -60,52 +60,6 @@ static const char help[] =
   ""                                                                   "\n";
 
 
-static int
-lwes_event_to_stream
-  (struct lwes_event *event,
-   FILE *stream,
-   const char *event_name)
-{
-  struct lwes_event_attribute *tmp;
-  struct lwes_hash_enumeration e;
-
-  if (event_name != NULL &&
-      strcmp(event->eventName, event_name) != 0) {
-    return 0;
-  }
-
-  fprintf (stream, "%s", event->eventName);
-  fprintf (stream,"[");
-  fflush (stream);
-  lwes_typed_value_to_stream (LWES_TYPE_U_INT_16, (void*)&event->number_of_attributes, stream);
-  fprintf (stream,"]");
-  fflush (stream);
-  fprintf (stream," {");
-  fflush (stream);
-
-  if (lwes_hash_keys (event->attributes, &e)) {
-      while (lwes_hash_enumeration_has_more_elements (&e)) {
-          LWES_SHORT_STRING tmpAttrName =
-            lwes_hash_enumeration_next_element (&e);
-
-          tmp =
-            (struct lwes_event_attribute *)lwes_hash_get (event->attributes,
-                                                          tmpAttrName);
-
-          fprintf (stream, "%s", tmpAttrName);
-          fflush (stream);
-          fprintf (stream," = ");
-          fflush (stream);
-          lwes_event_attribute_to_stream (tmp,stream);
-          fflush (stream);
-          fprintf (stream,";");
-          fflush (stream);
-        }
-    }
-  fprintf (stream,"}\n");
-  fflush (stream);
-  return 0;
-}
 
 int main (int   argc, char *argv[]) {
 
@@ -190,7 +144,10 @@ int main (int   argc, char *argv[]) {
     if ( event != NULL ) {
       int ret = lwes_listener_recv ( listener, event);
       if ( ret > 0 ) {
-        lwes_event_to_stream (event, stdout, event_name);
+        if (event_name == NULL ||
+            strcmp(event->eventName, event_name) == 0) {
+          lwes_event_to_stream (event, stdout);
+        }
       }
     }
     lwes_event_destroy (event);

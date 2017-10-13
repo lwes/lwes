@@ -349,7 +349,7 @@ lwes_event_destroy
   {                                               \
     if (!marshall_array_attribute                 \
           (tmp, bytes, num_bytes, &tmpOffset))    \
-      { ret = fail_ret-100; }                     \
+      { ret = fail_ret-150; }                     \
   }
 
 
@@ -704,7 +704,7 @@ lwes_event_add_headers
             (attr, bytes, num_bytes, &tmpOffset))                    \
         {                                                            \
           lwes_event_attribute_destroy(attr);                        \
-          return mar_fail_ret-100;                                   \
+          return mar_fail_ret-150;                                   \
         }                                                            \
       if (0 > lwes_event_add_attr                                    \
             (event, tmp_short_str, attr))                            \

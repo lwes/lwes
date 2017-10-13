@@ -41,6 +41,7 @@ void *my_malloc (size_t size)
 #define malloc my_malloc
 
 #include "lwes_marshall_functions.c"
+#include "lwes_hash.c"
 #include "lwes_types.c"
 
 #undef malloc
@@ -504,25 +505,23 @@ int main(void)
   assert ( ip_addr.s_addr == ip_addr_1.s_addr );
   assert ( ip_addr2.s_addr == ip_addr2_1.s_addr );
   offset = 0;
-  assert (!unmarshall_generic(LWES_TYPE_UNDEFINED, &aByte_1,           bytes, 500, &offset));
-  assert (unmarshall_generic(LWES_TYPE_BYTE,     &aByte_1,             bytes, 500, &offset));
-  assert (unmarshall_generic(LWES_TYPE_BOOLEAN,  &aBool_1,             bytes, 500, &offset));
-  assert (unmarshall_generic(LWES_TYPE_U_INT_16, &uint16_1,            bytes, 500, &offset));
-  assert (unmarshall_generic(LWES_TYPE_INT_16,   &int16_1,             bytes, 500, &offset));
-  assert (unmarshall_generic(LWES_TYPE_U_INT_32, &uint32_1,            bytes, 500, &offset));
-  assert (unmarshall_generic(LWES_TYPE_INT_32,   &int32_1,             bytes, 500, &offset));
-  assert (unmarshall_generic(LWES_TYPE_U_INT_64, &uint64_1,            bytes, 500, &offset));
-  assert (unmarshall_generic(LWES_TYPE_INT_64,   &int64_1,             bytes, 500, &offset));
-  assert (unmarshall_generic(LWES_TYPE_FLOAT,    &aFloat_1,            bytes, 500, &offset));
-  assert (unmarshall_generic(LWES_TYPE_DOUBLE,   &aDouble_1,           bytes, 500, &offset));
-  //assert (unmarshall_generic(LWES_TYPE_STRING,   &aString_1,       500, bytes, 500, &offset));
-  //assert (unmarshall_generic(LWES_TYPE_STRING,   &anEmptyString_1, 500, bytes, 500, &offset));
-  //assert (unmarshall_generic(LWES_TYPE_STRING,   NULL,            0,   bytes, 500, &short_string_offset1));
-  assert (unmarshall_LONG_STRING  (aString_1,       500, bytes, 500, &offset));
-  assert (unmarshall_LONG_STRING  (anEmptyString_1, 500, bytes, 500, &offset));
-  assert (unmarshall_SHORT_STRING (NULL,            0,   bytes, 500, &short_string_offset1));
-  assert (unmarshall_generic(LWES_TYPE_IP_ADDR,     &ip_addr_1,           bytes, 500, &offset));
-  assert (unmarshall_generic(LWES_TYPE_IP_ADDR,     &ip_addr2_1,          bytes, 500, &offset));
+  assert (!unmarshall_generic(LWES_TYPE_UNDEFINED, &aByte_1,   sizeof(aByte_1),   bytes, 500, &offset));
+  assert ( unmarshall_generic(LWES_TYPE_BYTE,      &aByte_1,   sizeof(aByte_1),   bytes, 500, &offset));
+  assert ( unmarshall_generic(LWES_TYPE_BOOLEAN,   &aBool_1,   sizeof(aBool_1),   bytes, 500, &offset));
+  assert ( unmarshall_generic(LWES_TYPE_U_INT_16,  &uint16_1,  sizeof(uint16_1),  bytes, 500, &offset));
+  assert ( unmarshall_generic(LWES_TYPE_INT_16,    &int16_1,   sizeof(int16_1),   bytes, 500, &offset));
+  assert ( unmarshall_generic(LWES_TYPE_U_INT_32,  &uint32_1,  sizeof(uint32_1),  bytes, 500, &offset));
+  assert ( unmarshall_generic(LWES_TYPE_INT_32,    &int32_1,   sizeof(int32_1),   bytes, 500, &offset));
+  assert ( unmarshall_generic(LWES_TYPE_U_INT_64,  &uint64_1,  sizeof(uint64_1),  bytes, 500, &offset));
+  assert ( unmarshall_generic(LWES_TYPE_INT_64,    &int64_1,   sizeof(int64_1),   bytes, 500, &offset));
+  assert ( unmarshall_generic(LWES_TYPE_FLOAT,     &aFloat_1,  sizeof(aFloat_1),  bytes, 500, &offset));
+  assert ( unmarshall_generic(LWES_TYPE_DOUBLE,    &aDouble_1, sizeof(aDouble_1), bytes, 500, &offset));
+  short_string_offset1 = offset;
+  assert (unmarshall_generic(LWES_TYPE_STRING,   NULL,            0,   bytes, 500, &short_string_offset1));
+  assert (unmarshall_generic(LWES_TYPE_STRING,   aString_1,       500, bytes, 500, &offset));
+  assert (unmarshall_generic(LWES_TYPE_STRING,   anEmptyString_1, 500, bytes, 500, &offset));
+  assert (unmarshall_generic(LWES_TYPE_IP_ADDR,     &ip_addr_1,  sizeof(ip_addr_1), bytes, 500, &offset));
+  assert (unmarshall_generic(LWES_TYPE_IP_ADDR,     &ip_addr2_1, sizeof(ip_addr2_1),bytes, 500, &offset));
   assert ( aByte == aByte_1 );
   assert ( aBool == aBool_1 );
   assert ( uint16 == uint16_1 );

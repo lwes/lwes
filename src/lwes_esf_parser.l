@@ -168,7 +168,7 @@ double          {
                 }
 "#"[^\n]*       /* eat up one-line comments */
 [ \t]           ; /* ignore whitespace */
-[^ \t\n0-9a-zA-Z_:;{}\[\]]+               {
+[^ \t\n0-9a-zA-Z_:;{}\[\]()]+               {
                   /* return yytext[0]; */
                   /* yyterminate(); */
                   return(INVALID);

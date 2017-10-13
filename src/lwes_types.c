@@ -12,6 +12,7 @@
 
 #include "lwes_types.h"
 #include "lwes_event.h"
+#include "lwes_hash.h"
 
 #include <string.h>
 #include <netinet/in.h>
@@ -263,3 +264,52 @@ lwes_event_attribute_to_stream
       return lwes_typed_value_to_stream(attribute->type, val, stream);
     }
 }
+
+int
+lwes_event_to_stream
+  (struct lwes_event *event,
+   FILE *stream)
+{
+  struct lwes_event_attribute *tmp;
+  struct lwes_hash_enumeration e;
+
+  fprintf (stream, "%s", event->eventName);
+  fprintf (stream,"[");
+  fflush (stream);
+  lwes_typed_value_to_stream (LWES_TYPE_U_INT_16, (void*)&event->number_of_attributes, stream);
+  fprintf (stream,"]");
+  fflush (stream);
+  fprintf (stream,"\n");
+  fflush (stream);
+  fprintf (stream,"{\n");
+  fflush (stream);
+
+  if (lwes_hash_keys (event->attributes, &e))
+    {
+      while (lwes_hash_enumeration_has_more_elements (&e))
+        {
+          LWES_SHORT_STRING tmpAttrName =
+            lwes_hash_enumeration_next_element (&e);
+
+          tmp =
+            (struct lwes_event_attribute *)lwes_hash_get (event->attributes,
+                                                          tmpAttrName);
+
+          fprintf (stream,"\t");
+          fflush (stream);
+          fprintf (stream, "%s", tmpAttrName);
+          fflush (stream);
+          fprintf (stream," = ");
+          fflush (stream);
+          lwes_event_attribute_to_stream (tmp, stream);
+          fflush (stream);
+          fprintf (stream,";\n");
+          fflush (stream);
+        }
+    }
+  fprintf (stream,"}\n");
+  fflush (stream);
+  return 0;
+}
+
+
