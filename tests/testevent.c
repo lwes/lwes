@@ -300,7 +300,7 @@ test_deserialize_event(LWES_BYTE *event_bytes, int event_size, char* str, size_t
   rewind(tmp);
   assert(tmp_len > 0);
   assert(tmp_len < 4096);
-  fread(buf, tmp_len, 1, tmp);
+  assert(tmp_len == fread(buf, 1, tmp_len, tmp));
   fclose(tmp);
 
   assert(tmp_len == str_len);
