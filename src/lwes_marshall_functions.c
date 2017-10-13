@@ -139,6 +139,7 @@ int marshall_FLOAT        (LWES_FLOAT        val,
     LWES_U_INT_32 i32;
     LWES_FLOAT     fl;
   } tmp;
+  memset(&tmp, 0, sizeof(tmp));
   tmp.fl = val;
   return marshall_U_INT_32(tmp.i32, bytes, length, offset);
 }
@@ -152,6 +153,7 @@ int marshall_DOUBLE       (LWES_DOUBLE       val,
     LWES_U_INT_64 i64;
     LWES_DOUBLE    db;
   } tmp;
+  memset(&tmp, 0, sizeof(tmp));
   tmp.db = val;
   return marshall_U_INT_64(tmp.i64, bytes, length, offset);
 }
@@ -362,6 +364,7 @@ int unmarshall_FLOAT       (LWES_FLOAT *val,
     LWES_U_INT_32 i32;
     LWES_FLOAT     fl;
   } tmp;
+  memset(&tmp, 0, sizeof(tmp));
   ret = unmarshall_U_INT_32(&tmp.i32, bytes, length, offset);
   *val = tmp.fl;
   return ret;
@@ -377,6 +380,7 @@ int unmarshall_DOUBLE       (LWES_DOUBLE *val,
     LWES_U_INT_64 i64;
     LWES_DOUBLE    db;
   } tmp;
+  memset(&tmp, 0, sizeof(tmp));
   ret = unmarshall_U_INT_64(&tmp.i64, bytes, length, offset);
   *val = tmp.db;
   return ret;
