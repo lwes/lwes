@@ -47,9 +47,12 @@ lweslexdestroy
    experiment with reentrancy */
   lwes_delete_buffer (YY_CURRENT_BUFFER);
 }
+/* pragma does not work with gcc 4.1.2 on Centos5, so guard against that */
+#if __GNUC__ > 4 &&  __GNUC_MINOR__ > 1
 /* fix for Centos 7 (flex 2.5.37) */
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wsign-compare"
+#endif
 %}
 
 %option noyywrap nounput
@@ -175,4 +178,7 @@ double          {
                   return(INVALID);
                 }
 %%
+/* pragma does not work with gcc 4.1.2 on Centos5, so guard against that */
+#if __GNUC__ > 4 &&  __GNUC_MINOR__ > 1
 #pragma GCC diagnostic pop
+#endif
