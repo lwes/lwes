@@ -47,8 +47,9 @@ lweslexdestroy
    experiment with reentrancy */
   lwes_delete_buffer (YY_CURRENT_BUFFER);
 }
-
-
+/* fix for Centos 7 (flex 2.5.37) */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wsign-compare"
 %}
 
 %option noyywrap nounput
@@ -174,3 +175,4 @@ double          {
                   return(INVALID);
                 }
 %%
+#pragma GCC diagnostic pop
