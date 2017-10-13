@@ -23,7 +23,6 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <stdio.h>
-#include <inttypes.h>
 
 /* prototypes */
 static void signal_handler(int sig);
