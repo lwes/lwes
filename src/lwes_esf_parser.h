@@ -25,8 +25,6 @@ extern "C" {
 
 #if (BISON_MAJOR > 2)
 #  define lweslval yylval
-//#else
-//#  define lweslval _lweslval
 #endif
 
 /* define a structure to control the parser and lexer */

@@ -293,7 +293,6 @@ test_deserialize_event(LWES_BYTE *event_bytes, int event_size, char* str, size_t
   ret = lwes_event_from_bytes (event, event_bytes, event_size, 0, &dtmp);
   assert(event_size == ret);
   lwes_event_to_stream(event, tmp);
-  /*lwes_event_to_stream(event, stdout);*/
   lwes_event_destroy(event);
 
   tmp_len = ftell(tmp);
