@@ -29,5 +29,10 @@ Event1
   uint64  t_uint64;    # test_uint64                  OPTIONAL, CALCULATED
   ip_addr t_ip_addr;   # test_ip_addr                 OPTIONAL, CALCULATED
   string  t_string;    # test_string                  OPTIONAL, CALCULATED, 50
+
+  byte    t_byte;      # test_bool_array              OPTIONAL, CALCULATED
+  float   t_float;     # test_bool_array              OPTIONAL, CALCULATED
+  double  t_double;    # test_bool_array              OPTIONAL, CALCULATED
+
 }
 

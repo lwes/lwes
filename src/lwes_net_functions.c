@@ -407,7 +407,7 @@ lwes_net_recv_bytes
       return -1;
     }
 
-  if ( (ret = lwes_net_recv_bind (conn)) < 0) 
+  if ( (ret = lwes_net_recv_bind (conn)) < 0)
     {
       return ret;
     }
@@ -423,7 +423,7 @@ lwes_net_recv_bytes
 
 int
 lwes_net_recv_bytes_by
-  (struct lwes_net_connection *conn, 
+  (struct lwes_net_connection *conn,
    LWES_BYTE_P bytes,
    size_t len,
    unsigned int timeout_ms)

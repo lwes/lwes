@@ -123,6 +123,7 @@ my_sendto
  * The actual file we are testing is included here                     *
  *=====================================================================*/
 #include "lwes_net_functions.c"
+#include "lwes_hash.c"
 
 #undef getsockopt
 #undef setsockopt
@@ -796,7 +797,7 @@ test_get_sock_fd (void)
   lwes_net_close (&connection);
 }
 
-static void 
+static void
 test_large_send ()
 {
   struct lwes_net_connection connection;
@@ -813,8 +814,8 @@ test_large_send ()
                           (char *)mcast_iface,
                           (int)mcast_port)
            == 0 );
-  assert ( lwes_net_send_bytes (&connection, buffer, MAX_MSG_SIZE)  > 0); 
-  lwes_net_close (&connection);  
+  assert ( lwes_net_send_bytes (&connection, buffer, MAX_MSG_SIZE)  > 0);
+  lwes_net_close (&connection);
 }
 
 

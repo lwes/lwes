@@ -1,6 +1,11 @@
 dnl Process this file with autoconf to produce a configure script.
 
-AC_INIT([lwes], [1.0.2], [anthonym@alumni.caltech.edu])
+dnl -- get local macros (e.g. bison-version)
+AC_CONFIG_MACRO_DIRS([m4])
+m4_include([m4/bison-version.m4])
+
+AC_INIT([lwes], [1.1.0], [anthonym@alumni.caltech.edu])
+
 dnl -- we want a header to include in our source files with configure
 dnl    info
 AC_CONFIG_HEADERS(src/config.h)
@@ -47,6 +52,8 @@ AM_PROG_LIBTOOL
 dnl Checks for programs.
 AC_PROG_YACC
 AM_PROG_LEX
+
+AX_PROG_BISON_VERSION
 
 dnl Checks for header files.
 AC_HEADER_STDC

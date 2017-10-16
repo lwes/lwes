@@ -1,3 +1,14 @@
+Version 1.1.0 (timrc)
+  * Added BYTE, FLOAT, DOUBLE for parity with Erlang/Java
+  * Added array types, required/optional/nullable and string-size to ESF parser.
+  * Added basic and nullable array type support to the library.
+  * Flag invalid characters from ESF parser.
+  * Removed LWES_*_TOKEN constants in favor of LWES_TYPE_* enum.
+  * Use stdint types in typedefs (e.g. uint16_t for LWES_U_INT_16)
+  * Removed lots of copy-paste code.
+  * Moved repeated field-printing functions from the tools to the library.
+  * Support bison 2.x and 3.x.
+
 Version 1.0.2 (molinaro)
   * attempt to work with bison on travis box
 

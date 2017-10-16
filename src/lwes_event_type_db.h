@@ -21,7 +21,7 @@
 
 #ifdef __cplusplus
 extern "C" {
-#endif 
+#endif
 
 /*! \file lwes_event_type_db.h
  *  \brief Functions for an event specification file database
@@ -39,6 +39,31 @@ struct lwes_event_type_db_attribute
   struct lwes_event *event;
 };
 
+
+/*! Attribute non-mandatory in the event flag. */
+extern const LWES_U_INT_32 ATTRIBUTE_OPTIONAL;
+/*! Attribute mandatory in the event flag. */
+extern const LWES_U_INT_32 ATTRIBUTE_REQUIRED;
+/*! Attribute is an array type. */
+extern const LWES_U_INT_32 ATTRIBUTE_ARRAYED;
+/*! Attribute attribute array elements are nullable. */
+extern const LWES_U_INT_32 ATTRIBUTE_NULLABLE;
+
+/*! \struct lwes_event_field_db_attribute lwes_event_type_db.h
+ *  \brief The fields of an event, as stored in the database
+ */
+struct lwes_event_field_db_attribute
+{
+  /*! Maximum size for arrayed fields  */
+  LWES_INT_16 array_size;
+  /*! Maximum character length for strings  */
+  LWES_INT_16 max_str_size;
+  /*! Field attribute flags  */
+  LWES_INT_32 attr_flags;
+  /*! Type of the field, one of the LWES_*_TOKEN constants. */
+  LWES_BYTE type;
+};
+
 /*! \struct lwes_event_type_db lwes_event_type_db.h
  *  \brief The data base itself
  */
@@ -52,7 +77,7 @@ struct lwes_event_type_db
 };
 
 /*! \brief Creates the memory for the event_type_db.
- *  
+ *
  *  This creates memory which should be freed with lwes_event_type_db_destroy
  *
  *  \param[in] filename the path to the file containing the esf description
@@ -105,6 +130,30 @@ lwes_event_type_db_add_attribute
    LWES_SHORT_STRING attr_name,
    LWES_SHORT_STRING type);
 
+/*! \brief Add an array-type attribute name to an event name of the database
+ *
+ * \param[in] db the db to add the attr_name into
+ * \param[in] event_name the name of an event
+ * \param[in] attr_name the name of an attribute
+ * \param[in] type the type of the attribute
+ * \param[in] flags the properties of the attribute (e.g. ATTRIBUTE_REQUIRED)
+ * \param[in] arr_size the maximum size of the array of the type
+ *    0 for 'not an array', -1 for unspecified size
+ * \param[in] max_str_size (string/string-array fields only) the maximum length of each string
+ *    0 for default (64k)
+ *
+ * \return 0 if the add is successful, a negative number on failure
+ */
+int
+lwes_event_type_db_add_attribute_ex
+  (struct lwes_event_type_db *db,
+   LWES_SHORT_STRING event_name,
+   LWES_SHORT_STRING attr_name,
+   LWES_SHORT_STRING type,
+   LWES_INT_32 flags,
+   LWES_INT_16 arr_size,
+   LWES_INT_16 max_str_size);
+
 /*! \brief Check for an event in the database
  *
  *  \param[in] db the db to check for the event in
@@ -114,8 +163,23 @@ lwes_event_type_db_add_attribute
  */
 int
 lwes_event_type_db_check_for_event
-  (struct lwes_event_type_db *db, 
+  (struct lwes_event_type_db *db,
    LWES_SHORT_STRING event_name);
+
+/*! \brief Lookup an attribute in an event in the db
+ *
+ *  \param[in] db the db to check
+ *  \param[in] attr_name the attribute name to check for
+ *  \param[in] event_name the event name to check in
+ *
+ *  \return the attribute record, if found
+ *          NULL otherwise
+ */
+const struct lwes_event_field_db_attribute*
+lwes_event_type_db_lookup_attr
+  (struct lwes_event_type_db *db,
+   LWES_CONST_SHORT_STRING attr_name,
+   LWES_CONST_SHORT_STRING event_name);
 
 /*! \brief Check for an attribute in an event in the database
  *
@@ -127,7 +191,7 @@ lwes_event_type_db_check_for_event
  */
 int
 lwes_event_type_db_check_for_attribute
-  (struct lwes_event_type_db *db, 
+  (struct lwes_event_type_db *db,
    LWES_CONST_SHORT_STRING attr_name,
    LWES_CONST_SHORT_STRING event_name);
 
@@ -143,13 +207,13 @@ lwes_event_type_db_check_for_attribute
  */
 int
 lwes_event_type_db_check_for_type
-  (struct lwes_event_type_db *db, 
+  (struct lwes_event_type_db *db,
    LWES_BYTE type_value,
    LWES_CONST_SHORT_STRING attr_name,
    LWES_CONST_SHORT_STRING event_name);
 
 #ifdef __cplusplus
 }
-#endif 
+#endif
 
 #endif /* __LWES_EVENT_TYPE_DB */

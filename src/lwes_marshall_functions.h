@@ -17,10 +17,11 @@
 #include <stdio.h>
 
 #include "lwes_types.h"
+#include "lwes_event.h"
 
 #ifdef __cplusplus
 extern "C" {
-#endif 
+#endif
 
 /*! \file lwes_marshall_functions.h
  *  \brief Functions for marshalling LWES data types to/from byte arrays
@@ -214,6 +215,54 @@ marshall_INT_64
 int
 marshall_BOOLEAN
   (LWES_BOOLEAN      aBoolean,
+   LWES_BYTE_P       bytes,
+   size_t            length,
+   size_t            *offset);
+
+/*! \brief Marshall a float into a byte array
+ *
+ * Attempt to marshall val into the given byte array at the given
+ * offset if there is enough total space.  The length should be the total
+ * length of the array.
+ *
+ * The offset will be modified by the number of bytes set, and that value
+ * will be returned.  Thus a value of 0 is an error, meaning not enough
+ * space to write this.
+ *
+ *  \param[in] val the float to write into the array
+ *  \param[in] bytes the byte array to write into
+ *  \param[in] length total length of the array
+ *  \param[in,out] offset the offset into the array, then the new offset
+ *
+ *  \return 0 on error, the number of bytes written on success.
+ */
+int
+marshall_FLOAT
+  (LWES_FLOAT        val,
+   LWES_BYTE_P       bytes,
+   size_t            length,
+   size_t            *offset);
+
+/*! \brief Marshall a double into a byte array
+ *
+ * Attempt to marshall val into the given byte array at the given
+ * offset if there is enough total space.  The length should be the total
+ * length of the array.
+ *
+ * The offset will be modified by the number of bytes set, and that value
+ * will be returned.  Thus a value of 0 is an error, meaning not enough
+ * space to write this.
+ *
+ *  \param[in] val the double to write into the array
+ *  \param[in] bytes the byte array to write into
+ *  \param[in] length total length of the array
+ *  \param[in,out] offset the offset into the array, then the new offset
+ *
+ *  \return 0 on error, the number of bytes written on success.
+ */
+int
+marshall_DOUBLE
+  (LWES_DOUBLE       val,
    LWES_BYTE_P       bytes,
    size_t            length,
    size_t            *offset);
@@ -498,6 +547,58 @@ unmarshall_BOOLEAN
    size_t            length,
    size_t *          offset);
 
+/*! \brief Unmarshall a float from a byte array
+ *
+ * Attempt to unmarshall val from the given byte array at the
+ * given offset, without overflowing the bound.  If the bound would be
+ * overflown, an error is returned.
+ *
+ * The length should be the total length of the array.
+ *
+ * The offset will be modified by the number of bytes consumed, and that value
+ * will be returned.  Thus a value of 0 is an error, meaning not enough
+ * bytes to fill out the given type.
+ *
+ *  \param[out] val the float to read from the array and write into
+ *  \param[in] bytes the byte array to read from
+ *  \param[in] length total length of the byte array
+ *  \param[in,out] offset the offset into the array, then the new offset
+ *
+ *  \return 0 on error, the number of bytes consumed on success.
+ */
+int
+unmarshall_FLOAT
+  (LWES_FLOAT *      val,
+   LWES_BYTE_P       bytes,
+   size_t            length,
+   size_t *          offset);
+
+/*! \brief Unmarshall a double from a byte array
+ *
+ * Attempt to unmarshall val from the given byte array at the
+ * given offset, without overflowing the bound.  If the bound would be
+ * overflown, an error is returned.
+ *
+ * The length should be the total length of the array.
+ *
+ * The offset will be modified by the number of bytes consumed, and that value
+ * will be returned.  Thus a value of 0 is an error, meaning not enough
+ * bytes to fill out the given type.
+ *
+ *  \param[out] val the double to read from the array and write into
+ *  \param[in] bytes the byte array to read from
+ *  \param[in] length total length of the byte array
+ *  \param[in,out] offset the offset into the array, then the new offset
+ *
+ *  \return 0 on error, the number of bytes consumed on success.
+ */
+int
+unmarshall_DOUBLE
+  (LWES_DOUBLE *     val,
+   LWES_BYTE_P       bytes,
+   size_t            length,
+   size_t *          offset);
+
 /*! \brief Unmarshall an ipv4 address from a byte array
  *
  * Attempt to unmarshall ipAddress from the given byte array at the
@@ -590,8 +691,58 @@ unmarshall_LONG_STRING
    size_t           length,
    size_t *         offset);
 
+/* Private functions for internal library use */
+
+int unmarshall_string  (LWES_LONG_STRING aString,
+                        size_t max_string_length,
+                        int string_size_bits,
+                        LWES_BYTE_P bytes,
+                        size_t length,
+                        size_t *offset);
+
+int
+calculate_array_byte_size
+  (LWES_BYTE       type,
+   LWES_U_INT_16   array_len,
+   LWES_BYTE_P     bytes,
+   size_t          length,
+   size_t          offset);
+
+
+int
+marshall_generic
+  (LWES_BYTE      type,
+   void*          val,
+   LWES_BYTE_P    bytes,
+   size_t         length,
+   size_t *       offset);
+
+int
+unmarshall_generic
+  (LWES_BYTE      type,
+   void*          val,
+   size_t         max_val_len,
+   LWES_BYTE_P    bytes,
+   size_t         length,
+   size_t *       offset);
+
+int
+marshall_array_attribute
+  (struct lwes_event_attribute* attr,
+   LWES_BYTE_P     bytes,
+   size_t          length,
+   size_t*         offset);
+
+int
+unmarshall_array_attribute
+  (struct lwes_event_attribute* attr,
+   LWES_BYTE_P     bytes,
+   size_t          length,
+   size_t*         offset);
+
+
 #ifdef __cplusplus
 }
-#endif 
+#endif
 
 #endif /* __LWES_MARSHALL_FUNCTIONS_H */

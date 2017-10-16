@@ -271,7 +271,7 @@ lwes_emitter_collect_statistics
   emitter->count_since_last_beat++;
 
   /* Send a heartbeat event */
-  if ( emitter->emitHeartbeat 
+  if ( emitter->emitHeartbeat
        && (current_time - emitter->last_beat_time) >= emitter->frequency )
     {
       struct lwes_event *tmp_event =

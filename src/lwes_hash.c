@@ -211,7 +211,7 @@ lwes_hash_remove
   while ( searcher != NULL && strcmp (searcher->key,key) != 0 )
     {
       prev     = searcher;
-      searcher = searcher->next; 
+      searcher = searcher->next;
     }
   /* it's not in the list, so don't do anything, return NULL; */
   if ( searcher == NULL )
@@ -250,11 +250,13 @@ int lwes_hash_contains_key(struct lwes_hash* hash, const char *key)
 
   while ( searcher != NULL && strcmp (searcher->key,key) != 0 )
     {
-      searcher = searcher->next; 
+      searcher = searcher->next;
     }
 
   if ( searcher == NULL )
-    return 0;
+    {
+      return 0;
+    }
 
   return 1;
 }

@@ -218,6 +218,18 @@ sub calculateEventEntrySize
     {
       $size += 8;
     }
+  elsif ($type eq "byte")
+    {
+      $size += 1;
+    }
+  elsif ($type eq "float")
+    {
+      $size += 4;
+    }
+  elsif ($type eq "double")
+    {
+      $size += 8;
+    }
   elsif ($type eq "ip_addr")
     {
       $size += 4;
