@@ -30,7 +30,6 @@
 int lwesparse(void *param);
 int lweslex(YYSTYPE *lvalp, void *param);
 void lweslexdestroy (void);
-int lweslex_destroy  (void); /* the auto-generated one */
 void lwesrestart(FILE *input_file);
 
 void duplicate_lex_string (void* param, char* *dest, const char* str, const char* label);
@@ -205,7 +204,7 @@ lwes_parse_esf
     lwesin = fd;
     lwesrestart(lwesin);
     lwesparse((void *) &state);
-    lweslex_destroy();
+    lweslexdestroy();
     free(state.lastType);
     state.lastType = NULL;
     free(state.lastEvent);
