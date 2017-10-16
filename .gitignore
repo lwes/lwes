@@ -32,3 +32,4 @@ ylwrap
 out
 src/lwes_esf_parser_lwes_esf_parser_y.h
 src/lwes_esf_parser_lwes_esf_parser_y.c
+tests/tmp-event.out
