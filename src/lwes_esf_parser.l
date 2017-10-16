@@ -38,6 +38,9 @@ static int __lwesfwriteout;
 /* function prototypes */
 int lweslex(YYSTYPE *lvalp, void *param);
 void lweslexdestroy (void);
+#if YY_FLEX_SUBMINOR_VERSION >= 35
+int lweslex_destroy  (void); /* the auto-generated one */
+#endif
 
 void
 lweslexdestroy
@@ -46,6 +49,9 @@ lweslexdestroy
 /* FIXME: This doesn't work with multiple parsers, I think I need to
    experiment with reentrancy */
   lwes_delete_buffer (YY_CURRENT_BUFFER);
+#if YY_FLEX_SUBMINOR_VERSION >= 35
+  lweslex_destroy();
+#endif
 }
 /* pragma does not work with gcc 4.1.2 on Centos5, so guard against that */
 #if __GNUC__ > 4 &&  __GNUC_MINOR__ > 1
