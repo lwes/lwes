@@ -1,3 +1,7 @@
+Version 1.1.1 (timrc)
+  * Allow numeric and string literal default values in ESF.
+    (Not stored in eventdb yet.)
+
 Version 1.1.0 (timrc)
   * Added BYTE, FLOAT, DOUBLE for parity with Erlang/Java
   * Added array types, required/optional/nullable and string-size to ESF parser.

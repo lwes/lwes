@@ -173,8 +173,15 @@ double          {
                   ((struct lwes_parser_state *) param)->in_str_size = 0;
                   return ')';
                 }
+"="             {
+                  return '=';
+                }
 ";"             {
                   return ';';
+                }
+\"[^\"]*\"      {
+                    *lvalp = (YYSTYPE)lwestext;
+                    return(LITERALSTRING);
                 }
 "#"[^\n]*       /* eat up one-line comments */
 [ \t]           ; /* ignore whitespace */
