@@ -49,7 +49,7 @@ void lwes_cleanup_attribute_state(void* param);
 
 %token YY_UINT16 YY_INT16 YY_UINT32 YY_INT32 YY_INT64 YY_UINT64 YY_BOOLEAN YY_STRING YY_IP_ADDR YY_BYTE YY_FLOAT YY_DOUBLE 
 %token YY_REQUIRED YY_OPTIONAL YY_NULLABLE
-%token EVENTWORD ATTRIBUTEWORD ATTRIBUTESIZE BADSIZE INVALID
+%token EVENTWORD ATTRIBUTEWORD ATTRIBUTESIZE BADSIZE INVALID LITERALSTRING
 
 %%
 
@@ -77,7 +77,7 @@ attributelist:
     | attributelist attribute
     ;
 
-attribute: check type check attributename check stringspec check arrayspec check ';' {
+attribute: check type check attributename check stringspec check arrayspec check defaultvalspec ';' {
         {
           struct lwes_parser_state* state = (struct lwes_parser_state *) param;
           if (state->lastType != NULL)
@@ -100,6 +100,30 @@ attribute: check type check attributename check stringspec check arrayspec check
              }
         }
     }
+    ;
+
+defaultvalspec:
+      /* empty */
+    | '=' literal
+    ;
+
+literal:
+      ATTRIBUTEWORD
+           {
+             /* TODO store this in the eventdb */
+             char* end;
+             int val = strtol(lweslval, &end, 0);
+             (void) val;
+             /* validate numeric */
+             if (0 != *end) 
+               {
+               lwes_yyerror(param, "Bad numeric default value.");
+               }
+           }
+    | LITERALSTRING
+           {
+             /* TODO store this in the eventdb */
+           }
     ;
 
 stringspec:

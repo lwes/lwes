@@ -11,9 +11,9 @@ Event2
   ip_addr t_ip_addr;   # test_ip_addr                 OPTIONAL, CALCULATED
   string  t_string;    # test_string                  OPTIONAL, CALCULATED, 50
 
-  byte    t_byte;      # test_bool_array              OPTIONAL, CALCULATED
-  float   t_float;     # test_bool_array              OPTIONAL, CALCULATED
-  double  t_double;    # test_bool_array              OPTIONAL, CALCULATED
+  byte    t_byte;      # test_byte                    OPTIONAL, CALCULATED
+  float   t_float;     # test_float                   OPTIONAL, CALCULATED
+  double  t_double;    # test_double                  OPTIONAL, CALCULATED
 
   boolean t_bool_ar[8];   # test_bool_array              OPTIONAL, CALCULATED
   optional byte maybeb;
@@ -21,5 +21,8 @@ Event2
   nullable byte possiblyb[8];
   required nullable string full_feature_string(32)[8];
   required nullable string unlimited_string[];
+
+  int16   d_int16 = 32767; # test_int16  with default value  OPTIONAL, CALCULATED
+  string   d_string = "some string"; # test_int16  with default value  OPTIONAL, CALCULATED
 }
 
