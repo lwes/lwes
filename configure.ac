@@ -71,14 +71,55 @@ AC_TYPE_SIZE_T
 AC_HEADER_TIME
 AC_STRUCT_TM
 
-dnl Check for SO_REUSEPORT
-AC_CHECK_DECL([SO_REUSEPORT],
-              AC_DEFINE(HAVE_SO_REUSEPORT,1,[Define if kernel supports SO_REUSEPORT]),
-              ,
-              [
-                #include <sys/types.h>
-                #include <sys/socket.h>
-              ])
+dnl Found this check here https://github.com/varnish/hitch with license
+dnl ------------- BEGIN included chunk
+dnl Copyright 2015-2016 Varnish Software
+dnl Copyright 2012 Bump Technologies, Inc. All rights reserved.
+dnl 
+dnl Redistribution and use in source and binary forms, with or without modification, are
+dnl permitted provided that the following conditions are met:
+dnl 
+dnl    1. Redistributions of source code must retain the above copyright notice, this list of
+dnl       conditions and the following disclaimer.
+dnl 
+dnl    2. Redistributions in binary form must reproduce the above copyright notice, this list
+dnl       of conditions and the following disclaimer in the documentation and/or other materials
+dnl       provided with the distribution.
+dnl 
+dnl THIS SOFTWARE IS PROVIDED BY BUMP TECHNOLOGIES, INC. ``AS IS'' AND ANY EXPRESS OR IMPLIED
+dnl WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
+dnl FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL BUMP TECHNOLOGIES, INC. OR
+dnl CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+dnl CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+dnl SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+dnl ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+dnl NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+dnl ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+dnl 
+dnl The views and conclusions contained in the software and documentation are those of the
+dnl authors and should not be interpreted as representing official policies, either expressed
+dnl or implied, of Bump Technologies, Inc.
+AC_CACHE_CHECK([whether SO_REUSEPORT works],
+  [ac_cv_so_reuseport_works],
+  [AC_RUN_IFELSE(
+    [AC_LANG_PROGRAM([[
+#include <sys/types.h>
+#include <sys/socket.h>
+    ]], [[
+  int s = socket(AF_INET, SOCK_STREAM, 0);
+  int i = 5;
+  if (setsockopt(s, SOL_SOCKET, SO_REUSEPORT, &i, sizeof i) < 0)
+    return (1);
+  return (0);
+]])],
+  [ac_cv_so_reuseport_works=yes],
+  [ac_cv_so_reuseport_works=no])
+  ]
+)
+if test "$ac_cv_so_reuseport_works" = yes; then
+  AC_DEFINE([HAVE_SO_REUSEPORT], [1], [Define if SO_REUSEPORT works])
+fi
+dnl ------------- END included chunk
 
 dnl Checks for library functions.
 AC_FUNC_ALLOCA
