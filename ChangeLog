@@ -1,3 +1,6 @@
+Version 1.1.2 (molinaro)
+  * better SO_REUSEPORT check, this was failing on some old linux kernels
+
 Version 1.1.1 (timrc)
   * Allow numeric and string literal default values in ESF.
     (Not stored in eventdb yet.)
